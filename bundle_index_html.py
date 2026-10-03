@@ -75,6 +75,16 @@ def main():
     <article class="article-container" id="articleContainer"></article>
     <div class="article-container quiz-container" id="quizContainer"></div>
   </main>
+  <!-- Fullscreen Diagram Zoom Lightbox Modal -->
+  <div class="diagram-modal" id="diagramModal">
+    <div class="diagram-modal-backdrop" id="diagramModalBackdrop"></div>
+    <div class="diagram-modal-content">
+      <button class="diagram-modal-close" id="diagramModalClose" aria-label="Đóng">✕</button>
+      <div class="diagram-modal-body" id="diagramModalBody"></div>
+      <div class="diagram-modal-caption" id="diagramModalCaption"></div>
+    </div>
+  </div>
+
 </div>
 <script>
 {lessons_js}

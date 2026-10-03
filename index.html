@@ -352,7 +352,7 @@ body {
 
 /* Article Container */
 .article-container {
-  max-width: 840px;
+  max-width: 960px;
   width: 100%;
   margin: 0 auto;
   padding: 32px 28px 80px 28px;
@@ -546,22 +546,142 @@ body {
   line-height: 1.5;
 }
 
-/* Diagram & SVG */
+/* Diagram & SVG (Enlarged, Responsive & Zoomable) */
 .diagram-wrapper {
-  margin: 20px 0;
-  padding: 14px;
+  margin: 28px 0;
+  padding: 24px 20px;
   background: var(--bg-subtle);
   border: 1px solid var(--border-light);
+  border-radius: 6px;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  position: relative;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  cursor: zoom-in;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+
+.diagram-wrapper:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: var(--border);
 }
 
 .diagram-wrapper svg {
+  width: 100% !important;
   max-width: 100%;
-  height: auto;
+  height: auto !important;
+  min-height: 250px;
   display: block;
+  margin: 0 auto;
+}
+
+.diagram-zoom-hint {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  opacity: 0.85;
+}
+
+.diagram-wrapper:hover .diagram-zoom-hint {
+  opacity: 1;
+  color: var(--text);
+}
+
+/* Diagram Fullscreen Lightbox Modal */
+.diagram-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.diagram-modal.active {
+  display: flex;
+}
+
+.diagram-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.diagram-modal-content {
+  position: relative;
+  z-index: 1010;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-width: 95vw;
+  max-height: 90vh;
+  width: 1060px;
+  padding: 28px;
+  overflow: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.diagram-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-light);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  transition: all 0.12s;
+}
+
+.diagram-modal-close:hover {
+  background: var(--text);
+  color: #fff;
+}
+
+.diagram-modal-body {
+  width: 100%;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.diagram-modal-body svg {
+  width: 100% !important;
+  min-width: 720px;
+  height: auto !important;
+  max-height: 72vh;
+}
+
+.diagram-modal-caption {
+  margin-top: 14px;
+  font-size: 0.94rem;
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  max-width: 840px;
+  line-height: 1.5;
 }
 
 /* Deep Dive Content */
@@ -1133,6 +1253,19 @@ canvas {
     margin: 18px 0;
   }
 
+  .diagram-wrapper {
+    padding: 16px 12px;
+    margin: 20px -8px;
+    cursor: default;
+  }
+
+  .diagram-wrapper svg {
+    min-width: 620px !important;
+    width: 620px !important;
+    height: auto !important;
+    min-height: 180px;
+  }
+
   .checkpoint-q-text {
     font-size: 0.94rem;
   }
@@ -1499,6 +1632,16 @@ canvas {
     <article class="article-container" id="articleContainer"></article>
     <div class="article-container quiz-container" id="quizContainer"></div>
   </main>
+  <!-- Fullscreen Diagram Zoom Lightbox Modal -->
+  <div class="diagram-modal" id="diagramModal">
+    <div class="diagram-modal-backdrop" id="diagramModalBackdrop"></div>
+    <div class="diagram-modal-content">
+      <button class="diagram-modal-close" id="diagramModalClose" aria-label="Đóng">✕</button>
+      <div class="diagram-modal-body" id="diagramModalBody"></div>
+      <div class="diagram-modal-caption" id="diagramModalCaption"></div>
+    </div>
+  </div>
+
 </div>
 <script>
 // lessons.js - 13 Master Textbook-Grade Lessons for VAIO 2025 AI Olympiad
@@ -7025,6 +7168,24 @@ function initVAIOApp() {
     sidebarBackdropEl.addEventListener("click", closeMobileSidebar);
   }
 
+  // Diagram Modal Close Handlers
+  const diagramModal = document.getElementById("diagramModal");
+  const diagramModalClose = document.getElementById("diagramModalClose");
+  const diagramModalBackdrop = document.getElementById("diagramModalBackdrop");
+
+  function closeDiagramModal() {
+    if (diagramModal) {
+      diagramModal.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+  }
+
+  if (diagramModalClose) diagramModalClose.addEventListener("click", closeDiagramModal);
+  if (diagramModalBackdrop) diagramModalBackdrop.addEventListener("click", closeDiagramModal);
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeDiagramModal();
+  });
+
   if (resetProgressBtn) {
     resetProgressBtn.addEventListener("click", () => {
       if (confirm("Bạn có muốn đặt lại toàn bộ tiến trình học và các bài tập trắc nghiệm không?")) {
@@ -7201,9 +7362,10 @@ function initVAIOApp() {
         const caption = typeof diagramObj === "object" ? diagramObj.caption : "";
         if (svgContent) {
           html += `
-            <div class="diagram-wrapper">
+            <div class="diagram-wrapper" title="Bấm vào để phóng to chi tiết">
               ${svgContent}
-              ${caption ? `<div class="diagram-caption" style="text-align:center; font-size:0.84rem; color:var(--text-muted); margin-top:8px; font-style:italic;">${formatContent(caption)}</div>` : ""}
+              ${caption ? `<div class="diagram-caption" style="text-align:center; font-size:0.86rem; color:var(--text-muted); margin-top:10px; font-style:italic;">${formatContent(caption)}</div>` : ""}
+              <div class="diagram-zoom-hint">🔍 Nhấp vào sơ đồ để phóng to toàn màn hình</div>
             </div>
           `;
         }
@@ -7388,7 +7550,26 @@ function initVAIOApp() {
       mountInteractiveWidget(lesson.interactiveWidget);
     }
 
-        // Attach Copy Code Handlers
+        // Attach Diagram Zoom Lightbox Handlers
+    articleContainerEl.querySelectorAll(".diagram-wrapper").forEach(wrapper => {
+      wrapper.addEventListener("click", (e) => {
+        const svgEl = wrapper.querySelector("svg");
+        const captionEl = wrapper.querySelector(".diagram-caption");
+        const modal = document.getElementById("diagramModal");
+        const modalBody = document.getElementById("diagramModalBody");
+        const modalCaption = document.getElementById("diagramModalCaption");
+        if (modal && modalBody && svgEl) {
+          modalBody.innerHTML = svgEl.outerHTML;
+          if (modalCaption) {
+            modalCaption.textContent = captionEl ? captionEl.textContent : "";
+          }
+          modal.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
+      });
+    });
+
+    // Attach Copy Code Handlers
     articleContainerEl.querySelectorAll(".copy-code-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const targetId = btn.getAttribute("data-target");

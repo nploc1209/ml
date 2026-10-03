@@ -534,6 +534,24 @@ function initVAIOApp() {
     sidebarBackdropEl.addEventListener("click", closeMobileSidebar);
   }
 
+  // Diagram Modal Close Handlers
+  const diagramModal = document.getElementById("diagramModal");
+  const diagramModalClose = document.getElementById("diagramModalClose");
+  const diagramModalBackdrop = document.getElementById("diagramModalBackdrop");
+
+  function closeDiagramModal() {
+    if (diagramModal) {
+      diagramModal.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+  }
+
+  if (diagramModalClose) diagramModalClose.addEventListener("click", closeDiagramModal);
+  if (diagramModalBackdrop) diagramModalBackdrop.addEventListener("click", closeDiagramModal);
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeDiagramModal();
+  });
+
   if (resetProgressBtn) {
     resetProgressBtn.addEventListener("click", () => {
       if (confirm("Bạn có muốn đặt lại toàn bộ tiến trình học và các bài tập trắc nghiệm không?")) {
@@ -710,9 +728,10 @@ function initVAIOApp() {
         const caption = typeof diagramObj === "object" ? diagramObj.caption : "";
         if (svgContent) {
           html += `
-            <div class="diagram-wrapper">
+            <div class="diagram-wrapper" title="Bấm vào để phóng to chi tiết">
               ${svgContent}
-              ${caption ? `<div class="diagram-caption" style="text-align:center; font-size:0.84rem; color:var(--text-muted); margin-top:8px; font-style:italic;">${formatContent(caption)}</div>` : ""}
+              ${caption ? `<div class="diagram-caption" style="text-align:center; font-size:0.86rem; color:var(--text-muted); margin-top:10px; font-style:italic;">${formatContent(caption)}</div>` : ""}
+              <div class="diagram-zoom-hint">🔍 Nhấp vào sơ đồ để phóng to toàn màn hình</div>
             </div>
           `;
         }
@@ -897,7 +916,26 @@ function initVAIOApp() {
       mountInteractiveWidget(lesson.interactiveWidget);
     }
 
-        // Attach Copy Code Handlers
+        // Attach Diagram Zoom Lightbox Handlers
+    articleContainerEl.querySelectorAll(".diagram-wrapper").forEach(wrapper => {
+      wrapper.addEventListener("click", (e) => {
+        const svgEl = wrapper.querySelector("svg");
+        const captionEl = wrapper.querySelector(".diagram-caption");
+        const modal = document.getElementById("diagramModal");
+        const modalBody = document.getElementById("diagramModalBody");
+        const modalCaption = document.getElementById("diagramModalCaption");
+        if (modal && modalBody && svgEl) {
+          modalBody.innerHTML = svgEl.outerHTML;
+          if (modalCaption) {
+            modalCaption.textContent = captionEl ? captionEl.textContent : "";
+          }
+          modal.classList.add("active");
+          document.body.style.overflow = "hidden";
+        }
+      });
+    });
+
+    // Attach Copy Code Handlers
     articleContainerEl.querySelectorAll(".copy-code-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const targetId = btn.getAttribute("data-target");
