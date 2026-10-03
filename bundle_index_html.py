@@ -75,6 +75,11 @@ def main():
     <article class="article-container" id="articleContainer"></article>
     <div class="article-container quiz-container" id="quizContainer"></div>
   </main>
+  <!-- Floating Tools for Mobile (Scroll to top) -->
+  <div class="floating-tools" id="floatingTools">
+    <button class="fab-btn" id="scrollTopBtn" title="Cuộn lên đầu trang" aria-label="Cuộn lên đầu trang">↑</button>
+  </div>
+
   <!-- Fullscreen Diagram Zoom Lightbox Modal -->
   <div class="diagram-modal" id="diagramModal">
     <div class="diagram-modal-backdrop" id="diagramModalBackdrop"></div>

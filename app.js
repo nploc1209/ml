@@ -552,6 +552,23 @@ function initVAIOApp() {
     if (e.key === "Escape") closeDiagramModal();
   });
 
+  // Scroll to Top FAB Handler
+  const scrollTopBtn = document.getElementById("scrollTopBtn");
+  if (scrollTopBtn) {
+    scrollTopBtn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 300) {
+        scrollTopBtn.style.opacity = "0.92";
+        scrollTopBtn.style.pointerEvents = "auto";
+      } else {
+        scrollTopBtn.style.opacity = "0";
+        scrollTopBtn.style.pointerEvents = "none";
+      }
+    });
+  }
+
   if (resetProgressBtn) {
     resetProgressBtn.addEventListener("click", () => {
       if (confirm("Bạn có muốn đặt lại toàn bộ tiến trình học và các bài tập trắc nghiệm không?")) {
@@ -845,9 +862,11 @@ function initVAIOApp() {
     const isDone = completedLessons.includes(lesson.id);
     html += `
       <div class="nav-buttons">
-        <button class="btn" id="prevBtn" ${index === 0 ? 'disabled' : ''}>← Bài Trước</button>
-        <button class="btn ${isDone ? 'active' : ''}" id="doneBtn">${isDone ? '✓ Đã xong' : 'Đánh dấu xong'}</button>
-        <button class="btn" id="nextBtn" ${index === LESSONS_DATA.length - 1 ? 'disabled' : ''}>Bài Sau →</button>
+        <button class="btn ${isDone ? 'active' : ''}" id="doneBtn">${isDone ? '✓ Đã hoàn thành bài này' : 'Đánh dấu đã học xong'}</button>
+        <div class="nav-buttons-row">
+          <button class="btn" id="prevBtn" ${index === 0 ? 'disabled' : ''}>← Bài Trước</button>
+          <button class="btn" id="nextBtn" ${index === LESSONS_DATA.length - 1 ? 'disabled' : ''}>Bài Sau →</button>
+        </div>
       </div>
     `;
 
