@@ -1,0 +1,4666 @@
+// lessons.js - 13 Master Textbook-Grade Lessons for VAIO 2025 AI Olympiad
+const LESSONS_DATA = [
+  {
+    "id": "lesson-1",
+    "title": "1. Đạo Hàm, Đạo Hàm Riêng & Vector Gradient",
+    "summary": "Khởi đầu từ con số 0: Nền tảng giải tích của toàn bộ ngành học máy. Dẫn dắt từng bước từ bản chất hàm số, giới hạn, vận tốc tức thời, đạo hàm, đạo hàm riêng nhiều biến, quy tắc chuỗi (Chain Rule) đến vector gradient chỉ hướng leo dốc và hạ dốc của hàm mất mát.",
+    "syllabusBadge": "BUỔI 1: GIẢI TÍCH NỀN TẢNG & VECTOR GRADIENT",
+    "intuition": {
+      "title": "Trực giác thực tế: Dò đường xuống đáy thung lũng trong màn sương mù dày đặc",
+      "content": "Hãy tưởng tượng bạn đang bị lạc trên một sườn núi gập ghềnh vào một buổi chiều muộn. Xung quanh sương mù dày đặc đến mức tầm nhìn của bạn chỉ đúng 1 mét quanh bàn chân. Bạn không thể nhìn thấy chân núi ở đâu, cũng không thấy đỉnh núi ở đâu. Nhiệm vụ sống còn của bạn là phải tìm đường xuống đáy thung lũng (nơi có làng mạc và nguồn nước). Bạn sẽ làm gì?\n\nCách duy nhất bạn có thể làm là dùng bàn chân cảm nhận độ dốc của mặt đất xung quanh mình 360 độ: hướng nào mặt đất dốc xuống mạnh nhất, bạn bước một bước ngắn về hướng đó. Sau khi bước xong, bạn lại dừng lại, cảm nhận độ dốc mới tại vị trí mới, và tiếp tục bước. Cứ lặp lại như vậy hàng trăm lần, từng bước một, bạn chắc chắn sẽ xuống tới đáy thung lũng!\n\nTrong Machine Learning, toàn bộ quá trình máy tính tự học diễn ra y hệt như vậy:\n- **Mặt đất sườn núi:** Chính là Hàm Mất Mát (Loss Function) đo mức độ sai lệch của mô hình.\n- **Độ dốc tại vị trí bạn đứng:** Chính là Đạo Hàm Riêng (Partial Derivatives) theo từng biến số.\n- **Hướng dốc xuống mạnh nhất:** Chính là Hướng Ngược Với Vector Gradient ($-\\nabla f$).\n- **Độ dài bước chân:** Chính là Tốc Độ Học (Learning Rate $\\eta$).\n- **Đáy thung lũng:** Chính là Điểm Cực Tiểu Toàn Cục (Global Minimum), nơi mô hình dự đoán chính xác nhất!"
+    },
+    "sections": [
+      {
+        "heading": "1.1. Bức Tranh Toàn Cảnh: Học Máy Là Gì? Phân Biệt Hồi Quy (Regression) vs Phân Loại (Classification)",
+        "content": "Hãy tưởng tượng bạn đang dạy một đứa trẻ 3 tuổi nhận biết quả táo và quả cam. Bạn không dạy bằng cách đưa cho đứa trẻ một bảng công thức hình học: 'Nếu bán kính từ 3 đến 5 cm, bước sóng ánh sáng từ 620 đến 750 nm thì đó là quả táo'. Cách dạy đó là bất khả thi! Thay vào đó, bạn đưa cho đứa trẻ xem 10 quả táo thật và 10 quả cam thật, vừa chỉ vừa nói: 'Đây là táo', 'Đây là cam'. Sau vài lần quan sát, bộ não đứa trẻ tự động tổng quát hóa và nhận biết được quả nào là táo khi nhìn thấy một quả hoàn toàn mới. Đó chính xác là cách Học Máy (Machine Learning) ra đời.",
+        "deepDive": "**1. So sánh Lập trình truyền thống vs Học máy:**\n- **Lập trình truyền thống (Rule-based Programming):** Con người nắm rõ mọi quy tắc, ngồi gõ từng dòng mã lệnh: Dữ liệu (Data) + Quy tắc (Rules) $\\to$ Máy tính xuất ra Kết quả (Answers). Ví dụ: Tính lương công nhân: `Lương = Ngày công * 300.000 + Thưởng`.\n- **Học máy (Machine Learning):** Con người KHÔNG biết hoặc không thể viết ra quy tắc toán học chính xác (ví dụ: làm sao viết hàng triệu lệnh if-else để nhận diện khuôn mặt bạn giữa 8 tỷ người?). Thay vào đó, con người nạp Dữ liệu (Data) + Kết quả mẫu (Answers) vào, máy tính sẽ dùng giải tích để TỰ ĐỘNG MÒ MẪM TÌM RA QUY TẮC $y = f(x)$!\n\n**2. Hai nhánh bài toán cốt lõi trong Học Máy Có Giám Sát (Supervised Learning):**\nMọi bài toán học máy có giám sát đều được phân chia dựa trên bản chất của biến đầu ra $y$:\n\n**Nhánh 1: Bài toán Hồi quy (Regression):**\n- **Bản chất toán học:** Giá trị đầu ra $y$ là một con số thực liên tục ($y \\in \\mathbb{R}$). Con số này có thể nhận vô số giá trị thập phân lẻ trong một khoảng.\n- **Ví dụ thực tiễn đời sống:**\n  - Dự đoán giá bán một căn hộ chung cư (ví dụ: 3.45 tỷ, 3.46 tỷ VNĐ...).\n  - Dự đoán thời gian tài xế Grab giao thức ăn đến nhà bạn (ví dụ: 18.5 phút, 19.2 phút).\n  - Dự đoán điểm thi tốt nghiệp THPT môn Toán của học sinh (ví dụ: 8.75 điểm).\n  - Dự đoán nồng độ bụi mịn PM2.5 trong không khí (ví dụ: 45.6 $\\mu\\text{g}/\\text{m}^3$).\n- **Ý nghĩa hình học:** Tìm ra một đường cong hoặc mặt phẳng xấp xỉ liên tục đi xuyên qua đám mây dữ liệu sao cho khoảng cách sai số giữa các điểm thực tế tới đường dự đoán là nhỏ nhất.\n\n**Nhánh 2: Bài toán Phân loại (Classification):**\n- **Bản chất toán học:** Giá trị đầu ra $y$ là một nhãn danh mục rời rạc ($y \\in \\{0, 1\\}$ hoặc $y \\in \\{1, 2, \\dots, C\\}$). Máy tính phải phân chia đối tượng vào các nhóm cụ thể không thể chia nhỏ.\n- **Ví dụ thực tiễn đời sống:**\n  - Lọc Email: 'Thư rác (Spam = 1)' hay 'Hợp lệ (Ham = 0)'.\n  - Chẩn đoán y khoa: Phim chụp X-quang phổi là 'Có u (1)' hay 'Bình thường (0)'.\n  - Nhận diện chữ số viết tay từ ảnh: Nhãn thuộc tập hợp 10 chữ số rời rạc $\\{0, 1, 2, \\dots, 9\\}$.\n  - Cảnh báo chất lượng không khí: Phân vào một trong 3 mức danh mục {Tốt, Trung bình, Nguy hại}.\n- **Ý nghĩa hình học:** Tìm ra một ranh giới phân chia (Decision Boundary) cắt ngang không gian dữ liệu thành các vùng lãnh thổ độc lập cho từng nhãn.",
+        "formula": "\\text{Hồi quy: } y \\in \\mathbb{R} \\quad \\Longleftrightarrow \\quad \\text{Phân loại: } y \\in \\{0, 1, \\dots, C-1\\}",
+        "mathExplainer": [
+          {
+            "sym": "y \\in \\mathbb{R}",
+            "name": "Số thực liên tục",
+            "mean": "y thuộc tập số thực (Real numbers), có thể nhận vô số giá trị thập phân lẻ như 3.14, 0.005 hay -12.8."
+          },
+          {
+            "sym": "y \\in \\{0, 1\\}",
+            "name": "Nhãn nhị phân",
+            "mean": "y chỉ nhận một trong hai trạng thái đối lập rời rạc: 0 (Không/Âm tính) hoặc 1 (Có/Dương tính)."
+          },
+          {
+            "sym": "C \\ge 2",
+            "name": "Số lớp phân loại",
+            "mean": "Số lượng danh mục nhãn cần phân biệt trong bài toán phân loại đa lớp (Multiclass Classification)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"120\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Hồi Quy (Regression): Đầu ra liên tục y ∈ ℝ</text>\n                        <line x1=\"20\" y1=\"125\" x2=\"220\" y2=\"125\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"20\" y1=\"25\" x2=\"20\" y2=\"125\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"30\" y1=\"115\" x2=\"210\" y2=\"35\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"50\" cy=\"100\" r=\"3.5\" fill=\"#111\"/><circle cx=\"90\" cy=\"90\" r=\"3.5\" fill=\"#111\"/><circle cx=\"130\" cy=\"60\" r=\"3.5\" fill=\"#111\"/><circle cx=\"170\" cy=\"50\" r=\"3.5\" fill=\"#111\"/>\n                        <text x=\"120\" y=\"145\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Đường xấp xỉ liên tục y = f(x)</text>\n                      </g>\n                      <g transform=\"translate(340, 20)\">\n                        <text x=\"120\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Phân Loại (Classification): Nhãn rời rạc y ∈ {0, 1}</text>\n                        <line x1=\"20\" y1=\"125\" x2=\"220\" y2=\"125\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"20\" y1=\"25\" x2=\"20\" y2=\"125\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"30\" y1=\"125\" x2=\"200\" y2=\"25\" stroke=\"#111\" stroke-dasharray=\"3,3\" stroke-width=\"1.5\"/>\n                        <circle cx=\"60\" cy=\"45\" r=\"4\" fill=\"#111\"/><circle cx=\"90\" cy=\"35\" r=\"4\" fill=\"#111\"/><circle cx=\"70\" cy=\"65\" r=\"4\" fill=\"#111\"/>\n                        <text x=\"75\" y=\"25\" font-family=\"Georgia\" font-size=\"9\">Lớp +1</text>\n                        <circle cx=\"150\" cy=\"95\" r=\"4\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/><circle cx=\"180\" cy=\"110\" r=\"4\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"165\" y=\"125\" font-family=\"Georgia\" font-size=\"9\">Lớp 0</text>\n                        <text x=\"120\" y=\"145\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Ranh giới phân chia (Decision Boundary)</text>\n                      </g>\n                    </svg>",
+          "caption": "So sánh trực quan: Hồi quy dự đoán giá trị liên tục trên đường cong; Phân loại tìm đường ranh giới chia cắt các nhóm nhãn."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi kinh điển: Nhiều học sinh nhầm lẫn rằng bài toán dự đoán xác suất (ví dụ: dự đoán xác suất khách hàng click vào quảng cáo là 0.78) là bài toán Hồi quy vì 0.78 là số thực. SAI HOÀN TOÀN! Bản chất nhãn thực tế sau cùng chỉ có thể là 'Click (1)' hoặc 'Không click (0)' $\\implies$ Đây là bài toán PHÂN LOẠI NHỊ PHÂN. Con số 0.78 chỉ là mức độ tự tin của mô hình trước khi làm tròn thành nhãn.",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Một trạm quan trắc môi trường thông minh cần thực hiện 2 nhiệm vụ: (1) Dự đoán chính xác nồng độ bụi mịn PM2.5 vào lúc 12h trưa mai (tính bằng microgam/m³), và (2) Phát tín hiệu cảnh báo chất lượng không khí thuộc mức nào trong 3 mức {An toàn, Cảnh báo, Nguy hiểm}. Hai tác vụ này lần lượt thuộc nhóm học máy nào?",
+          "options": [
+            "A. Cả hai tác vụ đều là Hồi quy (Regression)",
+            "B. Tác vụ (1) là Phân loại (Classification); Tác vụ (2) là Hồi quy (Regression)",
+            "C. Tác vụ (1) là Hồi quy (Regression); Tác vụ (2) là Phân loại (Classification)",
+            "D. Cả hai tác vụ đều là Phân loại (Classification)"
+          ],
+          "correctIndex": 2,
+          "hint": "Hãy xem xét đầu ra: Đại lượng có thể nhận vô số giá trị thập phân liên tục (Hồi quy) hay là các danh mục được đặt tên tách rời (Phân loại)?",
+          "solution": [
+            "Bước 1: Phân tích tác vụ (1): Nồng độ bụi mịn PM2.5 là một số thực liên tục (ví dụ: 35.4, 35.5, 42.8 microgam/m³) $\\implies$ Đây là bài toán Hồi quy (Regression).",
+            "Bước 2: Phân tích tác vụ (2): Nhãn cảnh báo thuộc tập hợp 3 danh mục rời rạc {An toàn, Cảnh báo, Nguy hiểm} $\\implies$ Đây là bài toán Phân loại đa lớp (Multiclass Classification).",
+            "Kết luận: Đáp án chính xác là C."
+          ]
+        }
+      },
+      {
+        "heading": "1.2. Khởi Đầu Từ Con Số 0: Bản Chất Hàm Số, Giới Hạn (Limit) & Các Hàm Số Cốt Lõi Trong AI",
+        "content": "Nhiều bạn học sinh khi nhìn vào công thức toán học thường cảm thấy sợ hãi vì những ký hiệu lạ lẫm. Đừng lo! Hãy cùng bóc tách từng khái niệm từ nguồn gốc trực giác nguyên bản nhất: Hàm số thực chất là gì? Giới hạn sinh ra để làm gì? Và tại sao các nhà nghiên cứu AI lại chọn những hàm số đặc biệt như Sigmoid, ReLU hay hàm bậc hai?",
+        "deepDive": "**1. Hàm số (Function) thực chất là gì?**\nHàm số $y = f(x)$ không có gì thần bí: nó giống như một cỗ máy tự động hóa trong một xưởng sản xuất:\n- Bạn ném vào cỗ máy một nguyên liệu đầu vào $x$ (gọi là Input hay biến số độc lập).\n- Cỗ máy thực hiện một quy tắc biến đổi cố định bên trong.\n- Cỗ máy đẩy ra một thành phẩm $y$ (gọi là Output hay giá trị hàm số).\n*Ví dụ:* Máy tính tiền cước taxi: $f(x) = 15000 + 12000 \\cdot x$. Nếu bạn đi $x = 3$ km, máy nhả ra $y = 15000 + 12000(3) = 51000$ VNĐ.\n\n**2. Phân biệt Biến số (Variables) và Tham số (Parameters):**\nTrong Machine Learning, một hàm số thường được viết dưới dạng $y = f(x; w, b)$:\n- $x$: Biến số đầu vào (Dữ liệu khách hàng, người dùng đưa vào, mô hình không thể tự sửa dữ liệu này).\n- $w$ (Weight - trọng số) và $b$ (Bias - độ lệch): Là các 'núm vặn' nằm bên trong cỗ máy! Ban đầu máy vặn bừa khiến kết quả sai bét. Quá trình 'huấn luyện mô hình' (Training) thực chất là tự động xoay các núm vặn $w$ và $b$ cho đến khi máy tính ra kết quả chuẩn xác nhất!\n\n**3. Giới hạn (Limit) là gì? Tại sao phải cần giới hạn?**\nHãy tưởng tượng bạn đang bước những bước chân ngày càng lại gần một bờ sông tại vị trí $x = a$. Giới hạn $\\lim_{x \\to a} f(x)$ trả lời câu hỏi: Khi bạn bước cực kỳ gần sát tới $a$, giá trị của $f(x)$ đang nhắm tới con số nào?\nTại sao phải cần khái niệm này? Hãy xét biểu thức:\n$$g(x) = \\frac{x^2 - 4}{x - 2}$$\n- Nếu bạn cắm trực tiếp $x = 2$ vào: Mẫu số bằng $2 - 2 = 0$, tử số bằng $2^2 - 4 = 0$. Máy tính sẽ báo lỗi sập chương trình ngay lập tức vì phép chia cho $0$ không xác định!\n- Nhưng nếu bạn cho $x$ tiến sát 2 mà không bằng 2 (ví dụ $x = 2.001$ thì $g(x) = 4.001$; $x = 1.999$ thì $g(x) = 3.999$):\nTa phân tích: $\\frac{x^2 - 4}{x - 2} = \\frac{(x - 2)(x + 2)}{x - 2} = x + 2$.\nKhi $x$ tiến sát tới 2, giá trị $x + 2$ tiến sát tới $4$! Ta viết: $\\lim_{x \\to 2} \\frac{x^2 - 4}{x - 2} = 4$.\n*Bản chất:* Giới hạn cho phép các nhà toán học nhìn thấy xu hướng vận động của những đại lượng vô cùng bé mà không bị mắc kẹt bởi lỗi chia cho 0!\n\n**4. Năm hàm số kinh điển mà mọi kỹ sư AI bắt buộc phải biết:**\n\n**a) Hàm bậc hai (Parabol) $f(x) = x^2$:**\n- Hình dáng: Một chiếc lòng chảo đối xứng có đáy sâu nhất tại $x = 0$.\n- Ứng dụng trong AI: Đây là dạng của Hàm mất mát bình phương trung bình (MSE). Khi mô hình dự đoán sai, sai số bị bình phương lên: sai lệch 2 đơn vị bị phạt $2^2 = 4$, sai lệch 5 đơn vị bị phạt $5^2 = 25$! Bình phương vừa làm triệt tiêu dấu âm, vừa phạt cực nặng những dự đoán lệch nhiều.\n\n**b) Hàm mũ $e^x$ và hằng số Euler $e \\approx 2.71828$:**\n- Tính chất: Luôn dương ($e^x > 0$ với mọi $x$). Tăng trưởng bùng nổ theo cấp số nhân.\n- Đạo hàm kỳ diệu: $(e^x)' = e^x$ (Tốc độ tăng trưởng bằng chính giá trị hiện tại của nó).\n\n**c) Hàm Logarit tự nhiên $\\ln(x)$ (Logarit cơ số $e$):**\n- Điều kiện: Chỉ xác định khi $x > 0$. Khi $x \\to 1$ thì $\\ln(1) = 0$. Khi $x \\to 0^+$ thì $\\ln(x) \\to -\\infty$.\n- Ứng dụng trong AI: Dùng làm hàm mất mát Cross-Entropy Loss trong phân loại. Nếu xác suất dự đoán đúng $p = 1$, Loss $= -\\ln(1) = 0$ (không phạt). Nếu xác suất dự đoán đúng $p \\to 0$, Loss $= -\\ln(p) \\to +\\infty$ (phạt vô hạn)!\n\n**d) Hàm Sigmoid $\\sigma(z) = \\frac{1}{1 + e^{-z}}$:**\n- Đặc tính: Nhận bất kỳ số thực nào từ $-\\infty$ đến $+\\infty$ và 'nén' chặt lại vào khoảng an toàn $(0, 1)$.\n- Ứng dụng trong AI: Biến giá trị thô thành 'xác suất' trong phân loại nhị phân (Logistic Regression) và mạng nơ-ron.\n\n**e) Hàm ReLU (Rectified Linear Unit) $f(x) = \\max(0, x)$:**\n- Đặc tính: Nếu $x < 0$, giá trị bằng 0. Nếu $x \\ge 0$, giá trị bằng chính $x$.\n- Ứng dụng trong AI: Là hàm kích hoạt được sử dụng nhiều nhất trong thị giác máy tính và học sâu vì đạo hàm cực kỳ đơn giản (bằng 1 khi $x>0$), giúp máy tính huấn luyện nhanh gấp hàng chục lần so với Sigmoid.",
+        "formula": "\\sigma(z) = \\frac{1}{1 + e^{-z}}, \\quad \\text{ReLU}(z) = \\max(0, z), \\quad \\text{MSE}(w) = \\frac{1}{2}(w \\cdot x - y)^2",
+        "mathExplainer": [
+          {
+            "sym": "\\lim_{x \\to a}",
+            "name": "Giới hạn (Limit)",
+            "mean": "Mô tả giá trị mà hàm số tiến gần tới khi biến x tiến sát vô cùng gần điểm a."
+          },
+          {
+            "sym": "e \\approx 2.718",
+            "name": "Hằng số Euler",
+            "mean": "Hằng số toán học tự nhiên, cơ sở của hàm mũ e^x và logarit tự nhiên ln(x)."
+          },
+          {
+            "sym": "\\sigma(z)",
+            "name": "Hàm Sigmoid",
+            "mean": "Hàm nén giá trị số thực bất kỳ về khoảng xác suất (0, 1)."
+          },
+          {
+            "sym": "\\max(0, z)",
+            "name": "Hàm ReLU",
+            "mean": "Hàm kích hoạt trả về 0 nếu z âm, và giữ nguyên z nếu z dương."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(20, 20)\">\n                        <text x=\"80\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Parabol y = x² (MSE)</text>\n                        <line x1=\"20\" y1=\"125\" x2=\"140\" y2=\"125\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <line x1=\"80\" y1=\"25\" x2=\"80\" y2=\"125\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <path d=\"M 30 45 Q 80 135 130 45\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"80\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Đáy thung lũng x = 0</text>\n                      </g>\n                      <g transform=\"translate(210, 20)\">\n                        <text x=\"90\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">2. Sigmoid σ(z) = 1/(1+e⁻ᶻ)</text>\n                        <line x1=\"20\" y1=\"125\" x2=\"160\" y2=\"125\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <line x1=\"90\" y1=\"25\" x2=\"90\" y2=\"125\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <line x1=\"20\" y1=\"35\" x2=\"160\" y2=\"35\" stroke=\"#bbb\" stroke-dasharray=\"2,2\"/>\n                        <text x=\"170\" y=\"38\" font-family=\"Georgia\" font-size=\"8\">y=1</text>\n                        <path d=\"M 25 120 C 70 120 70 40 155 40\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"90\" cy=\"80\" r=\"3\" fill=\"#111\"/>\n                        <text x=\"110\" y=\"80\" font-family=\"Georgia\" font-size=\"8\">σ(0)=0.5</text>\n                        <text x=\"90\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Nén vào (0, 1)</text>\n                      </g>\n                      <g transform=\"translate(420, 20)\">\n                        <text x=\"80\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">3. ReLU y = max(0, z)</text>\n                        <line x1=\"20\" y1=\"125\" x2=\"140\" y2=\"125\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <line x1=\"80\" y1=\"25\" x2=\"80\" y2=\"125\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <line x1=\"20\" y1=\"125\" x2=\"80\" y2=\"125\" stroke=\"#111\" stroke-width=\"3\"/>\n                        <line x1=\"80\" y1=\"125\" x2=\"140\" y2=\"45\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"80\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Gãy khúc tại 0</text>\n                      </g>\n                    </svg>",
+          "caption": "Ba hàm số trụ cột trong Học máy: Parabol bình phương lỗi (MSE), Sigmoid nén xác suất, và ReLU kích hoạt nơ-ron."
+        },
+        "commonPitfalls": "Cạm bẫy toán học: Giá trị của hàm Sigmoid $\\sigma(z)$ KHÔNG BAO GIỜ chạm tới 0 hoặc 1, nó luôn nằm nghiêm ngặt trong khoảng $(0, 1)$. Tại $z = 0$: $\\sigma(0) = \\frac{1}{1 + e^0} = \\frac{1}{1 + 1} = 0.5$. Con số 0.5 mang ý nghĩa mô hình hoàn toàn phân vân 50-50 giữa hai nhãn!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong một mô hình phân loại nhị phân dự đoán bệnh nhân có mắc bệnh hay không, nơ-ron đầu ra tính được giá trị tổng z = 0. Giá trị xác suất dự đoán sau khi qua hàm kích hoạt Sigmoid σ(z) bằng bao nhiêu và mang ý nghĩa gì?",
+          "options": [
+            "A. Bằng 0: Chắc chắn bệnh nhân không mắc bệnh",
+            "B. Bằng 0.5: Mô hình hoàn toàn phân vân giữa việc có bệnh và không bệnh (xác suất 50%)",
+            "C. Bằng 1: Chắc chắn bệnh nhân mắc bệnh",
+            "D. Bằng không xác định vì mẫu số bị chia cho 0"
+          ],
+          "correctIndex": 1,
+          "hint": "Thay z = 0 vào công thức Sigmoid: e⁰ = 1, mẫu số là 1 + 1 = 2.",
+          "solution": [
+            "Bước 1: Áp dụng công thức hàm Sigmoid: σ(z) = 1 / (1 + e^(-z)).",
+            "Bước 2: Thay z = 0: e^(-0) = e^0 = 1. Mẫu số = 1 + 1 = 2.",
+            "Bước 3: Ta được σ(0) = 1 / 2 = 0.5.",
+            "Ý nghĩa thực tế: Giá trị 0.5 nằm chính giữa ranh giới, thể hiện mô hình đánh giá cơ hội mắc bệnh và không mắc bệnh là ngang nhau (50% - 50%).",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "1.3. Bản Chất Đạo Hàm (Derivative): Từ Vận Tốc Tức Thời Đến Hệ Số Góc Tiếp Tuyến & Điểm Cực Trị",
+        "content": "Bạn đã bao giờ thắc mắc: Làm thế nào đồng hồ đo tốc độ của xe máy (công-tơ-mét) có thể chỉ ra đúng con số 45 km/h tại đúng một giây cụ thể, trong khi để tính vận tốc ta luôn cần 'quãng đường chia cho thời gian'? Nếu tại đúng 1 tích tắc, thời gian chưa trôi đi (Δt = 0), quãng đường chưa dịch chuyển (Δs = 0), làm sao chia được 0 cho 0? Câu trả lời mở ra toàn bộ nền văn minh giải tích: ĐẠO HÀM.",
+        "deepDive": "**1. Trực giác vật lý: Vận tốc trung bình vs Vận tốc tức thời:**\n- Vận tốc trung bình trong khoảng thời gian $\\Delta t$: $v_{tb} = \\frac{\\Delta s}{\\Delta t} = \\frac{s(t + \\Delta t) - s(t)}{\\Delta t}$. Con số này chỉ cho ta biết bức tranh tổng thể, không phản ánh xe đang phóng nhanh hay dừng lại trong từng khoảnh khắc.\n- Vận tốc tức thời tại thời điểm $t$: Hãy cho khoảng thời gian $\\Delta t$ co lại thật bé: 0.1 giây, 0.001 giây, $0.000001$ giây... Khi $\\Delta t \\to 0$, tỉ số $\\frac{\\Delta s}{\\Delta t}$ không biến mất mà hội tụ về một con số xác định duy nhất! Con số đó chính là **Vận tốc tức thời**:\n$$v(t) = s'(t) = \\lim_{\\Delta t \\to 0} \\frac{s(t + \\Delta t) - s(t)}{\\Delta t}$$\n\n**2. Định nghĩa hình học của Đạo hàm: Cát tuyến biến thành Tiếp tuyến:**\nXét đồ thị hàm số $y = f(x)$:\n- Lấy hai điểm $A(x, f(x))$ và $B(x + \\Delta x, f(x + \\Delta x))$. Đường thẳng nối $A$ và $B$ gọi là một **đường cát tuyến** (cắt đồ thị tại 2 điểm).\n- Độ dốc (hệ số góc) của cát tuyến $AB$ là: $k_{\\text{cát tuyến}} = \\frac{f(x + \\Delta x) - f(x)}{\\Delta x}$.\n- Bây giờ, hãy cho điểm $B$ trượt dọc theo đường cong tiến sát về điểm $A$ (tương ứng $\\Delta x \\to 0$). Đường thẳng cát tuyến sẽ xoay dần và khi $B$ chạm khít vào $A$, nó trở thành **ĐƯỜNG TIẾP TUYẾN (Tangent line)** của đồ thị tại điểm $A$!\n- **Kết luận hình học tối cao:** Đạo hàm $f'(x)$ chính là HỆ SỐ GÓC (ĐỘ DỐC) của đường tiếp tuyến tại điểm $x$.\n\n**3. Ý nghĩa sống còn của Dấu đạo hàm:**\nHệ số góc của tiếp tuyến cho ta biết chính xác xu hướng thay đổi của hàm số:\n- **Nếu $f'(x) > 0$:** Tiếp tuyến nghiêng lên từ trái sang phải $\\implies$ Khi $x$ tăng thì $f(x)$ TĂNG (Đồ thị đang leo dốc, hàm đồng biến).\n- **Nếu $f'(x) < 0$:** Tiếp tuyến dốc xuống từ trái sang phải $\\implies$ Khi $x$ tăng thì $f(x)$ GIẢM (Đồ thị đang xuống dốc, hàm nghịch biến).\n- **Nếu $f'(x) = 0$:** Tiếp tuyến nằm ngang hoàn toàn (song song trục hoành, độ dốc bằng 0) $\\implies$ Đồ thị tạm thời bằng phẳng! Đây chính là vị trí của **ĐIỂM CỰC TRỊ**:\n  - Nếu đồ thị từ dốc xuống ($f' < 0$) chuyển qua bằng phẳng ($f' = 0$) rồi dốc lên ($f' > 0$): Đó là **Đáy cực tiểu (Local Minimum)** - Nơi hàm mất mát đạt giá trị nhỏ nhất!\n  - Nếu đồ thị từ dốc lên chuyển qua bằng phẳng rồi dốc xuống: Đó là **Đỉnh cực đại (Local Maximum)**.\n\n**4. Bảng quy tắc đạo hàm cơ bản giải thích cặn kẽ:**\n- $(c)' = 0$: Đạo hàm của hằng số bằng 0 (vì một con số cố định không thay đổi, tốc độ biến thiên phải bằng 0).\n- $(x^n)' = n \\cdot x^{n-1}$: Quy tắc lũy thừa (Ví dụ: $(x^2)' = 2x$, $(x^3)' = 3x^2$, $(x)' = 1$).\n- $(c \\cdot f(x))' = c \\cdot f'(x)$: Hằng số nhân giữ nguyên (Ví dụ: $(5x^2)' = 5 \\cdot (2x) = 10x$).\n- $(u \\pm v)' = u' \\pm v'$: Đạo hàm của tổng bằng tổng các đạo hàm.\n- $(e^x)' = e^x$: Đạo hàm hàm mũ tự nhiên giữ nguyên.\n- $(\\ln x)' = \\frac{1}{x}$: Đạo hàm của logarit tự nhiên.\n\n**5. Ví dụ số học hoàn chỉnh từng bước tính tay:**\nGiả sử hàm mất mát của mô hình hồi quy một tham số $w$ là: $L(w) = 2w^2 - 8w + 11$.\nTa muốn tìm giá trị trọng số $w$ sao cho hàm lỗi $L$ đạt cực tiểu (sai số nhỏ nhất).\n- **Bước 1: Tính đạo hàm $L'(w)$:**\n  $L'(w) = \\frac{d}{dw}(2w^2 - 8w + 11) = 2(2w) - 8(1) + 0 = 4w - 8$.\n- **Bước 2: Phân tích độ dốc tại điểm ban đầu $w = 0$:**\n  $L'(0) = 4(0) - 8 = -8 < 0$.\n  Độ dốc là số âm (tiếp tuyến đang dốc xuống) $\\implies$ Nếu ta TĂNG $w$ lên thì hàm Loss sẽ GIẢM xuống!\n- **Bước 3: Tìm điểm đáy cực tiểu:**\n  Đáy cực tiểu xảy ra khi tiếp tuyến nằm ngang: $L'(w) = 0$.\n  $4w - 8 = 0 \\iff 4w = 8 \\iff w = 2$.\n- **Bước 4: Tính giá trị cực tiểu của Loss:**\n  $L(2) = 2(2^2) - 8(2) + 11 = 2(4) - 16 + 11 = 8 - 16 + 11 = 3$.\n  Như vậy, trọng số tối ưu là $w = 2$ và sai số thấp nhất có thể đạt được là $3$.",
+        "formula": "f'(x) = \\lim_{\\Delta x \\to 0} \\frac{f(x + \\Delta x) - f(x)}{\\Delta x}, \\quad L'(w) = 0 \\iff \\text{Điểm dừng (Extremum)}",
+        "mathExplainer": [
+          {
+            "sym": "f'(x) = \\frac{df}{dx}",
+            "name": "Đạo hàm bậc một",
+            "mean": "Hệ số góc của tiếp tuyến tại điểm x, đo tốc độ thay đổi tức thời của hàm f."
+          },
+          {
+            "sym": "\\Delta x \\to 0",
+            "name": "Gia số tiến về 0",
+            "mean": "Khoảng dịch chuyển vô cùng nhỏ trên trục hoành."
+          },
+          {
+            "sym": "L'(w) = 0",
+            "name": "Điều kiện cực trị",
+            "mean": "Tiếp tuyến nằm ngang hoàn toàn, hàm số đạt cực đại hoặc cực tiểu."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"120\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Cát Tuyến → Tiếp Tuyến (Tangent)</text>\n                        <line x1=\"20\" y1=\"125\" x2=\"220\" y2=\"125\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <line x1=\"20\" y1=\"25\" x2=\"20\" y2=\"125\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <path d=\"M 30 115 Q 120 110 200 35\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"80\" cy=\"100\" r=\"3.5\" fill=\"#111\"/><text x=\"75\" y=\"115\" font-family=\"Georgia\" font-size=\"9\">A(x)</text>\n                        <circle cx=\"150\" cy=\"65\" r=\"3\" fill=\"#888\"/><text x=\"155\" y=\"75\" font-family=\"Georgia\" font-size=\"9\">B</text>\n                        <line x1=\"50\" y1=\"115\" x2=\"190\" y2=\"45\" stroke=\"#888\" stroke-dasharray=\"2,2\" stroke-width=\"1.2\"/>\n                        <line x1=\"40\" y1=\"125\" x2=\"160\" y2=\"45\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"120\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Tiếp tuyến tại A có hệ số góc f'(x)</text>\n                      </g>\n                      <g transform=\"translate(340, 20)\">\n                        <text x=\"120\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Dấu Đạo Hàm &amp; Đáy Cực Tiểu L'(w) = 0</text>\n                        <path d=\"M 40 40 Q 120 140 200 40\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <line x1=\"60\" y1=\"110\" x2=\"180\" y2=\"110\" stroke=\"#111\" stroke-dasharray=\"3,3\" stroke-width=\"1.5\"/>\n                        <circle cx=\"120\" cy=\"110\" r=\"4.5\" fill=\"#111\"/>\n                        <text x=\"120\" y=\"130\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Đáy Cực Tiểu: L'(w) = 0</text>\n                        <text x=\"60\" y=\"70\" font-family=\"Georgia\" font-size=\"9\">L'(w) &lt; 0 (Dốc xuống)</text>\n                        <text x=\"180\" y=\"70\" font-family=\"Georgia\" font-size=\"9\">L'(w) &gt; 0 (Dốc lên)</text>\n                      </g>\n                    </svg>",
+          "caption": "Trực quan hóa đạo hàm: Cát tuyến biến thành tiếp tuyến khi khoảng cách tiến về 0; Điểm đáy cực tiểu có tiếp tuyến nằm ngang."
+        },
+        "commonPitfalls": "Nhầm lẫn tai hại: Nhiều học sinh nghĩ rằng tại điểm cực tiểu thì giá trị hàm số phải bằng 0 ($L(w) = 0$). SAI! Tại điểm cực tiểu, ĐẠO HÀM bằng 0 ($L'(w) = 0$), còn bản thân hàm số $L(w)$ có thể nhận giá trị bằng 3, 10 hay bất kỳ con số nào!",
+        "practiceQuestion": {
+          "level": "Vận dụng",
+          "question": "Cho hàm mất mát của một mô hình học máy: L(w) = 5w² - 30w + 50. Giá trị trọng số w tối ưu để hàm mất mát đạt giá trị nhỏ nhất (cực tiểu) bằng bao nhiêu?",
+          "options": [
+            "A. w = 0",
+            "B. w = 6",
+            "C. w = 3",
+            "D. w = 5"
+          ],
+          "correctIndex": 2,
+          "hint": "Tính đạo hàm L'(w), cho L'(w) = 0 và giải phương trình bậc nhất tìm w.",
+          "solution": [
+            "Bước 1: Tính đạo hàm của L(w): L'(w) = d/dw (5w² - 30w + 50) = 10w - 30.",
+            "Bước 2: Tìm điểm cực tiểu bằng cách giải phương trình L'(w) = 0: 10w - 30 = 0 <=> 10w = 30 <=> w = 3.",
+            "Bước 3: Kiểm tra đạo hàm bậc hai: L''(w) = 10 > 0 => w = 3 chắc chắn là điểm cực tiểu.",
+            "Đáp án chính xác: C (w = 3)."
+          ]
+        }
+      },
+      {
+        "heading": "1.4. Đạo Hàm Riêng (Partial Derivatives) Cho Hàm Nhiều Biến & Kỹ Thuật 'Đóng Băng'",
+        "content": "Trong thế giới thực, một ngôi nhà không bao giờ chỉ có một thuộc tính. Giá nhà phụ thuộc cùng lúc vào Diện tích (x₁), Số phòng ngủ (x₂), Khoảng cách đến trường học (x₃),... Trong mạng nơ-ron học sâu (Deep Learning), một mô hình có thể có hàng triệu đến hàng tỷ trọng số w₁, w₂, ..., wₙ. Làm thế nào để biết trọng số w₅₀₀ đang làm tăng hay giảm sai số của mô hình khi tất cả các trọng số khác đều đang cùng biến động?",
+        "deepDive": "**1. Vấn đề của hàm nhiều biến:**\nMột hàm số nhiều biến có dạng $z = f(x, y)$ hoặc $L(w_1, w_2, \\dots, w_n)$.\nNếu cả $x$ và $y$ cùng thay đổi cùng lúc, ta sẽ rơi vào mớ bòng bong không thể đo đếm được nguyên nhân sai số đến từ biến nào.\n\n**2. Ý tưởng thiên tài: Kỹ thuật 'Đóng băng' (Freezing):**\nCác nhà toán học đưa ra giải pháp trực quan và thông minh bậc nhất:\nMuốn đo độ dốc theo biến nào, hãy **ĐÓNG BĂNG TẤT CẢ CÁC BIẾN CÒN LẠI**, coi chúng như những con số hằng số cố định bất di bất dịch (như số 5, số 10), và chỉ cho duy nhất một biến đó cựa quậy!\nPhép đạo hàm đặc biệt này được gọi là **ĐẠO HÀM RIÊNG (Partial Derivative)**.\n\n**3. Ký hiệu chữ cong $\\partial$ (Del):**\n- Đối với hàm một biến $y = f(x)$, ta dùng chữ $d$ thẳng: $\\frac{df}{dx}$.\n- Đối với hàm nhiều biến, ta bắt buộc phải dùng ký hiệu chữ cong $\\partial$ (đọc là 'del' hoặc 'partial'):\n  - $\\frac{\\partial f}{\\partial x}$: Đạo hàm riêng của $f$ theo biến $x$ (giữ $y, z...$ cố định).\n  - $\\frac{\\partial f}{\\partial y}$: Đạo hàm riêng của $f$ theo biến $y$ (giữ $x, z...$ cố định).\n\n**4. Ý nghĩa hình học trong không gian 3 chiều:**\nĐồ thị của hàm số hai biến $z = f(x, y)$ là một mặt cong 3D (như một quả đồi hoặc chiếc võng):\n- Khi bạn đứng tại một điểm trên quả đồi, có vô số hướng đi 360 độ xung quanh.\n- $\\frac{\\partial f}{\\partial x}$: Chính là độ dốc của mặt đồi khi bạn CHỈ đi dọc theo trục Tây - Đông (giữ nguyên vĩ độ Bắc - Nam).\n- $\\frac{\\partial f}{\\partial y}$: Chính là độ dốc của mặt đồi khi bạn CHỈ đi dọc theo trục Nam - Bắc (giữ nguyên kinh độ Tây - Đông).\n\n**5. Bài toán thực hành tính tay chi tiết từng chữ số một:**\nCho hàm số: $f(x, y) = 3x^2 y^3 + 5x^3 - 4y^2 + 7xy - 12$.\n\n**Bước 1: Tính $\\frac{\\partial f}{\\partial x}$ (Coi $y$ như hằng số):**\n- Xét hạng tử $3x^2 y^3$: Vì $y$ là hằng số, nên $3y^3$ là một cụm số hằng đứng trước $x^2$. Ta giữ nguyên $3y^3$ và đạo hàm $x^2$ thành $2x$:\n  $\\frac{\\partial}{\\partial x}(3x^2 y^3) = (3y^3) \\cdot (2x) = 6x y^3$.\n- Xét hạng tử $5x^3$: Đạo hàm bình thường theo $x$ $\\implies 5(3x^2) = 15x^2$.\n- Xét hạng tử $-4y^2$: Chú ý! Biểu thức này CHỈ CHỨA $y$, không chứa biến $x$. Đối với $x$, nó là một con số cố định $\\implies$ Đạo hàm của hằng số bằng $0$!\n- Xét hạng tử $7xy$: Coi $7y$ là hằng số, đạo hàm $x$ bằng 1 $\\implies 7y(1) = 7y$.\n- Xét hạng tử $-12$: Hằng số $\\implies 0$.\n$\\implies \\mathbf{\\frac{\\partial f}{\\partial x} = 6xy^3 + 15x^2 + 7y}$.\n\n**Bước 2: Tính $\\frac{\\partial f}{\\partial y}$ (Coi $x$ như hằng số):**\n- Xét hạng tử $3x^2 y^3$: Vì $x$ là hằng số, cụm $3x^2$ là hằng số đứng trước $y^3$. Đạo hàm $y^3$ thành $3y^2$:\n  $\\frac{\\partial}{\\partial y}(3x^2 y^3) = (3x^2) \\cdot (3y^2) = 9x^2 y^2$.\n- Xét hạng tử $5x^3$: Không chứa $y$, hoàn toàn là hằng số đối với $y \\implies 0$!\n- Xét hạng tử $-4y^2$: Đạo hàm theo $y$ $\\implies -4(2y) = -8y$.\n- Xét hạng tử $7xy$: Coi $7x$ là hằng số, đạo hàm $y$ bằng 1 $\\implies 7x(1) = 7x$.\n- Xét hạng tử $-12$: Hằng số $\\implies 0$.\n$\\implies \\mathbf{\\frac{\\partial f}{\\partial y} = 9x^2 y^2 - 8y + 7x}$.\n\n**Bước 3: Thay số tại điểm $(x = 1, y = 2)$:**\n- $\\frac{\\partial f}{\\partial x}(1, 2) = 6(1)(2^3) + 15(1^2) + 7(2) = 6(8) + 15 + 14 = 48 + 29 = 77$.\n- $\\frac{\\partial f}{\\partial y}(1, 2) = 9(1^2)(2^2) - 8(2) + 7(1) = 9(4) - 16 + 7 = 36 - 16 + 7 = 27$.\n\n**6. Điều kiện cực trị của hàm nhiều biến:**\nMột điểm $(x^*, y^*)$ là điểm cực tiểu/cực đại thì TẤT CẢ các tiếp tuyến theo mọi phương đều phải nằm ngang đồng thời, nghĩa là mọi đạo hàm riêng phải bằng 0:\n$$\\begin{cases} \\frac{\\partial f}{\\partial x} = 0 \\\\ \\frac{\\partial f}{\\partial y} = 0 \\end{cases}$$",
+        "formula": "\\frac{\\partial f}{\\partial x_i} = \\lim_{\\Delta x_i \\to 0} \\frac{f(x_1, \\dots, x_i + \\Delta x_i, \\dots, x_n) - f(x_1, \\dots, x_i, \\dots, x_n)}{\\Delta x_i}",
+        "mathExplainer": [
+          {
+            "sym": "\\partial",
+            "name": "Ký hiệu Del",
+            "mean": "Biểu thị đạo hàm riêng cho hàm nhiều biến, chỉ phẩy theo một biến duy nhất."
+          },
+          {
+            "sym": "\\frac{\\partial f}{\\partial x}",
+            "name": "Đạo hàm theo x",
+            "mean": "Đo tốc độ biến thiên khi chỉ có biến x dịch chuyển, giữ nguyên tất cả biến còn lại."
+          },
+          {
+            "sym": "\\frac{\\partial f}{\\partial y}",
+            "name": "Đạo hàm theo y",
+            "mean": "Đo tốc độ biến thiên khi chỉ có biến y dịch chuyển, giữ nguyên tất cả biến còn lại."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"140\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Thiết Diện Mặt Cắt 3D Của Đạo Hàm Riêng</text>\n                        <path d=\"M 40 120 Q 140 20 240 120\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <line x1=\"80\" y1=\"45\" x2=\"200\" y2=\"45\" stroke=\"#111\" stroke-dasharray=\"3,3\" stroke-width=\"1.5\"/>\n                        <circle cx=\"140\" cy=\"45\" r=\"4\" fill=\"#111\"/>\n                        <text x=\"140\" y=\"35\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Điểm Cực Trị: ∂f/∂x = 0 và ∂f/∂y = 0</text>\n                        <line x1=\"50\" y1=\"125\" x2=\"110\" y2=\"65\" stroke=\"#888\" stroke-width=\"1.5\"/>\n                        <circle cx=\"80\" cy=\"95\" r=\"3.5\" fill=\"#111\"/>\n                        <text x=\"50\" y=\"80\" font-family=\"Georgia\" font-size=\"9\">Độ dốc ∂f/∂x &gt; 0</text>\n                      </g>\n                      <g transform=\"translate(360, 30)\">\n                        <text x=\"0\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">Quy tắc vàng đóng băng biến số:</text>\n                        <text x=\"0\" y=\"45\" font-family=\"Georgia\" font-size=\"10\">• Phẩy theo x: coi y, z, w là con số hằng.</text>\n                        <text x=\"0\" y=\"65\" font-family=\"Georgia\" font-size=\"10\">• Phẩy theo y: coi x, z, w là con số hằng.</text>\n                        <text x=\"0\" y=\"90\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">Ví dụ: f(x, y) = 3x²y + 5y³</text>\n                        <text x=\"10\" y=\"110\" font-family=\"Georgia\" font-size=\"10\">∂f/∂x = 3(2x)y + 0 = 6xy</text>\n                        <text x=\"10\" y=\"128\" font-family=\"Georgia\" font-size=\"10\">∂f/∂y = 3x²(1) + 15y² = 3x² + 15y²</text>\n                      </g>\n                    </svg>",
+          "caption": "Ý nghĩa hình học của đạo hàm riêng: Độ dốc của mặt cong khi cắt bởi mặt phẳng song song với trục Ox hoặc Oy."
+        },
+        "commonPitfalls": "Lỗi sai chết người: Khi đạo hàm theo $x$, gặp hạng tử chỉ chứa $y$ (như $7y^3$) thì vội vàng viết là $21y^2$. SAI NẶNG! Đối với $x$, toàn bộ $7y^3$ là một hằng số độc lập, đạo hàm của nó bắt buộc phải bằng 0!",
+        "practiceQuestion": {
+          "level": "Vận dụng",
+          "question": "Cho hàm mất mát của mô hình hai tham số: L(w₁, w₂) = 4w₁² - 2w₁w₂ + 3w₂² - 8w₁ + 5. Đạo hàm riêng của hàm số này theo biến w₁ tại điểm (w₁ = 2, w₂ = 1) có giá trị bằng bao nhiêu?",
+          "options": [
+            "A. 14",
+            "B. 6",
+            "C. -2",
+            "D. 10"
+          ],
+          "correctIndex": 1,
+          "hint": "Coi w₂ là hằng số, tính đạo hàm theo w₁: d/dw₁(4w₁²) = 8w₁; d/dw₁(-2w₁w₂) = -2w₂; d/dw₁(3w₂² + 5) = 0.",
+          "solution": [
+            "Bước 1: Tính đạo hàm riêng ∂L/∂w₁ bằng cách coi w₂ là hằng số:",
+            "  - Đạo hàm của 4w₁² theo w₁ là: 8w₁.",
+            "  - Đạo hàm của -2w₁w₂ theo w₁ là: -2w₂ (vì w₂ là hằng số nhân phía sau).",
+            "  - Đạo hàm của 3w₂² và 5 theo w₁ bằng 0 (vì không chứa biến w₁).",
+            "  - Đạo hàm của -8w₁ theo w₁ là: -8.",
+            "  => Ta được: ∂L/∂w₁ = 8w₁ - 2w₂ - 8.",
+            "Bước 2: Thay tọa độ điểm (w₁=2, w₂=1) vào công thức vừa tìm được:",
+            "  ∂L/∂w₁(2, 1) = 8(2) - 2(1) - 8 = 16 - 2 - 8 = 6.",
+            "Đáp án chính xác: B (6)."
+          ]
+        }
+      },
+      {
+        "heading": "1.5. Hàm Hợp & Quy Tắc Chuỗi (Chain Rule) - Trái Tim Của Lan Truyền Ngược (Backpropagation)",
+        "content": "Một chiếc ô tô hiện đại không bao giờ nối trực tiếp chân ga tới bánh xe bằng một thanh sắt đơn giản. Khi bạn nhấn chân ga (x), tín hiệu truyền tới bộ vi xử lý phun xăng (u), van mở cung cấp nhiên liệu cho buồng đốt tạo áp suất xi-lanh (v), áp suất làm quay trục khuỷu (w), và trục khuỷu làm quay bánh xe (y). Từng khâu nối tiếp nhau như một dây chuyền xích. Trong Deep Learning, mạng nơ-ron cũng kết nối hàng trăm tầng liên tiếp như vậy. Làm thế nào để biết nhích nhẹ chân ga 1 milimet sẽ làm tăng tốc độ bánh xe thêm bao nhiêu km/h? Câu trả lời là QUY TẮC CHUỖI.",
+        "deepDive": "**1. Hàm hợp (Composite Function) là gì?**\nHàm hợp là một hàm lồng trong một hàm khác: $y = f(u)$ trong đó $u = g(x)$. Tóm tắt là $y = f(g(x))$.\nĐầu vào $x$ đi qua cỗ máy thứ nhất $g$ tạo ra thành phẩm trung gian $u$. Thành phẩm trung gian $u$ ngay lập tức trở thành nguyên liệu đầu vào cho cỗ máy thứ hai $f$ để tạo ra thành phẩm cuối cùng $y$.\n\n**2. Trực giác kinh điển: Bánh răng xe đạp:**\nGiả sử bạn đạp xe đạp thể thao:\n- Đĩa xích trước liên kết với bàn đạp: Khi bàn đạp ($x$) quay 1 vòng, đĩa xích ($u$) quay 2 vòng $\\implies \\frac{du}{dx} = 2$.\n- Líp xe sau liên kết với đĩa trước: Khi đĩa ($u$) quay 1 vòng, bánh xe sau ($y$) quay 3 vòng $\\implies \\frac{dy}{du} = 3$.\n- Hỏi: Nếu bạn đạp bàn đạp quay 1 vòng, bánh xe sau sẽ quay mấy vòng?\n- Rõ ràng: 1 vòng đạp $\\to$ 2 vòng đĩa $\\to 2 \\times 3 = 6$ vòng bánh xe!\n- Tốc độ thay đổi của bánh xe theo bàn đạp là tích của các tỷ lệ truyền động từng chặng:\n$$\\frac{dy}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx} = 3 \\cdot 2 = 6$$\nĐó chính là nội dung của **QUY TẮC CHUỖI (Chain Rule)**!\n\n**3. Quy tắc chuỗi trong Mạng Nơ-ron Nhân Tạo (Trọng tâm Đề thi VAIO):**\nHãy xét một nơ-ron nhân tạo cơ bản nhất trong quá trình tính toán:\n- **Chặng 1: Tổng có trọng số (Linear sum):** Nhận đầu vào $x$, nhân với trọng số $w$ và cộng độ lệch $b$:\n  $$z = w \\cdot x + b$$\n- **Chặng 2: Hàm kích hoạt phi tuyến (Activation):** Ép qua hàm kích hoạt $\\sigma$ (ví dụ Sigmoid) để tạo dự đoán:\n  $$\\hat{y} = \\sigma(z)$$\n- **Chặng 3: Tính hàm mất mát (Loss):** So sánh dự đoán $\\hat{y}$ với đáp án thực tế $y$:\n  $$\\mathcal{L} = \\frac{1}{2}(\\hat{y} - y)^2$$\n\nMục tiêu của thuật toán học máy là: Cần biết thay đổi trọng số $w$ một chút thì hàm mất mát $\\mathcal{L}$ tăng hay giảm bao nhiêu, tức tính $\\frac{\\partial \\mathcal{L}}{\\partial w}$!\nVì $w$ nằm sâu ở tầng đầu, muốn chạm tới $\\mathcal{L}$ ở tầng cuối, ta phải áp dụng Quy tắc chuỗi xâu chuỗi 3 mắt xích từ sau ra trước:\n$$\\frac{\\partial \\mathcal{L}}{\\partial w} = \\frac{\\partial \\mathcal{L}}{\\partial \\hat{y}} \\cdot \\frac{\\partial \\hat{y}}{\\partial z} \\cdot \\frac{\\partial z}{\\partial w}$$\n\n**4. Tính chi tiết từng mắt xích một bằng số cụ thể:**\nGiả sử nơ-ron đang xét có:\n- Đầu vào: $x = 2.0$.\n- Trọng số hiện tại: $w = 3.0$, bias $b = 1.0$.\n- Nhãn thực tế: $y = 0.0$.\n- Hàm kích hoạt là Sigmoid có công thức đạo hàm đẹp đẽ: $\\sigma'(z) = \\sigma(z)(1 - \\sigma(z))$.\n\n*Giai đoạn 1: Lan truyền tiến (Forward Pass) tính toán các giá trị:*\n- $z = w \\cdot x + b = 3.0(2.0) + 1.0 = 7.0$.\n- Giả sử $\\hat{y} = \\sigma(7.0) \\approx 0.9$.\n- $\\mathcal{L} = \\frac{1}{2}(0.9 - 0.0)^2 = \\frac{1}{2}(0.81) = 0.405$.\n\n*Giai đoạn 2: Lan truyền ngược (Backward Pass) tính từng đạo hàm:*\n- Mắt xích 1: $\\frac{\\partial \\mathcal{L}}{\\partial \\hat{y}} = \\frac{d}{d\\hat{y}}[\\frac{1}{2}(\\hat{y} - y)^2] = \\hat{y} - y = 0.9 - 0.0 = 0.9$.\n- Mắt xích 2: $\\frac{\\partial \\hat{y}}{\\partial z} = \\sigma'(z) = \\hat{y}(1 - \\hat{y}) = 0.9(1 - 0.9) = 0.9(0.1) = 0.09$.\n- Mắt xích 3: $\\frac{\\partial z}{\\partial w} = \\frac{\\partial}{\\partial w}(w \\cdot x + b) = x = 2.0$.\n\n*Giai đoạn 3: Ghép nối bằng Quy tắc chuỗi:*\n$$\\frac{\\partial \\mathcal{L}}{\\partial w} = 0.9 \\times 0.09 \\times 2.0 = 0.162$$\nÝ nghĩa: Vì đạo hàm dương ($0.162 > 0$), nếu ta tăng $w$ thì Loss sẽ tăng. Muốn giảm Loss, ta phải GIẢM trọng số $w$!",
+        "formula": "\\frac{dy}{dx} = \\frac{dy}{du} \\cdot \\frac{du}{dx}, \\quad \\frac{\\partial \\mathcal{L}}{\\partial w} = \\frac{\\partial \\mathcal{L}}{\\partial \\hat{y}} \\cdot \\frac{\\partial \\hat{y}}{\\partial z} \\cdot \\frac{\\partial z}{\\partial w}",
+        "mathExplainer": [
+          {
+            "sym": "\\frac{\\partial \\mathcal{L}}{\\partial \\hat{y}}",
+            "name": "Đạo hàm theo đầu ra dự đoán",
+            "mean": "Đo mức độ nhạy cảm của Loss khi dự đoán ŷ lệch đi một chút."
+          },
+          {
+            "sym": "\\frac{\\partial \\hat{y}}{\\partial z}",
+            "name": "Đạo hàm của hàm kích hoạt",
+            "mean": "Độ dốc của hàm phi tuyến tại điểm làm việc z."
+          },
+          {
+            "sym": "\\frac{\\partial z}{\\partial w}",
+            "name": "Đạo hàm theo trọng số",
+            "mean": "Bằng chính giá trị đầu vào x truyền vào nơ-ron."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 160\" width=\"100%\" height=\"160\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"160\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 25)\">\n                        <circle cx=\"40\" cy=\"50\" r=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"40\" y=\"55\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">w</text>\n                        <line x1=\"65\" y1=\"50\" x2=\"145\" y2=\"50\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <polygon points=\"145,46 155,50 145,54\" fill=\"#111\"/>\n                        <text x=\"105\" y=\"40\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">z = wx + b</text>\n                        <circle cx=\"180\" cy=\"50\" r=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"180\" y=\"55\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">z</text>\n                        <line x1=\"205\" y1=\"50\" x2=\"285\" y2=\"50\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <polygon points=\"285,46 295,50 285,54\" fill=\"#111\"/>\n                        <text x=\"245\" y=\"40\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">ŷ = σ(z)</text>\n                        <circle cx=\"320\" cy=\"50\" r=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"320\" y=\"55\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">ŷ</text>\n                        <line x1=\"345\" y1=\"50\" x2=\"425\" y2=\"50\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <polygon points=\"425,46 435,50 425,54\" fill=\"#111\"/>\n                        <text x=\"385\" y=\"40\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Loss L(ŷ, y)</text>\n                        <circle cx=\"460\" cy=\"50\" r=\"22\" fill=\"#111\"/>\n                        <text x=\"460\" y=\"55\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">L</text>\n                        <!-- Backward arrow below -->\n                        <path d=\"M 450 85 C 320 120 180 120 50 85\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\" stroke-dasharray=\"3,3\"/>\n                        <polygon points=\"48,82 43,90 52,91\" fill=\"#111\"/>\n                        <text x=\"250\" y=\"125\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Lan truyền ngược: ∂L/∂w = (∂L/∂ŷ) × (∂ŷ/∂z) × (∂z/∂w)</text>\n                      </g>\n                    </svg>",
+          "caption": "Dây chuyền tính toán (Computational Graph): Lan truyền tiến tính giá trị Loss; Quy tắc chuỗi lan truyền ngược tính Gradient."
+        },
+        "commonPitfalls": "Lỗi bỏ quên mắt xích hàm kích hoạt: Rất nhiều học sinh bỏ quên mắt xích đạo hàm $\\frac{\\partial \\hat{y}}{\\partial z}$ và nhân tắt $\\frac{\\partial \\mathcal{L}}{\\partial \\hat{y}} \\times x$. Đây là lỗi sai tai hại phá hủy toàn bộ cơ chế hội tụ của mạng nơ-ron sâu!",
+        "practiceQuestion": {
+          "level": "Vận dụng",
+          "question": "Cho một nơ-ron nhân tạo: Đầu vào x = 3, trọng số w = 2, bias b = 1. Giá trị tổng z = w·x + b. Đầu ra ŷ = z². Hàm mất mát Loss L = (ŷ - y_true) với y_true = 25. Hãy tính đạo hàm ∂L/∂w tại điểm dữ liệu này.",
+          "options": [
+            "A. 14",
+            "B. 42",
+            "C. 21",
+            "D. 7"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính từng bước theo Chain Rule: ∂L/∂w = (∂L/∂ŷ) × (∂ŷ/∂z) × (∂z/∂w). Tính z trước: z = 2(3) + 1 = 7.",
+          "solution": [
+            "Bước 1: Tính giá trị trung gian: z = w·x + b = 2(3) + 1 = 7.",
+            "Bước 2: Tính ŷ = z² = 7² = 49. Hàm Loss L = ŷ - 25 = 49 - 25 = 24.",
+            "Bước 3: Tính từng đạo hàm thành phần:",
+            "  - ∂L/∂ŷ = d/dŷ(ŷ - 25) = 1.",
+            "  - ∂ŷ/∂z = d/dz(z²) = 2z = 2(7) = 14.",
+            "  - ∂z/∂w = d/dw(w·x + b) = x = 3.",
+            "Bước 4: Nhân theo quy tắc chuỗi: ∂L/∂w = (∂L/∂ŷ) × (∂ŷ/∂z) × (∂z/∂w) = 1 × 14 × 3 = 42.",
+            "Đáp án chính xác: B (42)."
+          ]
+        }
+      },
+      {
+        "heading": "1.6. Vector Gradient ∇f & La Bàn Tối Ưu Hóa (Bám Sát Câu 48 Đề Thi VAIO 2025)",
+        "content": "Bây giờ bạn đã biết cách tính đạo hàm riêng cho từng biến số riêng rẽ. Nhưng trong mô hình AI, các trọng số không đứng một mình, chúng tạo thành một không gian đa chiều. Làm sao gom tất cả các độ dốc này lại thành một chiếc 'la bàn' chỉ đường duy nhất cho máy tính biết phải bước chân về hướng nào để giảm sai số? Khái niệm trung tâm của toàn bộ nền khoa học học máy chính là: VECTOR GRADIENT.",
+        "deepDive": "**1. Định nghĩa Vector Gradient:**\nVector Gradient của một hàm số nhiều biến $f(x, y)$ (hoặc hàm $n$ biến) là một vector gồm các thành phần là toàn bộ các đạo hàm riêng của hàm số đó:\n$$\\nabla f(x, y) = \\begin{bmatrix} \\frac{\\partial f}{\\partial x} \\\\ \\frac{\\partial f}{\\partial y} \\end{bmatrix} = \\frac{\\partial f}{\\partial x} \\mathbf{i} + \\frac{\\partial f}{\\partial y} \\mathbf{j}$$\n- Ký hiệu $\\nabla$: Là một tam giác ngược, gọi là **Nabla** (hoặc đọc trực tiếp là Gradient của $f$).\n- $\\mathbf{i} = \\begin{bmatrix} 1 \\\\ 0 \\end{bmatrix}$ và $\\mathbf{j} = \\begin{bmatrix} 0 \\\\ 1 \\end{bmatrix}$: Là hai vector đơn vị dọc theo trục hoành Ox và trục tung Oy.\n\n**2. Ba định lý hình học cốt tử của Vector Gradient (Chắc chắn xuất hiện trong đề thi):**\n\n**Định lý 1: Vector Gradient $\\nabla f$ LUÔN LUÔN chỉ về hướng mà hàm số TĂNG NHANH NHẤT!**\nNếu bạn đang đứng trên sườn núi, bạn quay la bàn theo vector $\\nabla f$, đó chính là hướng dốc đứng nhất dẫn thẳng lên đỉnh núi!\n\n**Định lý 2: Độ dài của vector gradient $\\|\\nabla f\\|$ thể hiện độ dốc cực đại:**\n$$\\|\\nabla f\\| = \\sqrt{\\left(\\frac{\\partial f}{\\partial x}\\right)^2 + \\left(\\frac{\\partial f}{\\partial y}\\right)^2}$$\nNếu $\\|\\nabla f\\|$ rất lớn, vách núi đang dựng đứng hiểm trở. Nếu $\\|\\nabla f\\| = 0$, bạn đang đứng trên một mặt phẳng bằng phẳng hoàn toàn (Đáy thung lũng hoặc Đỉnh núi).\n\n**Định lý 3: Vector Gradient luôn VUÔNG GÓC với các Đường đồng mức (Contour Lines):**\n- Đường đồng mức là đường nối tất cả các điểm có cùng độ cao (cùng giá trị hàm Loss).\n- Khi bạn đi dọc theo đường đồng mức, độ cao không đổi (độ dốc bằng 0).\n- Vì thế, hướng vuông góc với đường đồng mức chính là hướng có độ dốc lớn nhất $\\implies$ Gradient luôn trực giao (vuông góc) với tiếp tuyến đường đồng mức tại mọi điểm!\n\n**3. Tại sao Học máy lại bước đi theo $-\\nabla f$ (Gradient Descent)?**\n- Mục tiêu của học máy là **CỰC TIỂU HÓA HÀM MẤT MÁT (Minimize Loss)**, tìm nơi sai số nhỏ nhất.\n- Vì $\\nabla L$ là hướng Loss tăng nhanh nhất (lên đỉnh núi sai số),\n- Nên hướng ngược lại: **$-\\nabla L$ chính là HƯỚNG LOSS GIẢM NHANH NHẤT** (xuống đáy thung lũng an toàn)!\n- Công thức cập nhật tham số huyền thoại của Machine Learning:\n$$\\mathbf{w}_{\\text{mới}} = \\mathbf{w}_{\\text{cũ}} - \\eta \\nabla L(\\mathbf{w})$$\nDấu trừ ($-$) trong công thức trên chính là bản chất vì sao thuật toán có tên là **HẠ GRADIENT (Gradient Descent)**. Con số $\\eta > 0$ gọi là **Tốc độ học (Learning Rate)**, kiểm soát độ dài của mỗi bước chân.\n\n**4. Phân tích bám sát Câu 48 Đề thi chính thức Olympic AI VAIO 2025 (Mã Đề 006):**\n*Đề bài nguyên văn:* Tính gradient của hàm số $f(x, y) = 2x^2 - 3y^2 + 4y - 10$ tại điểm $(0, 0)$.\nCác phương án lựa chọn:\nA. $1\\mathbf{i} + 10\\mathbf{j}$ \t B. $2\\mathbf{i} - 3\\mathbf{j}$ \t C. $-3\\mathbf{i} + 4\\mathbf{j}$ \t D. $0\\mathbf{i} + 4\\mathbf{j}$\n\n*Cách 1: Lời giải tự luận chi tiết từng bước:*\n- **Bước 1: Tính đạo hàm riêng theo biến $x$:**\n  Coi $y$ là hằng số:\n  $\\frac{\\partial f}{\\partial x} = \\frac{\\partial}{\\partial x}(2x^2 - 3y^2 + 4y - 10) = 4x - 0 + 0 - 0 = 4x$.\n- **Bước 2: Tính đạo hàm riêng theo biến $y$:**\n  Coi $x$ là hằng số:\n  $\\frac{\\partial f}{\\partial y} = \\frac{\\partial}{\\partial y}(2x^2 - 3y^2 + 4y - 10) = 0 - 6y + 4 - 0 = -6y + 4$.\n- **Bước 3: Thay tọa độ điểm cần xét $(x=0, y=0)$ vào:**\n  $\\frac{\\partial f}{\\partial x}(0, 0) = 4(0) = 0$.\n  $\\frac{\\partial f}{\\partial y}(0, 0) = -6(0) + 4 = 4$.\n- **Bước 4: Viết vector gradient dưới dạng tổ hợp vector đơn vị:**\n  $\\nabla f(0, 0) = \\frac{\\partial f}{\\partial x}(0, 0) \\mathbf{i} + \\frac{\\partial f}{\\partial y}(0, 0) \\mathbf{j} = 0\\mathbf{i} + 4\\mathbf{j}$.\n$\\implies$ Chọn đáp án **D**.\n\n*Cách 2: Kỹ năng thi trắc nghiệm đỉnh cao giải trong 3 giây:*\n- Liếc nhanh biến $x$: Hạng tử chứa $x$ duy nhất là $2x^2$, đạo hàm ra $4x$. Tại $x = 0$, chắc chắn thành phần theo $\\mathbf{i}$ phải bằng $0$!\n- Nhìn 4 đáp án:\n  - A: có $1\\mathbf{i} \\neq 0$ (Loại ngay).\n  - B: có $2\\mathbf{i} \\neq 0$ (Loại ngay).\n  - C: có $-3\\mathbf{i} \\neq 0$ (Loại ngay).\n  - D: có $0\\mathbf{i} = 0$ (ĐÚNG DUY NHẤT!).\nChưa đầy 3 giây là có ngay điểm trọn vẹn của câu thi Olympic!",
+        "formula": "\\nabla f(x, y) = \\begin{bmatrix} \\frac{\\partial f}{\\partial x} \\\\ \\frac{\\partial f}{\\partial y} \\end{bmatrix} = \\frac{\\partial f}{\\partial x}\\mathbf{i} + \\frac{\\partial f}{\\partial y}\\mathbf{j}, \\quad \\mathbf{w}_{t+1} = \\mathbf{w}_t - \\eta \\nabla L(\\mathbf{w}_t)",
+        "mathExplainer": [
+          {
+            "sym": "\\nabla f (Nabla)",
+            "name": "Vector Gradient",
+            "mean": "Vector gồm tất cả các đạo hàm riêng, luôn chỉ về hướng hàm số tăng nhanh nhất."
+          },
+          {
+            "sym": "-\\nabla f",
+            "name": "Gradient âm (Ngược hướng)",
+            "mean": "Hướng hàm số giảm nhanh nhất, là hướng bước đi của thuật toán Gradient Descent."
+          },
+          {
+            "sym": "\\mathbf{i}, \\mathbf{j}",
+            "name": "Vector đơn vị",
+            "mean": "Vector có độ dài bằng 1 dọc theo trục hoành Ox và trục tung Oy."
+          },
+          {
+            "sym": "\\eta (Eta)",
+            "name": "Tốc độ học (Learning Rate)",
+            "mean": "Độ lớn của mỗi bước chân cập nhật trọng số trong thuật toán tối ưu."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <ellipse cx=\"120\" cy=\"70\" rx=\"90\" ry=\"50\" fill=\"none\" stroke=\"#bbb\" stroke-dasharray=\"2,2\"/>\n                        <ellipse cx=\"120\" cy=\"70\" rx=\"55\" ry=\"30\" fill=\"none\" stroke=\"#777\"/>\n                        <ellipse cx=\"120\" cy=\"70\" rx=\"20\" ry=\"10\" fill=\"none\" stroke=\"#111\"/>\n                        <circle cx=\"120\" cy=\"70\" r=\"3.5\" fill=\"#111\"/>\n                        <text x=\"120\" y=\"65\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Đáy Cực Tiểu (Loss min)</text>\n                        <!-- Current point -->\n                        <circle cx=\"170\" cy=\"45\" r=\"4.5\" fill=\"#111\"/>\n                        <!-- Gradient arrow UP -->\n                        <line x1=\"170\" y1=\"45\" x2=\"210\" y2=\"25\" stroke=\"#888\" stroke-width=\"2\"/>\n                        <polygon points=\"210,22 216,27 207,29\" fill=\"#888\"/>\n                        <text x=\"215\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" fill=\"#666\">+∇L (Hướng tăng Loss)</text>\n                        <!-- Negative Gradient arrow DOWN to center -->\n                        <line x1=\"170\" y1=\"45\" x2=\"130\" y2=\"65\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <polygon points=\"130,68 124,63 133,60\" fill=\"#111\"/>\n                        <text x=\"155\" y=\"85\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">-η∇L (Hướng bước của GD)</text>\n                      </g>\n                      <g transform=\"translate(360, 30)\">\n                        <text x=\"0\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">Điểm cốt lõi cho kỳ thi VAIO:</text>\n                        <text x=\"0\" y=\"45\" font-family=\"Georgia\" font-size=\"10\">• Gradient luôn VUÔNG GÓC với đường đồng mức (Contour line).</text>\n                        <text x=\"0\" y=\"65\" font-family=\"Georgia\" font-size=\"10\">• Tại điểm cực tiểu hoặc cực đại: ∇f = 0 (mọi đạo hàm riêng = 0).</text>\n                        <text x=\"0\" y=\"85\" font-family=\"Georgia\" font-size=\"10\">• Đề thi thường yêu cầu tính giá trị ∇f tại điểm cụ thể (x₀, y₀).</text>\n                      </g>\n                    </svg>",
+          "caption": "Các đường đồng mức của hàm mất mát: Vector Gradient vuông góc với đường đồng mức và chỉ hướng dốc tăng nhanh nhất; Hướng ngược lại chỉ về tâm cực tiểu."
+        },
+        "commonPitfalls": "Bẫy đề thi kinh điển: Đề thi trắc nghiệm thường hỏi 'Vector Gradient chỉ hướng nào của hàm số?'. Rất nhiều học sinh chọn 'Hướng giảm nhanh nhất của hàm số'. ĐÂY LÀ ĐÁP ÁN SAI! Bản thân ∇f chỉ hướng TĂNG nhanh nhất. Phải có dấu trừ (-) tức -∇f mới là hướng GIẢM nhanh nhất!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 48 Đề Thi VAIO 2025)",
+          "question": "Tính gradient của hàm số f(x, y) = 2x² - 3y² + 4y - 10 tại điểm (0, 0). (Câu 48 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. 1i + 10j",
+            "B. 2i - 3j",
+            "C. -3i + 4j",
+            "D. 0i + 4j"
+          ],
+          "correctIndex": 3,
+          "hint": "Tính ∂f/∂x coi y là hằng số, tính ∂f/∂y coi x là hằng số; sau đó thay x=0, y=0 vào từng thành phần của vector [∂f/∂x, ∂f/∂y].",
+          "solution": [
+            "Bước 1: Tính đạo hàm riêng theo biến x (coi y là số hằng):",
+            "  ∂f/∂x = d/dx (2x² - 3y² + 4y - 10) = 4x - 0 + 0 - 0 = 4x.",
+            "Bước 2: Tính đạo hàm riêng theo biến y (coi x là số hằng):",
+            "  ∂f/∂y = d/dy (2x² - 3y² + 4y - 10) = 0 - 6y + 4 - 0 = -6y + 4.",
+            "Bước 3: Thay tọa độ điểm (x=0, y=0) vào hai đạo hàm riêng:",
+            "  - Thành phần theo trục i: ∂f/∂x (0, 0) = 4(0) = 0.",
+            "  - Thành phần theo trục j: ∂f/∂y (0, 0) = -6(0) + 4 = 4.",
+            "Bước 4: Biểu diễn gradient dưới dạng vector đơn vị:",
+            "  ∇f(0, 0) = (∂f/∂x)i + (∂f/∂y)j = 0i + 4j.",
+            "Đáp án chính xác: D (0i + 4j)."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-gradient-descent",
+    "examConnection": {
+      "questionTitle": "Phân Tích Dạng Bài Thi Olympic VAIO 2025 (Mã Đề 006)",
+      "items": [
+        {
+          "code": "Câu 48",
+          "problem": "Tính vector gradient của hàm đa thức hai biến $f(x, y) = 2x^2 - 3y^2 + 4y - 10$ tại gốc tọa độ $(0, 0)$.",
+          "solution": [
+            "Chiến lược giải nhanh trong 3 giây: Tách riêng biến x: $2x^2 \\to 4x$, tại $x=0$ bằng 0 $\\implies$ Loại ngay A, B, C.",
+            "Chỉ còn duy nhất đáp án D ($0i + 4j$). Không cần tính biến y vẫn chọn đúng 100%!"
+          ]
+        },
+        {
+          "code": "Câu 47",
+          "problem": "Tính đầu ra nơ-ron: Vector trọng số $\\mathbf{w} = [1, 4, 3]$, vector đầu vào $\\mathbf{x} = [4, 8, 5]$, hệ số kích hoạt tuyến tính $k = 3$.",
+          "solution": [
+            "Bước 1: Tính tích vô hướng tổng có trọng số: $z = 1(4) + 4(8) + 3(5) = 4 + 32 + 15 = 51$.",
+            "Bước 2: Nhân với hệ số kích hoạt: $Output = 3 \\times 51 = 153$."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Học máy phân chia thành Hồi quy (đầu ra số thực liên tục y ∈ ℝ) và Phân loại (đầu ra nhãn rời rạc y ∈ {0, 1}).",
+      "Đạo hàm f'(x) là hệ số góc của tiếp tuyến; f'(x) = 0 là điều kiện cần của điểm cực trị (đáy thung lũng nơi Loss nhỏ nhất).",
+      "Đạo hàm riêng theo biến nào thì 'đóng băng' toàn bộ các biến còn lại như một con số hằng.",
+      "Quy tắc chuỗi (Chain Rule) ∂L/∂w = (∂L/∂ŷ) · (∂ŷ/∂z) · (∂z/∂w) là trái tim để lan truyền ngược sai số qua các tầng nơ-ron.",
+      "Vector Gradient ∇f luôn chỉ hướng TĂNG nhanh nhất; do đó thuật toán Gradient Descent bắt buộc phải bước đi theo hướng NGƯỢC LẠI: -η∇f."
+    ]
+  },
+  {
+    "id": "lesson-2",
+    "title": "2. Đại Số Tuyến Tính, Vector, Ma Trận & Cosine Similarity",
+    "summary": "Khởi đầu từ con số 0: Ngôn ngữ biểu diễn dữ liệu của toàn bộ thế giới AI. Dẫn dắt tường minh từ bản chất Scalar, Vector, Matrix, Tensor đến các phép toán cốt tử: Tích vô hướng (Dot Product), Tích Hadamard (⊙), Phép nhân ma trận, Chuẩn độ dài L1/L2, và Độ đo góc Cosine Similarity trong các hệ thống gợi ý & mô hình ngôn ngữ lớn (LLMs).",
+    "syllabusBadge": "BUỔI 4: ĐẠI SỐ TUYẾN TÍNH & HỆ THỐNG GỢI Ý",
+    "intuition": {
+      "title": "Trực giác thực tế: Gu âm nhạc trên Spotify và Không gian đa chiều",
+      "content": "Làm thế nào Spotify có thể biết bạn và một người lạ ở nửa bên kia bán cầu có sở thích âm nhạc giống hệt nhau để gợi ý bài hát cho bạn? Spotify không thể đọc suy nghĩ của bạn bằng phép thuật. Thay vào đó, Spotify biến toàn bộ hành vi nghe nhạc của mỗi người thành một danh sách các con số (Vector biểu diễn):\n- **Người A:** [Thích Rock: 0.90, Thích Pop: 0.20, Thích Jazz: 0.10, Thích EDM: 0.85]\n- **Người B:** [Thích Rock: 0.85, Thích Pop: 0.15, Thích Jazz: 0.05, Thích EDM: 0.90]\n- **Người C:** [Thích Rock: 0.05, Thích Pop: 0.95, Thích Jazz: 0.80, Thích EDM: 0.10]\n\nMỗi danh sách số này là một 'mũi tên' (Vector) chỉ về một hướng trong không gian sở thích 4 chiều. Người A và Người B có mũi tên cùng chỉ về một góc nhọn rất hẹp trong không gian $\\implies$ Góc lệch $\\theta \\approx 0^\\circ \\implies \\cos(\\theta) \\approx 0.99$. Hệ thống lập tức kết luận: 'Hai người này có gu âm nhạc tương đồng tuyệt đối!'\n\nĐây chính là sức mạnh tối thượng của Đại Số Tuyến Tính trong AI: Biến mọi khái niệm trừu tượng của thế giới thực (bài hát, phim ảnh, bài báo, khuôn mặt, giọng nói) thành các con số và dùng hình học không gian để đo độ tương đồng!"
+    },
+    "sections": [
+      {
+        "heading": "2.1. Khởi Đầu Từ Con Số 0: Đại Số Tuyến Tính Là Gì? 4 Cấp Bậc Dữ Liệu (Scalar, Vector, Matrix, Tensor)",
+        "content": "Bộ vi xử lý của máy tính thực chất chỉ là những mạch bán dẫn đóng ngắt dòng điện. Máy tính không thể nhìn thấy 'bức ảnh con mèo', không thể nghe thấy 'bản nhạc của Taylor Swift', cũng không thể hiểu 'đoạn văn tiếng Việt'. Muốn máy tính học được, con người bắt buộc phải chuyển đổi mọi thông tin ngoài đời thực thành các con số. Đại số tuyến tính chính là ngôn ngữ toán học giúp ta tổ chức các con số đó một cách ngăn nắp và khoa học.",
+        "deepDive": "**1. Bản chất của Đại số tuyến tính:**\nĐại số tuyến tính nghiên cứu các không gian vector và các phép biến đổi tuyến tính (co giãn, xoay, chiếu) giữa các không gian đó. Trong Machine Learning, nó đóng vai trò là 'hệ xương sống' để chứa đựng và truyền dẫn dữ liệu.\n\n**2. Bốn cấp bậc cấu trúc dữ liệu theo chiều không gian:**\n\n**a) Cấp bậc 0D: Scalar (Đại lượng vô hướng - Con số đơn lẻ):**\n- **Định nghĩa:** Là một con số thực duy nhất ($x \\in \\mathbb{R}$). Nó không có hướng, chỉ có độ lớn.\n- **Ví dụ thực tế:**\n  - Nhiệt độ phòng: $28^\\circ\\text{C}$.\n  - Tuổi của học sinh: $18$.\n  - Tốc độ học (Learning Rate) của mô hình AI: $\\eta = 0.01$.\n- **Ký hiệu:** Viết bằng chữ cái thường nghiêng: $x, y, z, c$.\n\n**b) Cấp bậc 1D: Vector (Mảng một chiều - Danh sách thuộc tính):**\n- **Định nghĩa:** Là một danh sách gồm nhiều con số được sắp xếp theo thứ tự, đại diện cho MỘT ĐỐI TƯỢNG có nhiều đặc trưng (features).\n- **Ý nghĩa hình học:** Một vector $\\mathbf{x} \\in \\mathbb{R}^d$ là một **mũi tên** trong không gian $d$ chiều, có gốc xuất phát từ gốc tọa độ $(0, 0, \\dots, 0)$ và đỉnh mũi tên trỏ tới tọa độ của các con số đó.\n- **Ví dụ thực tế:** Hồ sơ đặc trưng của một căn nhà:\n  $$\\mathbf{x} = \\begin{bmatrix} 85.5 \\\\ 3 \\\\ 4.2 \\\\ 12 \\end{bmatrix} \\begin{matrix} \\leftarrow \\text{Diện tích (m²)} \\\\ \\leftarrow \\text{Số phòng ngủ} \\\\ \\leftarrow \\text{Khoảng cách đến trung tâm (km)} \\\\ \\leftarrow \\text{Tầng cao} \\end{matrix}$$\n- **Phân biệt Vector cột vs Vector hàng:**\n  - Theo quy ước chuẩn quốc tế của Machine Learning, một vector mặc định luôn là **Vector Cột** (kích thước $d \\times 1$).\n  - Muốn biểu diễn vector hàng, ta dùng dấu chuyển vị: $\\mathbf{x}^T = [85.5, 3, 4.2, 12]$ (kích thước $1 \\times d$).\n\n**c) Cấp bậc 2D: Matrix (Ma trận - Bảng dữ liệu hai chiều):**\n- **Định nghĩa:** Là một bảng chữ nhật gồm $m$ hàng và $n$ cột ($A \\in \\mathbb{R}^{m \\times n}$).\n- **Ký hiệu phần tử:** $A_{ij}$ là con số nằm ở hàng thứ $i$ và cột thứ $j$.\n- **Ví dụ thực tế:**\n  - Một tập dữ liệu khách hàng (Dataset): Gồm 1000 khách hàng (1000 hàng) và mỗi khách hàng có 10 đặc trưng (10 cột) $\\implies$ Ma trận kích thước $1000 \\times 10$.\n  - Một bức ảnh xám (Grayscale Image) kích thước $28 \\times 28$ pixel (như bộ dữ liệu chữ số MNIST): Mỗi điểm ảnh là một ô chứa độ sáng từ 0 (đen) đến 255 (trắng) $\\implies$ Ma trận $28 \\times 28$.\n\n**d) Cấp bậc 3D, 4D+: Tensor (Mảng đa chiều):**\n- **Định nghĩa:** Là khái niệm mở rộng tổng quát hóa của ma trận lên không gian 3, 4, 5 chiều trở lên.\n- **Ví dụ kinh điển trong Computer Vision:**\n  - Một bức ảnh màu kỹ thuật số (RGB Image): Gồm 3 kênh màu riêng biệt (Kênh Đỏ - Red, Kênh Xanh lá - Green, Kênh Xanh dương - Blue). Mỗi kênh màu là một ma trận kích thước Chiều cao $H \\times$ Chiều rộng $W$. Do đó, 1 bức ảnh màu là một **Tensor 3 chiều** kích thước $(3, H, W)$.\n  - Một lô huấn luyện (Mini-batch) gồm 64 ảnh màu đưa vào mạng nơ-ron cùng lúc: Là một **Tensor 4 chiều** kích thước $(64, 3, 224, 224)$ tương ứng $(\\text{Batch\\_size}, \\text{Channels}, \\text{Height}, \\text{Width})$.\n  - Một video clip: Thêm một trục thời gian (số khung hình/giây) $\\implies$ **Tensor 5 chiều**!",
+        "formula": "x \\in \\mathbb{R} \\text{ (0D)} \\quad \\to \\quad \\mathbf{x} \\in \\mathbb{R}^d \\text{ (1D)} \\quad \\to \\quad A \\in \\mathbb{R}^{m \\times n} \\text{ (2D)} \\quad \\to \\quad \\mathcal{T} \\in \\mathbb{R}^{B \\times C \\times H \\times W} \\text{ (4D)}",
+        "mathExplainer": [
+          {
+            "sym": "x \\in \\mathbb{R}",
+            "name": "Scalar (Vô hướng)",
+            "mean": "Con số thực đơn lẻ duy nhất, không có hướng."
+          },
+          {
+            "sym": "\\mathbf{x} \\in \\mathbb{R}^d",
+            "name": "Vector d chiều",
+            "mean": "Mảng số 1 chiều biểu diễn một mũi tên có d tọa độ thuộc tính."
+          },
+          {
+            "sym": "A \\in \\mathbb{R}^{m \\times n}",
+            "name": "Ma trận m × n",
+            "mean": "Bảng số 2 chiều gồm m hàng ngang và n cột dọc."
+          },
+          {
+            "sym": "\\mathcal{T} \\in \\mathbb{R}^{B \\times C \\times H \\times W}",
+            "name": "Tensor 4 chiều",
+            "mean": "Mảng đa chiều trong học sâu: B lô ảnh, C kênh màu, H chiều cao, W chiều rộng."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(20, 20)\">\n                        <text x=\"50\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Scalar (0D)</text>\n                        <rect x=\"25\" y=\"45\" width=\"50\" height=\"50\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"50\" y=\"75\" font-family=\"Georgia\" font-size=\"16\" font-weight=\"bold\" text-anchor=\"middle\">42</text>\n                        <text x=\"50\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Một số đơn lẻ</text>\n                      </g>\n                      <g transform=\"translate(140, 20)\">\n                        <text x=\"60\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">2. Vector (1D)</text>\n                        <rect x=\"35\" y=\"30\" width=\"50\" height=\"80\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"60\" y=\"50\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">x₁ = 3</text>\n                        <text x=\"60\" y=\"75\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">x₂ = 7</text>\n                        <text x=\"60\" y=\"100\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">x₃ = -1</text>\n                        <text x=\"60\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Mảng 1 chiều</text>\n                      </g>\n                      <g transform=\"translate(280, 20)\">\n                        <text x=\"75\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">3. Matrix (2D)</text>\n                        <rect x=\"25\" y=\"30\" width=\"100\" height=\"80\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"50\" y=\"55\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">1.2</text>\n                        <text x=\"100\" y=\"55\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">4.5</text>\n                        <text x=\"50\" y=\"80\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">0.8</text>\n                        <text x=\"100\" y=\"80\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">9.1</text>\n                        <text x=\"50\" y=\"105\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">3.4</text>\n                        <text x=\"100\" y=\"105\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">2.7</text>\n                        <text x=\"75\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Bảng 3 hàng × 2 cột</text>\n                      </g>\n                      <g transform=\"translate(440, 20)\">\n                        <text x=\"75\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Tensor (3D/4D)</text>\n                        <!-- 3D layered boxes -->\n                        <rect x=\"45\" y=\"30\" width=\"70\" height=\"60\" fill=\"#e5e5e5\" stroke=\"#777\" stroke-width=\"1\"/>\n                        <rect x=\"35\" y=\"40\" width=\"70\" height=\"60\" fill=\"#f0f0f0\" stroke=\"#555\" stroke-width=\"1\"/>\n                        <rect x=\"25\" y=\"50\" width=\"70\" height=\"60\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"60\" y=\"85\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Ảnh RGB (3,H,W)</text>\n                        <text x=\"75\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Khối lập phương đa chiều</text>\n                      </g>\n                    </svg>",
+          "caption": "Trực quan hóa 4 cấp bậc dữ liệu trong Machine Learning: Từ con số đơn lẻ (Scalar) đến Vector thuộc tính, Bảng ma trận, và Khối Tensor đa kênh."
+        },
+        "commonPitfalls": "Cạm bẫy quy ước kích thước: Nhiều bạn nhầm lẫn thứ tự (Hàng, Cột). Hãy nhớ câu thần chú: 'HÀNG TRƯỚC, CỘT SAU' (Row-first, Column-second). Ma trận kích thước $3 \\times 2$ có 3 hàng ngang và 2 cột dọc. Nếu viết nhầm thành $2 \\times 3$, toàn bộ phép nhân ma trận phía sau sẽ bị lỗi kích thước!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong một hệ thống thị giác máy tính nhận diện biển số xe, mỗi lô dữ liệu huấn luyện nạp vào mô hình chứa 32 bức ảnh màu chất lượng cao, mỗi bức ảnh có chiều cao 128 pixel, chiều rộng 256 pixel và có 3 kênh màu (Đỏ, Xanh lá, Xanh dương). Cấu trúc dữ liệu chứa lô ảnh này là Tensor mấy chiều và có kích thước (Shape) bằng bao nhiêu?",
+          "options": [
+            "A. Tensor 3 chiều với kích thước (32, 128, 256)",
+            "B. Tensor 4 chiều với kích thước (32, 3, 128, 256)",
+            "C. Ma trận 2 chiều với kích thước (32, 32768)",
+            "D. Tensor 5 chiều với kích thước (32, 3, 128, 256, 1)"
+          ],
+          "correctIndex": 1,
+          "hint": "Đếm 4 thành phần: Số ảnh trong lô (Batch), Số kênh màu (Channels), Chiều cao (Height), Chiều rộng (Width).",
+          "solution": [
+            "Bước 1: Xác định từng trục dữ liệu:",
+            "  - Trục 1: Số lượng ảnh trong lô huấn luyện (Batch size) = 32.",
+            "  - Trục 2: Số kênh màu (Channels) = 3 (Đỏ, Xanh lá, Xanh dương).",
+            "  - Trục 3: Chiều cao ảnh (Height) = 128.",
+            "  - Trục 4: Chiều rộng ảnh (Width) = 256.",
+            "Bước 2: Ghép lại theo quy chuẩn NCHW (hoặc NHWC) của học sâu: (32, 3, 128, 256) gồm 4 trục chiều không gian => Tensor 4 chiều.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "2.2. Các Phép Toán Vector Cốt Lõi: Cộng, Trừ, Nhân Vô Hướng & Chuẩn Độ Dài L1/L2",
+        "content": "Để làm chủ các thuật toán học máy, ta không thể chỉ nhìn ngắm các vector mà phải bắt chúng vận động. Hai vector cộng với nhau ra cái gì? Làm thế nào để đo độ dài của một mũi tên trong không gian 1000 chiều? Và tại sao các nhà toán học lại phân biệt giữa 'Khoảng cách chim bay' (Chuẩn L2) và 'Khoảng cách đi bộ trên phố' (Chuẩn L1)?",
+        "deepDive": "**1. Các phép toán đại số cơ bản trên Vector:**\n\n**a) Phép cộng và trừ hai Vector (Element-wise Addition & Subtraction):**\n- **Điều kiện bắt buộc:** Hai vector PHẢI CÙNG KÍCH THƯỚC (cùng số chiều $d$).\n- **Quy tắc:** Cộng hoặc trừ từng phần tử ở vị trí tương ứng:\n  $$\\mathbf{u} + \\mathbf{v} = \\begin{bmatrix} u_1 \\\\ u_2 \\end{bmatrix} + \\begin{bmatrix} v_1 \\\\ v_2 \\end{bmatrix} = \\begin{bmatrix} u_1 + v_1 \\\\ u_2 + v_2 \\end{bmatrix}$$\n- **Ý nghĩa hình học:** Tuân theo **Quy tắc hình bình hành** trong vật lý (tổng hợp hai lực kéo).\n\n**b) Nhân Vector với một số vô hướng (Scalar Multiplication):**\n- **Quy tắc:** Lấy con số đó nhân vào TỪNG phần tử của vector:\n  $$c \\cdot \\mathbf{v} = c \\cdot \\begin{bmatrix} v_1 \\\\ v_2 \\end{bmatrix} = \\begin{bmatrix} c \\cdot v_1 \\\\ c \\cdot v_2 \\end{bmatrix}$$\n- **Ý nghĩa hình học:**\n  - Nếu $c > 1$: Phóng đại kéo dài mũi tên theo cùng hướng (ví dụ: $2\\mathbf{v}$ dài gấp đôi $\\mathbf{v}$).\n  - Nếu $0 < c < 1$: Thu ngắn mũi tên (ví dụ: $0.5\\mathbf{v}$ ngắn bằng một nửa).\n  - Nếu $c < 0$: Đảo ngược chiều mũi tên $180^\\circ$ (ví dụ: $-\\mathbf{v}$ quay ngược hướng). Đây chính là lý do $-\\eta \\nabla L$ đảo ngược hướng tăng thành hướng giảm trong Gradient Descent!\n\n**2. Chuẩn Vector (Vector Norms) - Cách đo độ dài trong không gian đa chiều:**\nTrong đời thực, khoảng cách giữa 2 điểm trên mặt phẳng được tính bằng định lý Pytago. Trong không gian nhiều chiều, khái niệm này được tổng quát hóa thành **Chuẩn (Norm)**, ký hiệu bằng hai dấu gạch đứng $\\|\\mathbf{v}\\|$:\n\n**a) Chuẩn L2 (Euclidean Norm - Khoảng cách chim bay):**\n- **Công thức:** Căn bậc hai của tổng các bình phương:\n  $$\\|\\mathbf{v}\\|_2 = \\sqrt{v_1^2 + v_2^2 + \\dots + v_d^2} = \\sqrt{\\sum_{i=1}^d v_i^2}$$\n- **Ý nghĩa:** Là độ dài vật lý thẳng tắp ngắn nhất nối từ gốc tọa độ $(0, 0)$ tới điểm ngọn của vector (khoảng cách chim bay).\n- **Ứng dụng trong AI:** Dùng làm kỹ thuật phạt độ lớn trọng số **L2 Regularization (Ridge)** để ngăn mô hình bị quá khớp (Overfitting), và làm mẫu số trong công thức Cosine Similarity.\n\n**b) Chuẩn L1 (Manhattan Norm / Taxi-cab Norm - Khoảng cách đi bộ trên phố):**\n- **Công thức:** Tổng các giá trị tuyệt đối:\n  $$\\|\\mathbf{v}\\|_1 = |v_1| + |v_2| + \\dots + |v_d| = \\sum_{i=1}^d |v_i|$$\n- **Ý nghĩa:** Tưởng tượng bạn đang ở quận Manhattan (New York) với các con phố ô bàn cờ vuông góc. Bạn không thể bay xuyên qua các tòa nhà cao tầng mà phải đi dọc theo các đại lộ rồi rẽ ngang. Chuẩn L1 đo tổng quãng đường đi dọc theo các trục tọa độ.\n- **Ứng dụng trong AI:** Dùng trong kỹ thuật **L1 Regularization (Lasso)** có khả năng triệt tiêu các trọng số thừa về đúng bằng 0, giúp chọn lọc đặc trưng tự động.\n\n**c) Chuẩn hóa Vector (Unit Vector / Vector đơn vị):**\n- Muốn biến một vector bất kỳ $\\mathbf{v}$ thành một vector có độ dài đúng bằng $1$ nhưng vẫn giữ nguyên hướng ban đầu, ta chỉ cần lấy vector đó chia cho độ dài L2 của chính nó:\n  $$\\mathbf{u} = \\frac{\\mathbf{v}}{\\|\\mathbf{v}\\|_2}$$\n- Phép biến đổi này gọi là **Chuẩn hóa (Normalization)**, cực kỳ quan trọng trong xử lý ngôn ngữ tự nhiên và tìm kiếm vector.",
+        "formula": "\\|\\mathbf{v}\\|_2 = \\sqrt{\\sum_{i=1}^d v_i^2}, \\quad \\|\\mathbf{v}\\|_1 = \\sum_{i=1}^d |v_i|, \\quad \\mathbf{u} = \\frac{\\mathbf{v}}{\\|\\mathbf{v}\\|_2}",
+        "mathExplainer": [
+          {
+            "sym": "\\|\\mathbf{v}\\|_2",
+            "name": "Chuẩn L2 (Euclid)",
+            "mean": "Độ dài đường thẳng hình học của vector theo định lý Pytago."
+          },
+          {
+            "sym": "\\|\\mathbf{v}\\|_1",
+            "name": "Chuẩn L1 (Manhattan)",
+            "mean": "Tổng giá trị tuyệt đối các tọa độ, đo quãng đường đi vuông góc theo trục."
+          },
+          {
+            "sym": "\\mathbf{u} = \\frac{\\mathbf{v}}{\\|\\mathbf{v}\\|}",
+            "name": "Vector đơn vị",
+            "mean": "Vector đã được chuẩn hóa về độ dài bằng 1, chỉ giữ lại thông tin phương hướng."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"120\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Chuẩn L2 (Khoảng cách Euclid)</text>\n                        <line x1=\"20\" y1=\"125\" x2=\"220\" y2=\"125\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"40\" y1=\"25\" x2=\"40\" y2=\"125\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <!-- Vector v = (3, 4) -->\n                        <line x1=\"40\" y1=\"125\" x2=\"160\" y2=\"45\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <polygon points=\"160,45 150,47 154,55\" fill=\"#111\"/>\n                        <circle cx=\"160\" cy=\"45\" r=\"3.5\" fill=\"#111\"/>\n                        <text x=\"175\" y=\"45\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">v = (3, 4)</text>\n                        <text x=\"115\" y=\"75\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#111\">||v||₂ = √(3²+4²) = 5</text>\n                        <line x1=\"40\" y1=\"125\" x2=\"160\" y2=\"125\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <line x1=\"160\" y1=\"125\" x2=\"160\" y2=\"45\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <text x=\"100\" y=\"140\" font-family=\"Georgia\" font-size=\"9\">Cạnh đáy = 3</text>\n                        <text x=\"170\" y=\"90\" font-family=\"Georgia\" font-size=\"9\">Cạnh cao = 4</text>\n                      </g>\n                      <g transform=\"translate(360, 20)\">\n                        <text x=\"100\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Chuẩn L1 (Khoảng cách Manhattan)</text>\n                        <line x1=\"20\" y1=\"125\" x2=\"200\" y2=\"125\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"40\" y1=\"25\" x2=\"40\" y2=\"125\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <!-- Manhattan path -->\n                        <line x1=\"40\" y1=\"125\" x2=\"160\" y2=\"125\" stroke=\"#111\" stroke-width=\"3\"/>\n                        <line x1=\"160\" y1=\"125\" x2=\"160\" y2=\"45\" stroke=\"#111\" stroke-width=\"3\"/>\n                        <circle cx=\"160\" cy=\"45\" r=\"3.5\" fill=\"#111\"/>\n                        <text x=\"100\" y=\"105\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">||v||₁ = |3| + |4| = 7</text>\n                        <text x=\"100\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Đi dọc theo bàn cờ đường phố</text>\n                      </g>\n                    </svg>",
+          "caption": "So sánh hình học giữa Chuẩn L2 (đường chéo ngắn nhất bằng 5) và Chuẩn L1 (tổng quãng đường ngang dọc bằng 7)."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa Chuẩn L2 và Bình phương chuẩn L2: Nhiều bài toán hỏi chuẩn L2 $\\|\\mathbf{v}\\|_2$ nhưng học sinh quên rút căn bậc hai! Với vector $\\mathbf{v} = [3, 4]$, tổng bình phương là $3^2 + 4^2 = 25$, nhưng chuẩn L2 phải lấy căn: $\\sqrt{25} = 5$.",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Cho vector lỗi chênh lệch giữa dự đoán và thực tế của mô hình: e = [3, -2, 6]. Hãy tính chuẩn độ dài Euclid L2 (||e||₂) và chuẩn Manhattan L1 (||e||₁) của vector này.",
+          "options": [
+            "A. ||e||₂ = 49 và ||e||₁ = 7",
+            "B. ||e||₂ = 7 và ||e||₁ = 11",
+            "C. ||e||₂ = 7 và ||e||₁ = 7",
+            "D. ||e||₂ = 11 và ||e||₁ = 7"
+          ],
+          "correctIndex": 1,
+          "hint": "Chuẩn L2 = căn bậc hai của tổng bình phương. Chuẩn L1 = tổng các trị tuyệt đối (chú ý |-2| = +2).",
+          "solution": [
+            "Bước 1: Tính chuẩn L2: ||e||₂ = √(3² + (-2)² + 6²) = √(9 + 4 + 36) = √49 = 7.",
+            "Bước 2: Tính chuẩn L1: ||e||₁ = |3| + |-2| + |6| = 3 + 2 + 6 = 11.",
+            "Kết luận: ||e||₂ = 7 và ||e||₁ = 11. Đáp án đúng là B."
+          ]
+        }
+      },
+      {
+        "heading": "2.3. Tích Vô Hướng (Dot Product) vs Tích Hadamard (⊙) & Phép Chiếu Hình Học",
+        "content": "Trong các bài giảng AI, bạn sẽ liên tục bắt gặp hai phép nhân vector khác hẳn nhau: lúc thì viết u · v, lúc thì viết u ⊙ v. Nếu không phân biệt được hai phép toán này, bạn sẽ không thể hiểu được cách một nơ-ron tính toán hay cách mạng LSTM kiểm soát thông tin. Hãy cùng làm sáng tỏ bản chất của chúng!",
+        "deepDive": "**1. Tích vô hướng (Dot Product / Inner Product $\\mathbf{u} \\cdot \\mathbf{v}$):**\n\n**a) Cách tính đại số:**\nLấy từng cặp phần tử ở cùng vị trí nhân với nhau, rồi **CỘNG DỒN TẤT CẢ LẠI THÀNH MỘT CON SỐ DUY NHẤT (Scalar)**:\n$$\\\\mathbf{u} \\\\cdot \\\\mathbf{v} = \\\\mathbf{u}^T \\\\mathbf{v} = u_1 v_1 + u_2 v_2 + \\\\dots + u_d v_d = \\\\sum_{i=1}^d u_i v_i$$\n*Ví dụ:* Cho $\\\\mathbf{u} = [2, 3, -1]$ và $\\\\mathbf{v} = [4, 0, 5]$:\n$$\\\\mathbf{u} \\\\cdot \\\\mathbf{v} = 2(4) + 3(0) + (-1)(5) = 8 + 0 - 5 = 3$$\n\n**b) Ý nghĩa hình học thần thánh:**\nTheo lượng giác, tích vô hướng liên hệ mật thiết với góc lệch $\\\\theta$ giữa hai vector:\n$$\\\\mathbf{u} \\\\cdot \\\\mathbf{v} = \\\\|\\\\mathbf{u}\\\\| \\\\|\\\\mathbf{v}\\\\| \\\\cos(\\\\theta)$$\n- Tích vô hướng đo xem hai mũi tên **'đồng lòng' (cùng hướng) với nhau đến mức độ nào**:\n  - **Nếu $\\\\theta = 0^\\\\circ$ (cùng hướng):** $\\\\cos(0^\\\\circ) = 1 \\\\implies \\\\mathbf{u} \\\\cdot \\\\mathbf{v}$ đạt giá trị dương cực đại.\n  - **Nếu $\\\\theta = 90^\\\\circ$ (vuông góc / trực giao):** $\\\\cos(90^\\\\circ) = 0 \\\\implies \\\\mathbf{u} \\\\cdot \\\\mathbf{v} = 0$. Hai vector hoàn toàn độc lập, không có chút liên quan nào!\n  - **Nếu $\\\\theta = 180^\\\\circ$ (ngược hướng):** $\\\\cos(180^\\\\circ) = -1 \\\\implies \\\\mathbf{u} \\\\cdot \\\\mathbf{v}$ đạt giá trị âm cực đại.\n\n**c) Ứng dụng trong AI (Nền tảng của Nơ-ron nhân tạo):**\nMọi nơ-ron trong mạng nơ-ron đều tính toán tổng có trọng số bằng chính Tích vô hướng giữa vector trọng số $\\\\mathbf{w}$ và vector đầu vào $\\\\mathbf{x}$:\n$$z = \\\\mathbf{w} \\\\cdot \\\\mathbf{x} + b = w_1 x_1 + w_2 x_2 + \\\\dots + w_d x_d + b$$\n(Đây chính là nội dung cốt lõi của **Câu 47 Đề thi VAIO 2025**!).\n\n**2. Tích từng phần tử (Hadamard Product / Element-wise Product $\\\\mathbf{u} \\\\odot \\\\mathbf{v}$):**\n\n**a) Cách tính đại số:**\nLấy từng cặp phần tử nhân với nhau và **GIỮ NGUYÊN VỊ TRÍ, KHÔNG CỘNG DỒN**:\n$$\\\\mathbf{u} \\\\odot \\\\mathbf{v} = \\\\begin{bmatrix} u_1 \\\\\\\\ u_2 \\\\\\\\ u_3 \\\\end{bmatrix} \\\\odot \\\\begin{bmatrix} v_1 \\\\\\\\ v_2 \\\\\\\\ v_3 \\\\end{bmatrix} = \\\\begin{bmatrix} u_1 v_1 \\\\\\\\ u_2 v_2 \\\\\\\\ u_3 v_3 \\\\end{bmatrix}$$\n*Ví dụ:* Với $\\\\mathbf{u} = [2, 3, -1]$ và $\\\\mathbf{v} = [4, 0, 5]$:\n$$\\\\mathbf{u} \\\\odot \\\\mathbf{v} = [2(4), 3(0), (-1)(5)] = [8, 0, -5]$$\nKết quả trả về vẫn là **MỘT VECTOR CÙNG KÍCH THƯỚC**, hoàn toàn không phải một số vô hướng!\n\n**b) Ứng dụng trong AI:**\n- Dùng làm **Cơ chế cổng lọc (Gate)** trong mạng hồi quy LSTM và GRU: Cổng quên (Forget gate) sinh ra một vector gồm các số từ 0 đến 1, rồi nhân Hadamard với trạng thái bộ nhớ để quyết định xóa hay giữ thông tin nào.\n- Dùng trong kỹ thuật **Dropout**: Nhân dữ liệu với một vector ngẫu nhiên gồm các số $\\{0, 1\\}$ để tắt bớt các nơ-ron nhằm chống học vẹt.\n\n**3. Bảng so sánh đối đầu:**\n- **Dot Product ($\\mathbf{u} \\cdot \\mathbf{v}$):** Nhân rồi CỘNG $\\implies$ Kết quả là 1 CON SỐ (Scalar). Đo độ tương đồng, chiếu không gian.\n- **Hadamard ($\\mathbf{u} \\odot \\mathbf{v}$):** Nhân GIỮ NGUYÊN $\\implies$ Kết quả là 1 VECTOR/MA TRẬN. Dùng làm mặt nạ lọc, đóng mở cổng.",
+        "formula": "\\mathbf{u} \\cdot \\mathbf{v} = \\sum_{i=1}^d u_i v_i \\in \\mathbb{R} \\quad \\Longleftrightarrow \\quad [\\mathbf{u} \\odot \\mathbf{v}]_i = u_i v_i \\in \\mathbb{R}^d",
+        "mathExplainer": [
+          {
+            "sym": "\\mathbf{u} \\cdot \\mathbf{v}",
+            "name": "Tích vô hướng (Dot product)",
+            "mean": "Nhân các cặp phần tử rồi cộng dồn lại, kết quả xuất ra một số thực duy nhất."
+          },
+          {
+            "sym": "\\mathbf{u} \\odot \\mathbf{v}",
+            "name": "Tích Hadamard",
+            "mean": "Nhân các phần tử tương ứng độc lập với nhau, kết quả xuất ra mảng cùng kích thước."
+          },
+          {
+            "sym": "\\cos(\\theta)",
+            "name": "Cosin góc lệch",
+            "mean": "Tỉ số đo mức độ cùng hướng giữa hai vector trong không gian."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"110\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Tích Vô Hướng u · v (Ra 1 số)</text>\n                        <!-- Vector u and v with angle -->\n                        <line x1=\"40\" y1=\"120\" x2=\"180\" y2=\"120\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <polygon points=\"180,120 170,116 170,124\" fill=\"#111\"/>\n                        <text x=\"185\" y=\"125\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">u</text>\n\n                        <line x1=\"40\" y1=\"120\" x2=\"140\" y2=\"40\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <polygon points=\"140,40 130,46 137,52\" fill=\"#111\"/>\n                        <text x=\"145\" y=\"35\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">v</text>\n\n                        <!-- Projection -->\n                        <line x1=\"140\" y1=\"40\" x2=\"140\" y2=\"120\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <rect x=\"132\" y=\"112\" width=\"8\" height=\"8\" fill=\"none\" stroke=\"#888\"/>\n                        <path d=\"M 70 120 A 30 30 0 0 0 62 102\" fill=\"none\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"75\" y=\"105\" font-family=\"Georgia\" font-size=\"10\">θ</text>\n                        <text x=\"110\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">u · v = ||u|| ||v|| cos(θ)</text>\n                      </g>\n                      <g transform=\"translate(340, 20)\">\n                        <text x=\"120\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Tích Hadamard u ⊙ v (Ra 1 vector)</text>\n                        <rect x=\"20\" y=\"45\" width=\"45\" height=\"60\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"42\" y=\"68\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">2</text>\n                        <text x=\"42\" y=\"93\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">5</text>\n\n                        <text x=\"80\" y=\"82\" font-family=\"Georgia\" font-size=\"16\" text-anchor=\"middle\">⊙</text>\n\n                        <rect x=\"95\" y=\"45\" width=\"45\" height=\"60\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"117\" y=\"68\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">3</text>\n                        <text x=\"117\" y=\"93\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">-1</text>\n\n                        <text x=\"155\" y=\"82\" font-family=\"Georgia\" font-size=\"16\" text-anchor=\"middle\">=</text>\n\n                        <rect x=\"170\" y=\"45\" width=\"45\" height=\"60\" fill=\"#e5e5e5\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"192\" y=\"68\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">6</text>\n                        <text x=\"192\" y=\"93\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">-5</text>\n                        <text x=\"120\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Nhân từng vị trí độc lập</text>\n                      </g>\n                    </svg>",
+          "caption": "Phân biệt bản chất: Tích vô hướng chiếu hình học tạo ra 1 con số; Tích Hadamard nhân từng ô giữ nguyên cấu trúc mảng."
+        },
+        "commonPitfalls": "Lỗi nhầm lẫn tai hại trong phòng thi: Đề bài yêu cầu tính Tích Hadamard mà học sinh lại đi cộng dồn ra một con số (hoặc ngược lại). Hãy nhớ: Phép nhân có chữ 'VÔ HƯỚNG' (Dot product) thì kết quả bắt buộc phải là một đại lượng vô hướng (Scalar, 1 con số)! Còn Hadamard thì trả về vector/ma trận.",
+        "practiceQuestion": {
+          "level": "Cơ bản (Bám sát Câu 47 Đề Thi VAIO 2025)",
+          "question": "Cho vector trọng số của một nơ-ron nhân tạo w = [1, 4, 3] và vector tín hiệu đầu vào x = [4, 8, 5]. Tính tích vô hướng w · x giữa hai vector này.",
+          "options": [
+            "A. [4, 32, 15]",
+            "B. 51",
+            "C. 48",
+            "D. 153"
+          ],
+          "correctIndex": 1,
+          "hint": "Nhân từng cặp tọa độ tương ứng rồi cộng dồn lại: 1(4) + 4(8) + 3(5).",
+          "solution": [
+            "Bước 1: Nhân từng cặp phần tử: 1 * 4 = 4; 4 * 8 = 32; 3 * 5 = 15.",
+            "Bước 2: Cộng dồn tất cả các tích thành phần: w · x = 4 + 32 + 15 = 51.",
+            "(Lưu ý: Nếu hỏi tích Hadamard w ⊙ x thì kết quả mới là vector [4, 32, 15] ở đáp án A).",
+            "Đáp án chính xác: B (51)."
+          ]
+        }
+      },
+      {
+        "heading": "2.4. Phép Nhân Ma Trận (Matrix Multiplication) & Các Dạng Ma Trận Đặc Biệt",
+        "content": "Nếu coi vector là các mũi tên đơn lẻ, thì ma trận chính là những chiếc máy biến đổi không gian. Phép nhân ma trận là phép toán xuất hiện nhiều nhất trong toàn bộ mã nguồn của mạng nơ-ron. Tại sao nhân ma trận không phải là lấy từng ô nhân với nhau? Điều kiện sống còn để hai ma trận nhân được là gì? Và ma trận chuyển vị giúp ích gì cho mô hình học máy?",
+        "deepDive": "**1. Điều kiện sống còn để hai Ma trận nhân được:**\nCho hai ma trận $A$ và $B$. Ta CHỈ CÓ THỂ thực hiện phép nhân $A \\times B$ khi và chỉ khi:\n$$\\mathbf{\\text{Số CỘT của ma trận đứng trước } A = \\text{Số HÀNG của ma trận đứng sau } B}$$\n- Kích thước: $(m \\times k) \\times (k \\times n) = (m \\times n)$.\n- Hai chỉ số ở giữa ($k$) phải giống hệt nhau thì mới 'khớp bánh răng', và kích thước của ma trận kết quả sẽ lấy hàng của ma trận đầu ($m$) ghép với cột của ma trận sau ($n$)!\n- *Ví dụ:* Ma trận $(3 \\times 4)$ nhân với $(4 \\times 2)$ sẽ cho ra ma trận kết quả $(3 \\times 2)$. Nhưng lấy $(4 \\times 2)$ nhân với $(3 \\times 4)$ thì KHÔNG THỂ NHÂN ĐƯỢC vì $2 \\neq 3$!\n\n**2. Thuật toán nhân ma trận: Quy tắc 'HÀNG NHÂN CỘT' (Row-by-Column):**\nPhần tử $C_{ij}$ nằm ở hàng $i$, cột $j$ của ma trận kết quả $C$ được tính bằng **Tích vô hướng giữa HÀNG $i$ của ma trận trước với CỘT $j$ của ma trận sau**:\n$$C_{ij} = \\sum_{r=1}^k A_{ir} B_{rj}$$\n\n*Ví dụ tính tay chi tiết từng bước:*\nCho hai ma trận:\n$$A = \\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\end{bmatrix} (2 \\times 2), \\quad B = \\begin{bmatrix} 5 & 6 \\\\ 7 & 8 \\end{bmatrix} (2 \\times 2)$$\nMa trận kết quả $C = A \\times B$ có kích thước $2 \\times 2$:\n- **Hàng 1, Cột 1 ($C_{11}$):** Lấy Hàng 1 của $A$ nhân Cột 1 của $B$:\n  $$C_{11} = 1(5) + 2(7) = 5 + 14 = 19$$\n- **Hàng 1, Cột 2 ($C_{12}$):** Lấy Hàng 1 của $A$ nhân Cột 2 của $B$:\n  $$C_{12} = 1(6) + 2(8) = 6 + 16 = 22$$\n- **Hàng 2, Cột 1 ($C_{21}$):** Lấy Hàng 2 của $A$ nhân Cột 1 của $B$:\n  $$C_{21} = 3(5) + 4(7) = 15 + 28 = 43$$\n- **Hàng 2, Cột 2 ($C_{22}$):** Lấy Hàng 2 của $A$ nhân Cột 2 của $B$:\n  $$C_{22} = 3(6) + 4(8) = 18 + 32 = 50$$\nKết quả hoàn chỉnh:\n$$C = \\begin{bmatrix} 19 & 22 \\\\ 43 & 50 \\end{bmatrix}$$\n\n**3. Tính chất cốt tử: Phép nhân ma trận KHÔNG CÓ TÍNH GIAO HOÁN ($AB \\neq BA$):**\nTrong đại số thông thường, $3 \\times 5 = 5 \\times 3$. Nhưng trong ma trận:\n$$A \\times B \\neq B \\times A$$\nThậm chí, $AB$ tính được nhưng $BA$ có thể hoàn toàn vô nghĩa do lệch kích thước!\n\n**4. Ma trận chuyển vị (Transpose $A^T$):**\n- **Quy tắc:** Lật ngược ma trận qua đường chéo chính: Hàng biến thành Cột, Cột biến thành Hàng. Nếu $A$ có kích thước $m \\times n$ thì $A^T$ có kích thước $n \\times m$.\n- **Tính chất vàng cần nhớ khi làm bài thi:**\n  - $(A^T)^T = A$ (lật hai lần về lại ban đầu).\n  - $(A + B)^T = A^T + B^T$.\n  - **$(AB)^T = B^T A^T$ (ĐẢO NGƯỢC THỨ TỰ NHÂN - Cực kỳ hay bẫy trong đề thi!).**\n\n**5. Các dạng ma trận đặc biệt trong Machine Learning:**\n- **Ma trận đơn vị (Identity Matrix $I$):** Là ma trận vuông có các số trên đường chéo chính bằng 1, tất cả các ô còn lại bằng 0. Đóng vai trò như số 1 trong đại số: $A \\cdot I = I \\cdot A = A$.\n- **Ma trận đối xứng (Symmetric Matrix):** Thỏa mãn $A = A^T$ (Ví dụ: Ma trận hiệp phương sai Covariance Matrix dùng trong thuật toán PCA).\n- **Ma trận nghịch đảo (Inverse Matrix $A^{-1}$):** Thỏa mãn $A \\cdot A^{-1} = I$. Dùng để giải phương trình nghiệm chuẩn trong Hồi quy tuyến tính: $\\mathbf{w} = (X^T X)^{-1} X^T \\mathbf{y}$.",
+        "formula": "C_{ij} = \\sum_{r=1}^k A_{ir} B_{rj}, \\quad (AB)^T = B^T A^T, \\quad A \\cdot I = A, \\quad A \\cdot A^{-1} = I",
+        "mathExplainer": [
+          {
+            "sym": "A \\in \\mathbb{R}^{m \\times k}",
+            "name": "Ma trận trước",
+            "mean": "Ma trận có m hàng và k cột."
+          },
+          {
+            "sym": "B \\in \\mathbb{R}^{k \\times n}",
+            "name": "Ma trận sau",
+            "mean": "Ma trận có k hàng và n cột, số hàng k phải khớp với số cột của ma trận trước."
+          },
+          {
+            "sym": "A^T",
+            "name": "Ma trận chuyển vị",
+            "mean": "Ma trận lật các hàng thành cột và cột thành hàng qua đường chéo chính."
+          },
+          {
+            "sym": "I",
+            "name": "Ma trận đơn vị",
+            "mean": "Ma trận vuông có đường chéo chính bằng 1, nhân với ma trận nào cũng giữ nguyên ma trận đó."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"120\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Khớp Kích Thước: (m × k) × (k × n) = (m × n)</text>\n                        <!-- Matrix A -->\n                        <rect x=\"20\" y=\"35\" width=\"60\" height=\"70\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <rect x=\"20\" y=\"45\" width=\"60\" height=\"20\" fill=\"#111\"/>\n                        <text x=\"50\" y=\"59\" font-family=\"Georgia\" font-size=\"10\" fill=\"#fff\" text-anchor=\"middle\">Hàng i</text>\n                        <text x=\"50\" y=\"125\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">A (m × k)</text>\n\n                        <text x=\"95\" y=\"75\" font-family=\"Georgia\" font-size=\"16\" text-anchor=\"middle\">×</text>\n\n                        <!-- Matrix B -->\n                        <rect x=\"110\" y=\"35\" width=\"70\" height=\"60\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <rect x=\"135\" y=\"35\" width=\"20\" height=\"60\" fill=\"#111\"/>\n                        <text x=\"145\" y=\"70\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">Cột j</text>\n                        <text x=\"145\" y=\"125\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">B (k × n)</text>\n\n                        <text x=\"195\" y=\"75\" font-family=\"Georgia\" font-size=\"16\" text-anchor=\"middle\">=</text>\n\n                        <!-- Matrix C -->\n                        <rect x=\"210\" y=\"35\" width=\"70\" height=\"70\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <circle cx=\"245\" cy=\"55\" r=\"5\" fill=\"#111\"/>\n                        <text x=\"245\" y=\"125\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">C (m × n)</text>\n                        <text x=\"245\" y=\"75\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">C_ij</text>\n                      </g>\n                      <g transform=\"translate(360, 30)\">\n                        <text x=\"0\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">Quy tắc vàng chuyển vị tích:</text>\n                        <text x=\"0\" y=\"40\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#111\">(A · B)ᵀ = Bᵀ · Aᵀ</text>\n                        <text x=\"0\" y=\"65\" font-family=\"Georgia\" font-size=\"10\">• Bắt buộc đảo ngược thứ tự hai ma trận!</text>\n                        <text x=\"0\" y=\"85\" font-family=\"Georgia\" font-size=\"10\">• Nếu viết (A · B)ᵀ = Aᵀ · Bᵀ là SAI HOÀN TOÀN.</text>\n                        <text x=\"0\" y=\"110\" font-family=\"Georgia\" font-size=\"10\">• Kích thước: Aᵀ(k×m), Bᵀ(n×k) ⇒ BᵀAᵀ ra (n×m).</text>\n                      </g>\n                    </svg>",
+          "caption": "Quy tắc nhân ma trận: Hàng i của ma trận trước nhân tích vô hướng với Cột j của ma trận sau tạo thành phần tử C_ij."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi kinh điển: Biểu thức chuyển vị của tích hai ma trận $(AB)^T$. Rất nhiều học sinh chọn phương án $A^T B^T$. SAI HOÀN TOÀN! Quy tắc đúng bắt buộc phải ĐẢO NGƯỢC THỨ TỰ: $(AB)^T = B^T A^T$. Nếu giữ nguyên thứ tự, phép nhân $A^T B^T$ thậm chí còn không thể thực hiện được do lệch kích thước!",
+        "practiceQuestion": {
+          "level": "Vận dụng",
+          "question": "Cho ma trận X có kích thước 100 × 5 (100 mẫu dữ liệu, 5 đặc trưng) và vector trọng số w có kích thước 5 × 1. Ma trận tích chuyển vị (X · w)ᵀ có kích thước bằng bao nhiêu?",
+          "options": [
+            "A. 100 × 1",
+            "B. 1 × 100",
+            "C. 5 × 100",
+            "D. 1 × 5"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính kích thước của tích X · w trước (hàng của X ghép cột của w), sau đó lật kích thước qua phép chuyển vị Transpose.",
+          "solution": [
+            "Bước 1: Tính kích thước tích X · w: (100 × 5) nhân (5 × 1) cho ra vector kết quả có kích thước 100 × 1 (vector cột).",
+            "Bước 2: Áp dụng phép chuyển vị Transpose (·)ᵀ: Lật hàng thành cột => Kích thước 100 × 1 bị lật thành 1 × 100 (vector hàng).",
+            "Đáp án chính xác: B (1 × 100)."
+          ]
+        }
+      },
+      {
+        "heading": "2.5. Cosine Similarity: Thước Đo Góc Trong Không Gian Ngữ Nghĩa & Hệ Thống Gợi Ý (Câu 43 Đề Thi VAIO 2025)",
+        "content": "Giả sử bạn đang xây dựng một công cụ tìm kiếm bài báo khoa học. Có một bài báo ngắn 50 từ và một bài báo dài 2000 từ cùng viết về chủ đề 'Khám phá Sao Hỏa'. Nếu dùng khoảng cách thông thường (Euclid), máy tính sẽ thấy hai bài báo này cách xa nhau cả cây số vì bài báo dài có số lượng từ lớn gấp 40 lần bài ngắn. Làm thế nào để máy tính nhận ra hai bài viết này có nội dung hoàn toàn giống nhau? Bí quyết nằm ở ĐỘ ĐO GÓC COSINE SIMILARITY.",
+        "deepDive": "**1. Tại sao khoảng cách Euclidean thất bại khi so sánh văn bản & dữ liệu lớn?**\n- Khoảng cách Euclid (Chuẩn L2) đo độ dài đoạn thẳng trực tiếp nối hai đỉnh mũi tên:\n  $$d_{\\text{Euclid}}(\\mathbf{u}, \\mathbf{v}) = \\|\\mathbf{u} - \\mathbf{v}\\|_2 = \\sqrt{\\sum (u_i - v_i)^2}$$\n- Nếu bài báo A ngắn 50 từ và bài báo B dài 2000 từ cùng nội dung: Vector từ của bài B sẽ dài gấp hàng chục lần vector bài A $\\implies$ Khoảng cách Euclid rất lớn $\\implies$ Máy tính kết luận nhầm: 'Hai bài này không liên quan!'\n- Nhưng hãy quan sát hình học: Vì cùng nội dung về Sao Hỏa, hai mũi tên này **CÙNG CHỈ VỀ MỘT HƯỚNG TRONG KHÔNG GIAN**! Góc lệch giữa chúng xấp xỉ bằng $0^\\circ$!\n\n**2. Định nghĩa toán học của Cosine Similarity:**\nCosine Similarity đo cosin của góc lệch $\\theta$ giữa hai vector trong không gian đa chiều:\n$$\\text{Cosine Similarity}(\\mathbf{u}, \\mathbf{v}) = \\cos(\\theta) = \\frac{\\mathbf{u} \\cdot \\mathbf{v}}{\\|\\mathbf{u}\\|_2 \\|\\mathbf{v}\\|_2} = \\frac{\\sum_{i=1}^d u_i v_i}{\\sqrt{\\sum_{i=1}^d u_i^2} \\cdot \\sqrt{\\sum_{i=1}^d v_i^2}}$$\n\n**3. Mổ xẻ cặn kẽ từng thành phần trong công thức:**\n- **Tử số (Tích vô hướng $\\mathbf{u} \\cdot \\mathbf{v}$):** Nhân từng cặp tọa độ rồi cộng dồn lại. Đại lượng này mang thông tin về sự tương quan giữa các chiều.\n- **Mẫu số (Tích độ dài Euclid $\\|\\mathbf{u}\\| \\|\\mathbf{v}\\|$):** Đóng vai trò là 'Bộ triệt tiêu kích thước'! Nó chia đều cho độ dài của từng vector, đưa cả hai vector về độ dài bằng 1 $\\implies$ Triệt tiêu hoàn toàn sự chênh lệch về độ dài ngắn của văn bản, chỉ giữ lại duy nhất thông tin về **PHƯƠNG HƯỚNG**!\n\n**4. Ý nghĩa của các giá trị Cosine Similarity:**\nVì giá trị của hàm $\\cos(\\theta)$ luôn nằm trong đoạn $[-1, 1]$:\n- **Bằng $+1.0$ (Góc $\\theta = 0^\\circ$):** Hai vector cùng hướng tuyệt đối $\\implies$ Hoàn toàn tương đồng (Hai bài viết y hệt nhau về chủ đề).\n- **Bằng $0.0$ (Góc $\\theta = 90^\\circ$):** Hai vector vuông góc trực giao $\\implies$ Hoàn toàn độc lập, không có chút liên quan nào (Ví dụ: Một bài viết về nấu ăn và một bài viết về cơ học lượng tử).\n- **Bằng $-1.0$ (Góc $\\theta = 180^\\circ$):** Hai vector ngược hướng hoàn toàn $\\implies$ Đối nghịch tuyệt đối.\n\n**5. Bài toán tính tay mẫu mực từng bước (Bám sát Câu 43 Đề thi Olympic VAIO 2025):**\nCho hai vector đặc trưng của hai khách hàng:\n$$\\mathbf{u} = [1, 2, 3], \\quad \\mathbf{v} = [2, 4, 6]$$\nHãy tính Cosine Similarity giữa hai khách hàng này:\n- **Bước 1: Tính tích vô hướng ở tử số:**\n  $$\\mathbf{u} \\cdot \\mathbf{v} = 1(2) + 2(4) + 3(6) = 2 + 8 + 18 = 28$$\n- **Bước 2: Tính độ dài chuẩn L2 của vector $\\mathbf{u}$:**\n  $$\\|\\mathbf{u}\\| = \\sqrt{1^2 + 2^2 + 3^2} = \\sqrt{1 + 4 + 9} = \\sqrt{14}$$\n- **Bước 3: Tính độ dài chuẩn L2 của vector $\\mathbf{v}$:**\n  $$\\|\\mathbf{v}\\| = \\sqrt{2^2 + 4^2 + 6^2} = \\sqrt{4 + 16 + 36} = \\sqrt{56} = \\sqrt{4 \\times 14} = 2\\sqrt{14}$$\n- **Bước 4: Thay vào công thức Cosine Similarity:**\n  $$\\cos(\\theta) = \\frac{28}{\\sqrt{14} \\times 2\\sqrt{14}} = \\frac{28}{2 \\times 14} = \\frac{28}{28} = 1.0$$\n*Nhận xét sâu sắc:* Vì $\\mathbf{v} = 2\\mathbf{u}$ (vector $\\mathbf{v}$ chỉ là vector $\\mathbf{u}$ bị kéo dài gấp đôi), góc giữa chúng bằng đúng $0^\\circ$, nên $\\cos(\\theta) = 1.0$ tuyệt đối!\n\n**6. Ứng dụng thực tế trong AI:**\n- **Hệ thống gợi ý (Recommender Systems):** Spotify hay YouTube biểu diễn người dùng và bài hát/video thành các vector nhúng (Embeddings). Video nào có Cosine Similarity gần 1 nhất với sở thích của bạn sẽ được tự động xếp lên đầu trang chủ!\n- **Mô hình ngôn ngữ lớn (LLMs & RAG):** Khi bạn hỏi ChatGPT, câu hỏi được mã hóa thành vector và so khớp Cosine Similarity với hàng triệu đoạn tài liệu để trích xuất câu trả lời chính xác nhất!",
+        "formula": "\\text{Cosine Similarity}(\\mathbf{u}, \\mathbf{v}) = \\frac{\\mathbf{u} \\cdot \\mathbf{v}}{\\|\\mathbf{u}\\|_2 \\|\\mathbf{v}\\|_2} = \\cos(\\theta) \\in [-1, 1]",
+        "mathExplainer": [
+          {
+            "sym": "\\cos(\\theta)",
+            "name": "Cosine góc lệch",
+            "mean": "Độ đo độ tương đồng phương hướng giữa 2 vector, nằm trong khoảng [-1, 1]."
+          },
+          {
+            "sym": "\\mathbf{u} \\cdot \\mathbf{v}",
+            "name": "Tích vô hướng tử số",
+            "mean": "Tổng các tích tọa độ đo mức độ liên kết giữa hai vector."
+          },
+          {
+            "sym": "\\|\\mathbf{u}\\| \\|\\mathbf{v}\\|",
+            "name": "Mẫu số chuẩn hóa",
+            "mean": "Tích độ dài hai vector, triệt tiêu ảnh hưởng của độ dài/kích thước dữ liệu."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"120\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Ba Trạng Thái Cosine Similarity</text>\n                        <!-- Center Origin -->\n                        <circle cx=\"120\" cy=\"90\" r=\"3.5\" fill=\"#111\"/>\n                        <text x=\"120\" y=\"105\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Gốc O</text>\n                        <!-- Angle = 0: cos = 1 -->\n                        <line x1=\"120\" y1=\"90\" x2=\"200\" y2=\"40\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <line x1=\"120\" y1=\"90\" x2=\"230\" y2=\"20\" stroke=\"#888\" stroke-dasharray=\"2,2\" stroke-width=\"2\"/>\n                        <text x=\"210\" y=\"30\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">cos(0°) = 1.0</text>\n                        <!-- Angle = 90: cos = 0 -->\n                        <line x1=\"120\" y1=\"90\" x2=\"60\" y2=\"40\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"50\" y=\"35\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">cos(90°) = 0</text>\n                        <!-- Angle = 180: cos = -1 -->\n                        <line x1=\"120\" y1=\"90\" x2=\"40\" y2=\"140\" stroke=\"#777\" stroke-width=\"2\"/>\n                        <text x=\"30\" y=\"155\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">cos(180°) = -1.0</text>\n                      </g>\n                      <g transform=\"translate(340, 25)\">\n                        <text x=\"0\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">Ứng dụng trong AI:</text>\n                        <text x=\"0\" y=\"40\" font-family=\"Georgia\" font-size=\"10\">• Đo độ tương đồng bài hát trên Spotify.</text>\n                        <text x=\"0\" y=\"60\" font-family=\"Georgia\" font-size=\"10\">• Tìm kiếm tài liệu ngữ nghĩa trong RAG &amp; LLMs.</text>\n                        <text x=\"0\" y=\"80\" font-family=\"Georgia\" font-size=\"10\">• So sánh mức độ giống nhau của 2 bức ảnh.</text>\n                        <text x=\"0\" y=\"105\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#111\">Khoảng cách Cosine (Cosine Distance):</text>\n                        <text x=\"0\" y=\"125\" font-family=\"Georgia\" font-size=\"10\">Distance = 1 - Cosine_Similarity (Càng nhỏ càng gần)</text>\n                      </g>\n                    </svg>",
+          "caption": "Ý nghĩa của Cosine Similarity: Bằng 1 khi cùng hướng hoàn toàn; Bằng 0 khi vuông góc không liên quan; Bằng -1 khi ngược hướng đối nghịch."
+        },
+        "commonPitfalls": "Phân biệt Cosine Similarity và Cosine Distance: Đề thi có thể hỏi 'Khoảng cách Cosine' (Cosine Distance). Hãy nhớ công thức: $\\text{Cosine Distance} = 1 - \\text{Cosine Similarity}$. Hai vector giống hệt nhau thì Cosine Similarity bằng 1, nhưng Khoảng cách Cosine bằng $1 - 1 = 0$ (khoảng cách bằng 0 nghĩa là sát nhau tuyệt đối)!",
+        "practiceQuestion": {
+          "level": "Vận dụng (Câu 43 Đề Thi Olympic VAIO 2025)",
+          "question": "Tính Cosine Similarity giữa hai vector thuộc tính u = [3, 4] và v = [6, 8].",
+          "options": [
+            "A. 0.5",
+            "B. 0.0",
+            "C. 1.0",
+            "D. 0.8"
+          ],
+          "correctIndex": 2,
+          "hint": "Để ý mối liên hệ: vector v = 2 * u. Hai vector tỉ lệ dương với nhau thì cùng chỉ về một hướng trong không gian.",
+          "solution": [
+            "Bước 1: Tính tích vô hướng tử số: u · v = 3(6) + 4(8) = 18 + 32 = 50.",
+            "Bước 2: Tính độ dài chuẩn L2 của từng vector:",
+            "  ||u|| = √(3² + 4²) = √25 = 5.",
+            "  ||v|| = √(6² + 8²) = √(36 + 64) = √100 = 10.",
+            "Bước 3: Thay vào công thức: Cosine Similarity = 50 / (5 * 10) = 50 / 50 = 1.0.",
+            "Nhận xét nhanh: Vì v = 2u, hai vector cùng phương cùng chiều (góc θ = 0°) nên cos(0°) = 1.0 ngay lập tức mà không cần bấm máy!",
+            "Đáp án chính xác: C (1.0)."
+          ]
+        }
+      },
+      {
+        "heading": "2.6. Vector Hóa (Vectorization) & Gradient Descent Dạng Ma Trận",
+        "content": "Tại sao các mô hình học máy hiện đại như ChatGPT, Stable Diffusion hay xe tự hành Tesla lại ngốn hàng trăm triệu đô-la cho các chip đồ họa GPU của NVIDIA? Tại sao không dùng CPU của máy tính thông thường? Bí mật nằm ở kỹ thuật VECTOR HÓA (Vectorization) - chuyển đổi toàn bộ thuật toán về dạng ma trận để tính toán song song.",
+        "deepDive": "**1. Nỗi ác mộng của Vòng lặp For trên CPU:**\nGiả sử bạn có tập dữ liệu gồm $N = 1.000.000$ mẫu (1 triệu dòng) và mỗi mẫu có $d = 100$ thuộc tính:\n- Nếu viết mã bằng vòng lặp `for` thông thường:\n  ```python\n  # Cách tính thủ công chậm chạp\n  for i in range(1000000):\n      y_pred[i] = 0\n      for j in range(100):\n          y_pred[i] += X[i][j] * w[j]\n      y_pred[i] += b\n  ```\n  CPU phải thực hiện tuần tự $1.000.000 \\times 100 = 100.000.000$ phép tính nối tiếp nhau, mất hàng chục giây đến hàng phút cho MỘT LẦN lặp!\n\n**2. Sức mạnh kỳ diệu của Vector hóa (Vectorization):**\nThay vì lặp từng phần tử, ta gom toàn bộ dữ liệu thành ma trận $X$ kích thước $N \\times d$, vector trọng số $\\mathbf{w}$ kích thước $d \\times 1$:\n$$\\hat{\\mathbf{y}} = X \\mathbf{w} + \\mathbf{b}$$\n- Chip GPU chứa hàng chục ngàn nhân tính toán nhỏ (CUDA cores). Toàn bộ phép nhân ma trận khổng lồ này được ném vào GPU và xử lý **đồng thời song song trong 1 tích tắc (vài mili-giây)**!\n- Tốc độ tăng tốc nhanh gấp từ $100$ đến $10.000$ lần so với chạy vòng lặp tuần tự trên CPU!\n\n**3. Thuật toán Gradient Descent dạng ma trận hoàn chỉnh:**\nHãy cùng viết lại thuật toán tối ưu hóa mô hình Hồi quy tuyến tính bằng ngôn ngữ ma trận:\n- **Đầu vào:**\n  - Ma trận dữ liệu: $X \\in \\mathbb{R}^{N \\times d}$ ($N$ mẫu, $d$ đặc trưng).\n  - Vector nhãn thực tế: $\\mathbf{y} \\in \\mathbb{R}^{N \\times 1}$.\n  - Vector trọng số cần học: $\\mathbf{w} \\in \\mathbb{R}^{d \\times 1}$.\n- **Bước 1: Tính dự đoán cho toàn bộ 1 triệu mẫu cùng lúc:**\n  $$\\hat{\\mathbf{y}} = X \\mathbf{w}$$\n- **Bước 2: Tính vector sai số của toàn bộ tập dữ liệu:**\n  $$\\mathbf{e} = \\hat{\\mathbf{y}} - \\mathbf{y} = X \\mathbf{w} - \\mathbf{y} \\in \\mathbb{R}^{N \\times 1}$$\n- **Bước 3: Tính Vector Gradient của hàm Loss theo $\\mathbf{w}$:**\n  $$\\nabla_{\\mathbf{w}} L = \\frac{1}{N} X^T (X \\mathbf{w} - \\mathbf{y}) = \\frac{1}{N} X^T \\mathbf{e} \\in \\mathbb{R}^{d \\times 1}$$\n  *Kiểm tra kích thước:* $X^T$ có kích thước $(d \\times N)$, nhân với vector sai số $\\mathbf{e}$ kích thước $(N \\times 1)$ cho ra vector gradient có kích thước $(d \\times 1)$ khớp hoàn hảo với số chiều của $\\mathbf{w}$!\n- **Bước 4: Cập nhật trọng số theo hướng ngược gradient:**\n  $$\\mathbf{w} \\leftarrow \\mathbf{w} - \\eta \\nabla_{\\mathbf{w}} L$$\nChỉ với 4 dòng toán ma trận ngắn gọn, toàn bộ cỗ máy AI triệu tham số đã tự động học tập và hạ dốc sai số cực kỳ mạnh mẽ!",
+        "formula": "\\hat{\\mathbf{y}} = X \\mathbf{w} + \\mathbf{b}, \\quad \\nabla_{\\mathbf{w}} L = \\frac{1}{N} X^T (X \\mathbf{w} - \\mathbf{y}), \\quad \\mathbf{w} \\leftarrow \\mathbf{w} - \\eta \\nabla_{\\mathbf{w}} L",
+        "mathExplainer": [
+          {
+            "sym": "X \\in \\mathbb{R}^{N \\times d}",
+            "name": "Ma trận thiết kế (Design Matrix)",
+            "mean": "Bảng chứa toàn bộ dữ liệu huấn luyện gồm N hàng mẫu và d cột thuộc tính."
+          },
+          {
+            "sym": "\\mathbf{e} = X\\mathbf{w} - \\mathbf{y}",
+            "name": "Vector sai số (Residual)",
+            "mean": "Chênh lệch giữa giá trị dự đoán và nhãn thực tế trên toàn bộ N mẫu."
+          },
+          {
+            "sym": "X^T \\mathbf{e}",
+            "name": "Tích ma trận chuyển vị",
+            "mean": "Chiếu sai số ngược lại không gian d chiều của các trọng số để tính đạo hàm riêng."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"120\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Vector Hóa: ŷ = X · w</text>\n                        <!-- Matrix X -->\n                        <rect x=\"20\" y=\"35\" width=\"80\" height=\"70\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"60\" y=\"75\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">X (N × d)</text>\n                        <text x=\"115\" y=\"75\" font-family=\"Georgia\" font-size=\"16\" text-anchor=\"middle\">×</text>\n                        <!-- Vector w -->\n                        <rect x=\"130\" y=\"35\" width=\"30\" height=\"70\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"145\" y=\"75\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">w (d×1)</text>\n                        <text x=\"175\" y=\"75\" font-family=\"Georgia\" font-size=\"16\" text-anchor=\"middle\">=</text>\n                        <!-- Vector y_hat -->\n                        <rect x=\"190\" y=\"35\" width=\"30\" height=\"70\" fill=\"#e5e5e5\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"205\" y=\"75\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">ŷ (N×1)</text>\n                        <text x=\"120\" y=\"130\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Dự đoán N mẫu chỉ trong 1 phép nhân GPU</text>\n                      </g>\n                      <g transform=\"translate(310, 20)\">\n                        <text x=\"140\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Gradient Dạng Ma Trận: ∇_w L = (1/N) Xᵀ e</text>\n                        <!-- Matrix X^T -->\n                        <rect x=\"20\" y=\"45\" width=\"80\" height=\"40\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"60\" y=\"70\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Xᵀ (d × N)</text>\n                        <text x=\"115\" y=\"70\" font-family=\"Georgia\" font-size=\"16\" text-anchor=\"middle\">×</text>\n                        <!-- Vector e -->\n                        <rect x=\"130\" y=\"30\" width=\"30\" height=\"80\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"145\" y=\"75\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">e (N×1)</text>\n                        <text x=\"175\" y=\"70\" font-family=\"Georgia\" font-size=\"16\" text-anchor=\"middle\">=</text>\n                        <!-- Vector grad -->\n                        <rect x=\"190\" y=\"45\" width=\"30\" height=\"40\" fill=\"#111\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"205\" y=\"70\" font-family=\"Georgia\" font-size=\"10\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">∇w (d×1)</text>\n                        <text x=\"140\" y=\"130\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Khớp hoàn hảo với kích thước vector w!</text>\n                      </g>\n                    </svg>",
+          "caption": "Sức mạnh của Vector hóa: Tính toán toàn bộ dự đoán và gradient trên toàn bộ tập dữ liệu chỉ bằng hai phép nhân ma trận."
+        },
+        "commonPitfalls": "Lỗi kích thước khi nhân Gradient: Nhiều học sinh viết công thức gradient là $X (X\\mathbf{w} - \\mathbf{y})$. SAI KÍCH THƯỚC! Ma trận $X$ có kích thước $(N \\times d)$, vector sai số có kích thước $(N \\times 1)$, hai số ở giữa là $d$ và $N$ không bằng nhau nên không thể nhân được! Bắt buộc phải chuyển vị $X^T$ có kích thước $(d \\times N)$ thì mới nhân được với $(N \\times 1)$ để ra kết quả $(d \\times 1)$!",
+        "practiceQuestion": {
+          "level": "Nâng cao",
+          "question": "Trong thuật toán Hồi quy tuyến tính đa biến, tập dữ liệu có N = 500 mẫu và d = 8 đặc trưng. Ma trận tích Xᵀ · X có kích thước bằng bao nhiêu và mang ý nghĩa gì?",
+          "options": [
+            "A. 500 × 500: Ma trận khoảng cách giữa các mẫu dữ liệu",
+            "B. 8 × 8: Ma trận tương quan giữa các đặc trưng (Gram matrix)",
+            "C. 500 × 8: Ma trận dữ liệu gốc",
+            "D. 8 × 1: Vector trọng số tối ưu"
+          ],
+          "correctIndex": 1,
+          "hint": "X có kích thước 500 × 8, vậy Xᵀ có kích thước 8 × 500. Nhân (8 × 500) với (500 × 8) sẽ ra kích thước nào?",
+          "solution": [
+            "Bước 1: Ma trận dữ liệu X có kích thước N × d = 500 × 8.",
+            "Bước 2: Ma trận chuyển vị Xᵀ có kích thước d × N = 8 × 500.",
+            "Bước 3: Thực hiện phép nhân Xᵀ · X: (8 × 500) nhân (500 × 8) => Kích thước kết quả là 8 × 8.",
+            "Ý nghĩa: Ma trận 8 × 8 này đo mức độ tương quan và tích vô hướng giữa 8 đặc trưng của bài toán, xuất hiện trực tiếp trong nghiệm giải tích w = (XᵀX)⁻¹ Xᵀy.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-cosine-similarity",
+    "examConnection": {
+      "questionTitle": "Phân Tích Dạng Bài Thi Olympic VAIO 2025 (Mã Đề 006)",
+      "items": [
+        {
+          "code": "Câu 43",
+          "problem": "Tính Cosine Similarity giữa hai vector thuộc tính: $\\mathbf{u} = [3, 4]$ và $\\mathbf{v} = [6, 8]$.",
+          "solution": [
+            "Mẹo giải thần tốc trong 2 giây: Nhận thấy vector $\\mathbf{v} = 2\\mathbf{u}$ (tỉ lệ dương gấp 2 lần).",
+            "Hai vector tỉ lệ dương thì hoàn toàn cùng hướng (góc lệch $\\theta = 0^\\circ$).",
+            "Do đó $\\cos(0^\\circ) = 1.0$ ngay lập tức, không cần tốn thời gian bấm máy tính!"
+          ]
+        },
+        {
+          "code": "Câu 47",
+          "problem": "Tính đầu ra nơ-ron: Vector trọng số $\\mathbf{w} = [1, 4, 3]$, vector đầu vào $\\mathbf{x} = [4, 8, 5]$, hệ số kích hoạt tuyến tính $k = 3$.",
+          "solution": [
+            "Bước 1: Tính tích vô hướng tổng có trọng số: $z = \\mathbf{w} \\cdot \\mathbf{x} = 1(4) + 4(8) + 3(5) = 4 + 32 + 15 = 51$.",
+            "Bước 2: Nhân với hệ số kích hoạt: $Output = k \\times z = 3 \\times 51 = 153$."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Đại số tuyến tính phân cấp dữ liệu thành 4 cấp: Scalar (0D, 1 số), Vector (1D, 1 đối tượng), Matrix (2D, bảng dữ liệu/ảnh xám), Tensor (3D/4D+, ảnh màu RGB/video).",
+      "Tích vô hướng (Dot product) $\\mathbf{u} \\cdot \\mathbf{v}$ nhân rồi cộng ra 1 con số (Scalar); Tích Hadamard $\\mathbf{u} \\odot \\mathbf{v}$ nhân từng vị trí độc lập ra 1 vector/ma trận cùng kích thước.",
+      "Phép nhân ma trận yêu cầu số cột ma trận trước bằng số hàng ma trận sau: $(m \\times k) \\times (k \\times n) = (m \\times n)$, và KHÔNG có tính chất giao hoán ($AB \\neq BA$).",
+      "Chuyển vị của tích bắt buộc đảo ngược thứ tự: $(AB)^T = B^T A^T$.",
+      "Cosine Similarity đo góc lệch $\\cos(\\theta) = \\frac{\\mathbf{u} \\cdot \\mathbf{v}}{\\|\\mathbf{u}\\| \\|\\mathbf{v}\\|} \\in [-1, 1]$, triệt tiêu ảnh hưởng của độ dài để so sánh ngữ nghĩa trong hệ thống gợi ý và LLMs."
+    ]
+  },
+  {
+    "id": "lesson-3",
+    "title": "3. Xác Suất & Bộ Phân Loại Naive Bayes",
+    "syllabusBadge": "BUỔI 2: XÁC SUẤT & GIẢ ĐỊNH NAIVE TRONG NLP",
+    "summary": "Nền tảng xác suất của Trí tuệ nhân tạo: Đi từ trực giác không gian mẫu, xác suất có điều kiện, định lý Bayes cập nhật niềm tin, đến bộ phân loại Naive Bayes kinh điển trong xử lý ngôn ngữ tự nhiên. Làm chủ kỹ thuật làm mịn Laplace và Log-Likelihood tránh tràn số.",
+    "intuition": {
+      "title": "Trực giác thực tế: Bác sĩ chẩn đoán bệnh & Bộ lọc thư rác trong hộp thư",
+      "content": "Hãy tưởng tượng bạn mở hộp thư điện tử Gmail vào buổi sáng. Trong số 100 email gửi đến, tại sao Gmail có thể tống ngay một email có tiêu đề 'CHÚC MỪNG BẠN TRÚNG THƯỞNG 10 TỶ NHẬN NGAY BITCOIN MIỄN PHÍ' vào hòm Thư rác (Spam) trong chưa đầy 1 phần nghìn giây?\n\nGmail không có trí thông minh ma thuật. Nó hoạt động y hệt một người bác sĩ giàu kinh nghiệm chẩn đoán bệnh:\n1. **Niềm tin ban đầu (Xác suất tiên nghiệm - Prior):** Bác sĩ biết rằng trong mùa lạnh, tỷ lệ một người ngẫu nhiên mắc bệnh Cúm A là 5% ($P(\\text{Cúm}) = 0.05$). Tương tự, Gmail biết rằng trong toàn bộ thư từ trên Internet, thông thường có khoảng 20% là thư rác ($P(\\text{Spam}) = 0.20$).\n2. **Quan sát bằng chứng mới (Dữ liệu quan sát - Evidence):** Bệnh nhân bước vào phòng khám với triệu chứng: Sốt cao và Ho dữ dội. Email gửi đến chứa các từ: 'trúng thưởng', 'bitcoin', 'miễn phí'.\n3. **Độ hợp lý của triệu chứng (Likelihood):** Bác sĩ tự hỏi: 'Nếu một người thực sự bị Cúm A, xác suất họ bị sốt và ho là bao nhiêu?' - Rất cao, lên tới 90%! Tương tự, Gmail tự hỏi: 'Nếu một email thực sự là thư rác, xác suất nó chứa các từ trúng thưởng, bitcoin là bao nhiêu?' - Cực kỳ cao!\n4. **Cập nhật niềm tin (Xác suất hậu nghiệm - Posterior):** Kết hợp niềm tin ban đầu và bằng chứng thực tế, bác sĩ kết luận: 'Xác suất bệnh nhân này bị cúm đã vọt từ 5% lên 88%!'. Gmail kết luận: 'Xác suất email này là Spam đã vọt từ 20% lên 99.9% -> Đẩy ngay vào thùng rác!'.\n\nĐây chính là bản chất kỳ diệu của **Định Lý Bayes**: Khả năng cập nhật niềm tin của chúng ta về một giả thuyết sau khi thu thập thêm bằng chứng thực tế!"
+    },
+    "sections": [
+      {
+        "heading": "3.1. Nền Tảng Xác Suất Từ Con Số 0: Không Gian Mẫu, Biến Cố & Xác Suất Có Điều Kiện",
+        "content": "Trước khi chạm vào AI hay Machine Learning, ta phải trả lời câu hỏi căn bản nhất: Xác suất là gì? Tại sao xác suất của một sự kiện lại thay đổi ngay khi ta có thêm thông tin mới?",
+        "deepDive": "**1. Không gian mẫu và Biến cố (Nền móng toán học):**\n\n- **Phép thử ngẫu nhiên (Random Experiment):** Một hành động mà kết quả không thể đoán trước chính xác, nhưng ta biết trước tất cả các kết quả có thể xảy ra. Ví dụ: Tung một con xúc xắc 6 mặt.\n- **Không gian mẫu (Sample Space - ký hiệu $\\Omega$ hoặc $S$):** Tập hợp chứa toàn bộ mọi kết quả có thể xảy ra của phép thử.\n  $$\\Omega = \\{1, 2, 3, 4, 5, 6\\} \\implies |\\Omega| = 6$$\n- **Biến cố (Event - ký hiệu $A, B$):** Một tập con của không gian mẫu ($A \\subseteq \\Omega$).\n  - Ví dụ biến cố $A$: 'Gieo được mặt chẵn' $\\implies A = \\{2, 4, 6\\}$.\n  - Xác suất cổ điển của biến cố $A$:\n    $$P(A) = \\frac{|A|}{|\\Omega|} = \\frac{3}{6} = 0.5 \\quad (50\\%)$$\n\n**2. Các phép toán biến cố quan trọng:**\n- **Biến cố giao ($A \\cap B$ hoặc $AB$):** Cả $A$ và $B$ cùng đồng thời xảy ra.\n- **Biến cố hợp ($A \\cup B$):** Ít nhất một trong hai biến cố $A$ hoặc $B$ xảy ra. Công thức cộng xác suất:\n  $$P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$$\n- **Biến cố xung khắc (Mutually Exclusive):** $A$ và $B$ không thể cùng xảy ra ($A \\cap B = \\emptyset \\implies P(A \\cap B) = 0$). Khi đó: $P(A \\cup B) = P(A) + P(B)$.\n\n**3. Xác suất có điều kiện (Conditional Probability $P(A|B)$):**\nHãy đọc ký hiệu $P(A|B)$ là: **'Xác suất của biến cố $A$ khi ĐÃ BIẾT biến cố $B$ đã xảy ra'**.\n- Khi biết $B$ đã xảy ra, thế giới thu nhỏ lại: Không gian mẫu không còn là toàn bộ $\\Omega$ nữa, mà bị thu hẹp hoàn toàn về đúng tập $B$!\n- Phần kết quả vừa thuộc $A$ vừa nằm trong thế giới mới $B$ chính là phần giao $A \\cap B$.\n- **Định nghĩa toán học:**\n  $$P(A|B) = \\frac{P(A \\cap B)}{P(B)} \\quad (\\text{với } P(B) > 0)$$\n\n*Ví dụ minh họa trực quan:* Gieo con xúc xắc 6 mặt ($\\Omega = \\{1, 2, 3, 4, 5, 6\\}$).\n- Gọi biến cố $A$: 'Được số lớn hơn hoặc bằng 4' $\\implies A = \\{4, 5, 6\\} \\implies P(A) = 3/6 = 0.5$.\n- Bây giờ, người bạn che xúc xắc lại và tiết lộ thông tin biến cố $B$: 'Tao thấy nó là một số CHẴN rồi đấy!' $\\implies B = \\{2, 4, 6\\}$.\n- Hỏi xác suất số đó $\\ge 4$ bây giờ là bao nhiêu ($P(A|B)$)?\n  - Trong tập số chẵn $B = \\{2, 4, 6\\}$, chỉ có hai số $\\{4, 6\\}$ là thỏa mãn điều kiện $A$.\n  - Vậy: $P(A|B) = \\frac{|A \\cap B|}{|B|} = \\frac{2}{3} \\approx 66.7\\%$.\n  - Thông tin mới $B$ đã đẩy xác suất từ $50\\%$ vọt lên $66.7\\%$!\n\n**4. Quy tắc nhân xác suất và Khái niệm Độc Lập Thống Kê:**\n- Từ công thức có điều kiện, ta suy ra quy tắc nhân xác suất tổng quát:\n  $$P(A \\cap B) = P(B) \\cdot P(A|B) = P(A) \\cdot P(B|A)$$\n- **Hai biến cố Độc Lập (Independent) khi nào?**\n  Khi việc biến cố $B$ xảy ra hoàn toàn không làm thay đổi xác suất xảy ra của $A$:\n  $$P(A|B) = P(A) \\iff P(A \\cap B) = P(A) \\cdot P(B)$$\n  *Ví dụ:* Tung đồng xu lần 1 ra ngửa ($A$) và tung lần 2 ra sấp ($B$). Lần 1 không ảnh hưởng gì tới lần 2 $\\implies$ Hai biến cố độc lập!\n\n**5. Công thức Xác Suất Toàn Phần (Law of Total Probability):**\nNếu không gian mẫu được chia thành các mảnh ghép rời nhau $B_1, B_2, \\dots, B_k$ (ví dụ: Thư rác và Thư thường), thì xác suất của một biến cố quan sát $A$ bất kỳ được tính bằng tổng các nhánh:\n$$P(A) = \\sum_{j=1}^k P(B_j) \\cdot P(A|B_j)$$",
+        "formula": "P(A|B) = \\frac{P(A \\cap B)}{P(B)} \\quad \\Longleftrightarrow \\quad P(A \\cap B) = P(B) \\cdot P(A|B)",
+        "mathExplainer": [
+          {
+            "sym": "P(A|B)",
+            "name": "Xác suất có điều kiện",
+            "mean": "Xác suất của biến cố A trong điều kiện biến cố B ĐÃ XẢY RA rồi (B là thông tin đã biết)."
+          },
+          {
+            "sym": "P(A \\cap B)",
+            "name": "Xác suất đồng thời (Joint)",
+            "mean": "Xác suất cả hai biến cố A và B cùng xảy ra đồng thời."
+          },
+          {
+            "sym": "P(A \\cup B)",
+            "name": "Xác suất hợp (Union)",
+            "mean": "Xác suất có ít nhất một trong hai biến cố A hoặc B xảy ra: P(A) + P(B) - P(A ∩ B)."
+          },
+          {
+            "sym": "P(A \\cap B) = P(A)P(B)",
+            "name": "Điều kiện độc lập",
+            "mean": "Hai biến cố độc lập nếu và chỉ nếu xác suất xảy ra đồng thời bằng tích hai xác suất riêng rẽ."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Outer space Omega -->\n                      <rect x=\"25\" y=\"20\" width=\"260\" height=\"140\" fill=\"#fff\" stroke=\"#888\" stroke-dasharray=\"3,3\"/>\n                      <text x=\"35\" y=\"38\" font-family=\"Georgia\" font-size=\"11\" fill=\"#666\">Không gian mẫu toàn cục Ω</text>\n                      <!-- Set B (known evidence) -->\n                      <ellipse cx=\"170\" cy=\"95\" rx=\"90\" ry=\"50\" fill=\"#eee\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <text x=\"235\" y=\"80\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">Tập B</text>\n                      <!-- Set A -->\n                      <ellipse cx=\"110\" cy=\"95\" rx=\"65\" ry=\"45\" fill=\"none\" stroke=\"#666\" stroke-width=\"1.5\"/>\n                      <text x=\"65\" y=\"80\" font-family=\"Georgia\" font-size=\"11\">Tập A</text>\n                      <!-- Intersection A and B -->\n                      <path d=\"M 125 55 A 65 45 0 0 1 155 95 A 65 45 0 0 1 125 135 A 90 50 0 0 1 105 95 A 90 50 0 0 1 125 55\" fill=\"#111\"/>\n                      <text x=\"130\" y=\"100\" font-family=\"Georgia\" font-size=\"10\" fill=\"#fff\" text-anchor=\"middle\" font-weight=\"bold\">A ∩ B</text>\n\n                      <!-- Explanatory formula panel -->\n                      <g transform=\"translate(310, 30)\">\n                        <text x=\"0\" y=\"20\" font-family=\"Georgia\" font-size=\"13\" font-weight=\"bold\">Bản chất của P(A|B):</text>\n                        <text x=\"0\" y=\"45\" font-family=\"Georgia\" font-size=\"11\">• Khi biết B đã xảy ra, không gian mẫu bị thu hẹp:</text>\n                        <text x=\"15\" y=\"65\" font-family=\"Georgia\" font-size=\"12\" font-style=\"italic\">Toàn bộ thế giới mới bây giờ chính là hình elip B!</text>\n                        <text x=\"0\" y=\"92\" font-family=\"Georgia\" font-size=\"11\">• Xác suất của A trong thế giới mới B là tỉ lệ:</text>\n                        <text x=\"15\" y=\"115\" font-family=\"Georgia\" font-size=\"13\" font-weight=\"bold\">P(A|B) = Diện tích (A ∩ B) / Diện tích B</text>\n                        <text x=\"0\" y=\"138\" font-family=\"Georgia\" font-size=\"10\" fill=\"#555\">Nếu A và B độc lập: P(A|B) = P(A), diện tích tương đối không đổi.</text>\n                      </g>\n                    </svg>",
+          "caption": "Trực quan hóa Xác suất có điều kiện: Khi B đã xảy ra, không gian mẫu thu hẹp từ toàn bộ không gian Ω về đúng tập B."
+        },
+        "commonPitfalls": "Cạm bẫy 'Ngụy biện công tố viên' (Prosecutor's Fallacy): Tuyệt đối không nhầm lẫn giữa $P(A|B)$ và $P(B|A)$! Ví dụ: Xác suất một người có râu khi người đó là Đàn ông $P(\\text{Có râu}|\\text{Nam})$ là khoảng $30\\%$. Nhưng xác suất một người là Nam khi biết người đó Có râu $P(\\text{Nam}|\\text{Có râu})$ là xấp xỉ $100\\%$! Hai giá trị này hoàn toàn khác nhau!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong một lớp học sinh có 60% học sinh thích môn Toán, 40% học sinh thích môn Tin học, và 30% học sinh thích CẢ HAI môn Toán và Tin học. Chọn ngẫu nhiên một học sinh trong lớp, biết rằng bạn này thích môn Toán. Xác suất bạn này CŨNG thích môn Tin học là bao nhiêu?",
+          "options": [
+            "A. 0.30 (30%)",
+            "B. 0.50 (50%)",
+            "C. 0.75 (75%)",
+            "D. 0.20 (20%)"
+          ],
+          "correctIndex": 1,
+          "hint": "Xác định biến cố đã biết: 'Bạn này thích môn Toán' là điều kiện B. Biến cố cần tính: 'Thích môn Tin' là A. Dùng công thức P(Tin|Toán) = P(Toán ∩ Tin) / P(Toán).",
+          "solution": [
+            "Bước 1: Gọi các biến cố và tóm tắt đề bài:",
+            "  - Biến cố T: Học sinh thích Toán => P(T) = 0.60.",
+            "  - Biến cố C: Học sinh thích Tin => P(C) = 0.40.",
+            "  - Biến cố giao (thích cả hai môn): P(T ∩ C) = 0.30.",
+            "Bước 2: Đề bài yêu cầu: Biết học sinh thích Toán (T đã xảy ra), tính xác suất thích Tin (C):",
+            "  - Áp dụng công thức xác suất có điều kiện:",
+            "    P(C|T) = P(T ∩ C) / P(T) = 0.30 / 0.60 = 1/2 = 0.50 (50%).",
+            "Kết luận: Có 50% khả năng bạn học sinh đó thích môn Tin học. Đáp án đúng là B."
+          ]
+        }
+      },
+      {
+        "heading": "3.2. Định Lý Bayes (Bayes' Theorem): Nghệ Thuật Cập Nhật Niềm Tin Trong Trí Tuệ Nhân Tạo",
+        "content": "Làm thế nào một cỗ máy có thể 'thay đổi quan điểm' khi tiếp nhận thêm chứng cứ mới? Định lý Bayes chính là công thức toán học vĩ đại nhất để mô tả quá trình tư duy suy luận logic của con người và máy móc.",
+        "deepDive": "**1. Chứng minh toán học chỉ trong đúng 2 dòng:**\nTừ quy tắc nhân xác suất ở Mục 3.1, ta có hai cách biểu diễn xác suất đồng thời của hai biến cố $X$ và $Y$:\n$$P(X \\cap Y) = P(Y) \\cdot P(X|Y)$$\n$$P(X \\cap Y) = P(X) \\cdot P(Y|X)$$\n\nVì vế trái bằng nhau, hai vế phải bắt buộc phải bằng nhau:\n$$P(X) \\cdot P(Y|X) = P(Y) \\cdot P(X|Y)$$\n\nChia cả hai vế cho $P(X)$ (với điều kiện $P(X) > 0$), ta thu được **Định Lý Bayes**:\n$$P(Y|X) = \\frac{P(X|Y) \\cdot P(Y)}{P(X)}$$\n\n---\n\n**2. Mổ xẻ 4 thành phần vàng của Định lý Bayes (Bắt buộc phải thuộc làu):**\n\n| Thành phần | Tên gọi chuẩn mực | Ý nghĩa bản chất trong Học Máy |\n| :--- | :--- | :--- |\n| **$P(Y|X)$** | **Posterior** *(Xác suất hậu nghiệm)* | Xác suất nhãn $Y$ là đúng **SAU KHI** đã quan sát thấy dữ liệu/triệu chứng $X$. Đây là **mục tiêu cuối cùng mô hình cần dự đoán**. |\n| **$P(Y)$** | **Prior** *(Xác suất tiên nghiệm)* | Niềm tin ban đầu về nhãn $Y$ **TRƯỚC KHI** nhìn thấy bất kỳ dữ liệu nào. Được tính bằng tỷ lệ phần trăm mẫu của nhãn $Y$ trong tập huấn luyện. |\n| **$P(X|Y)$** | **Likelihood** *(Hàm hợp lý)* | Khả năng xuất hiện dữ liệu $X$ nếu giả thuyết $Y$ thực sự là đúng. Đong đếm xem nhãn $Y$ ủng hộ bằng chứng $X$ mạnh mẽ đến đâu. |\n| **$P(X)$** | **Evidence** *(Bằng chứng biên)* | Tổng xác suất xuất hiện dữ liệu $X$ trên toàn bộ thế giới: $P(X) = \\sum_y P(Y=y) P(X|Y=y)$. Đóng vai trò là hằng số chuẩn hóa để tổng các Posterior cộng lại bằng đúng 1. |\n\n---\n\n**3. Bài toán Y tế kinh điển: Nghịch lý tại sao xét nghiệm chính xác 99% mà xác suất có bệnh chỉ có 9%?**\n\n*Bài toán:* Một căn bệnh hiếm gặp trong xã hội có tỷ lệ mắc bệnh là $1/1000$ người ($P(\\text{Bệnh}) = 0.001$).\nCó một que thử nghiệm cực kỳ hiện đại với độ chính xác:\n- Nếu người thực sự có bệnh, que thử báo Dương tính 99% ($P(\\text{Dương}|\\text{Bệnh}) = 0.99$).\n- Nếu người hoàn toàn khỏe mạnh, que thử báo nhầm Dương tính giả chỉ 1% ($P(\\text{Dương}|\\text{Khỏe}) = 0.01$).\n\nMột người dân ngẫu nhiên đi xét nghiệm và nhận kết quả: **DƯƠNG TÍNH**. Hỏi xác suất người này thực sự mắc bệnh ($P(\\text{Bệnh}|\\text{Dương})$) là bao nhiêu?\n*Phần lớn mọi người đoán là 99%. Nhưng hãy giải bằng Định lý Bayes:*\n\n- **Bước 1: Tính tử số (Khả năng thực sự có bệnh):**\n  $$\\text{Tử số} = P(\\text{Bệnh}) \\cdot P(\\text{Dương}|\\text{Bệnh}) = 0.001 \\times 0.99 = 0.00099$$\n- **Bước 2: Tính mẫu số $P(\\text{Dương})$ bằng công thức xác suất toàn phần:**\n  Một người nhận kết quả dương tính có thể đến từ 2 trường hợp: Thực sự có bệnh HOẶC Bị dương tính giả do que thử nhầm!\n  $$P(\\text{Dương}) = P(\\text{Bệnh}) P(\\text{Dương}|\\text{Bệnh}) + P(\\text{Khỏe}) P(\\text{Dương}|\\text{Khỏe})$$\n  $$P(\\text{Dương}) = (0.001 \\times 0.99) + (0.999 \\times 0.01) = 0.00099 + 0.00999 = 0.01098$$\n- **Bước 3: Tính xác suất hậu nghiệm Posterior:**\n  $$P(\\text{Bệnh}|\\text{Dương}) = \\frac{0.00099}{0.01098} \\approx 0.09016 \\implies \\mathbf{9.02\\%}!$$\n\n*Bản chất trực giác sâu sắc:* Vì bệnh quá hiếm (chỉ 1/1000 người), số lượng người khỏe mạnh áp đảo hoàn toàn (999 người). Do đó, số lượng người khỏe bị dương tính giả (khoảng 10 người) vẫn nhiều gấp 10 lần số người thực sự mắc bệnh (1 người)!\nNhờ Bayes, bác sĩ sẽ không vội hoảng loạn kê thuốc độc hại mà sẽ yêu cầu bệnh nhân xét nghiệm lần thứ hai!\n\n---\n\n**4. Nguyên lý Quyết định MAP (Maximum A Posteriori):**\nTrong bài toán phân loại, ta cần so sánh giữa các nhãn $y \\in \\{C_1, C_2, \\dots, C_K\\}$.\nDo mẫu số $P(X)$ là **HOÀN TOÀN GIỐNG NHAU** đối với tất cả các nhãn, ta có thể bỏ qua mẫu số và đưa ra nhãn dự đoán $\\hat{y}$ bằng cách chỉ cần tối đa hóa tử số:\n$$\\hat{y} = \\arg\\max_{y} \\left[ P(y) \\cdot P(X|y) \\right]$$",
+        "formula": "P(Y|X) = \\frac{P(X|Y) \\cdot P(Y)}{P(X)} = \\frac{P(X|Y) \\cdot P(Y)}{\\sum_{y'} P(X|y') P(y')}",
+        "mathExplainer": [
+          {
+            "sym": "P(Y|X) (Posterior)",
+            "name": "Xác suất hậu nghiệm",
+            "mean": "Mục tiêu dự đoán của AI: Xác suất đối tượng thuộc nhãn Y sau khi biết tập đặc trưng X."
+          },
+          {
+            "sym": "P(Y) (Prior)",
+            "name": "Xác suất tiên nghiệm",
+            "mean": "Tỷ lệ xuất hiện tự nhiên của nhãn Y trong lịch sử (tần suất xuất hiện của nhãn)."
+          },
+          {
+            "sym": "P(X|Y) (Likelihood)",
+            "name": "Hàm hợp lý Likelihood",
+            "mean": "Mức độ phù hợp của dữ liệu quan sát X dưới giả thuyết nhãn Y."
+          },
+          {
+            "sym": "\\\\arg\\\\max_y",
+            "name": "Giá trị cực đại hóa",
+            "mean": "Chọn nhãn y mang lại giá trị tích xác suất lớn nhất trong số các nhãn có thể."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Step 1 Prior -->\n                      <g transform=\"translate(30, 25)\">\n                        <rect x=\"0\" y=\"20\" width=\"110\" height=\"70\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"55\" y=\"45\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">PRIOR P(Y)</text>\n                        <text x=\"55\" y=\"65\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Niềm tin ban đầu</text>\n                        <text x=\"55\" y=\"80\" font-family=\"Georgia\" font-size=\"9\" fill=\"#666\" text-anchor=\"middle\">(Tỷ lệ mẫu cũ)</text>\n                      </g>\n\n                      <!-- Multiplier icon -->\n                      <text x=\"160\" y=\"65\" font-family=\"Georgia\" font-size=\"20\" font-weight=\"bold\" text-anchor=\"middle\">×</text>\n\n                      <!-- Step 2 Likelihood -->\n                      <g transform=\"translate(185, 25)\">\n                        <rect x=\"0\" y=\"20\" width=\"130\" height=\"70\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"65\" y=\"45\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">LIKELIHOOD P(X|Y)</text>\n                        <text x=\"65\" y=\"65\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Chứng cứ thực tế</text>\n                        <text x=\"65\" y=\"80\" font-family=\"Georgia\" font-size=\"9\" fill=\"#666\" text-anchor=\"middle\">(Độ hợp lý triệu chứng)</text>\n                      </g>\n\n                      <!-- Equals icon -->\n                      <text x=\"335\" y=\"65\" font-family=\"Georgia\" font-size=\"20\" font-weight=\"bold\" text-anchor=\"middle\">∝</text>\n\n                      <!-- Step 3 Posterior -->\n                      <g transform=\"translate(360, 20)\">\n                        <rect x=\"0\" y=\"15\" width=\"130\" height=\"80\" fill=\"#111\"/>\n                        <text x=\"65\" y=\"42\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">POSTERIOR</text>\n                        <text x=\"65\" y=\"60\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">P(Y|X)</text>\n                        <text x=\"65\" y=\"80\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\" text-anchor=\"middle\">Niềm tin cập nhật</text>\n                      </g>\n\n                      <!-- Normalized note below -->\n                      <g transform=\"translate(505, 30)\">\n                        <line x1=\"0\" y1=\"50\" x2=\"90\" y2=\"50\" stroke=\"#888\"/>\n                        <text x=\"45\" y=\"40\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Chia cho P(X)</text>\n                        <text x=\"45\" y=\"70\" font-family=\"Georgia\" font-size=\"10\" fill=\"#555\" text-anchor=\"middle\">(Hằng số chuẩn hóa)</text>\n                      </g>\n\n                      <!-- Bottom description -->\n                      <text x=\"310\" y=\"145\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Quy tắc vàng: Posterior tỷ lệ thuận với [ Prior × Likelihood ]</text>\n                      <text x=\"310\" y=\"165\" font-family=\"Georgia\" font-size=\"10\" fill=\"#555\" text-anchor=\"middle\">Trong phân loại: So sánh các nhãn Y chỉ cần so sánh tử số này, không cần chia cho P(X)!</text>\n                    </svg>",
+          "caption": "Luồng cập nhật niềm tin của Định lý Bayes: Niềm tin ban đầu nhân với Bằng chứng quan sát cho ra Niềm tin cập nhật."
+        },
+        "commonPitfalls": "Quên tính đầy đủ mẫu số $P(X)$ khi đề bài hỏi xác suất tuyệt đối: Nếu đề bài hỏi 'Tính xác suất phần trăm bệnh nhân mắc bệnh', bạn bắt buộc phải chia cho mẫu số $P(X) = P(Bệnh)P(Dương|Bệnh) + P(Khỏe)P(Dương|Khỏe)$. Nhưng nếu đề bài chỉ hỏi 'Dự đoán nhãn là Spam hay Ham', bạn chỉ cần so sánh tử số!",
+        "practiceQuestion": {
+          "level": "Vận dụng",
+          "question": "Trong một nhà máy sản xuất chip AI, Máy A sản xuất 70% tổng số chip, Máy B sản xuất 30% còn lại. Tỷ lệ chip bị lỗi của Máy A là 2%, của Máy B là 5%. Một kỹ sư kiểm tra ngẫu nhiên thấy một con chip bị lỗi. Hỏi xác suất con chip bị lỗi này do Máy B sản xuất là bao nhiêu?",
+          "options": [
+            "A. 15 / 29 (khoảng 51.72%)",
+            "B. 14 / 29 (khoảng 48.28%)",
+            "C. 0.015 (khoảng 1.5%)",
+            "D. 0.050 (khoảng 5.0%)"
+          ],
+          "correctIndex": 0,
+          "hint": "Dùng định lý Bayes: P(B|Lỗi) = [P(B) × P(Lỗi|B)] / P(Lỗi). Trong đó P(Lỗi) = P(A)P(Lỗi|A) + P(B)P(Lỗi|B).",
+          "solution": [
+            "Bước 1: Liệt kê các đại lượng xác suất:",
+            "  - Prior: P(A) = 0.70; P(B) = 0.30.",
+            "  - Likelihood lỗi: P(Lỗi|A) = 0.02; P(Lỗi|B) = 0.05.",
+            "Bước 2: Tính mẫu số P(Lỗi) bằng công thức xác suất toàn phần:",
+            "  P(Lỗi) = P(A) × P(Lỗi|A) + P(B) × P(Lỗi|B)",
+            "  P(Lỗi) = (0.70 × 0.02) + (0.30 × 0.05) = 0.014 + 0.015 = 0.029.",
+            "Bước 3: Tính Posterior P(B|Lỗi):",
+            "  P(B|Lỗi) = [P(B) × P(Lỗi|B)] / P(Lỗi) = 0.015 / 0.029 = 15 / 29 ≈ 51.72%.",
+            "Kết luận: Dù Máy B chỉ sản xuất 30% chip, nhưng do tỷ lệ lỗi cao hơn nên khi phát hiện chip lỗi, khả năng nó đến từ Máy B lên tới hơn 51.72%! Đáp án đúng là A."
+          ]
+        }
+      },
+      {
+        "heading": "3.3. Bộ Phân Loại Naive Bayes & Cú Đột Phá Của Giả Định Độc Lập 'Ngây Thơ'",
+        "content": "Một câu văn hay một văn bản không chỉ có 1 từ mà có hàng trăm, hàng nghìn từ. Làm thế nào áp dụng định lý Bayes cho một chuỗi dữ liệu phức tạp mà không bị nổ tung bộ nhớ máy tính? Đó chính là lúc sự 'Ngây thơ' (Naive) phát huy sức mạnh kỳ diệu.",
+        "deepDive": "**1. Bế tắc của định lý Bayes cổ điển trên dữ liệu nhiều chiều:**\nGiả sử ta muốn phân loại một email $X$ gồm $d$ từ ngữ: $X = (x_1, x_2, \\dots, x_d)$ vào nhãn $Y \\in \\{\\text{Spam}, \\text{Ham}\\}$.\nTheo định lý Bayes, tử số cần tính là:\n$$P(Y) \\cdot P(X|Y) = P(Y) \\cdot P(x_1, x_2, \\dots, x_d | Y)$$\n\nĐể tính xác suất đồng thời $P(x_1, x_2, \\dots, x_d | Y)$ một cách chính xác tuyệt đối, ta phải áp dụng quy tắc chuỗi xác suất:\n$$P(x_1, x_2, \\dots, x_d | Y) = P(x_1|Y) \\cdot P(x_2 | x_1, Y) \\cdot P(x_3 | x_1, x_2, Y) \\dots P(x_d | x_1, x_2, \\dots, x_{d-1}, Y)$$\n\n- **Sự bế tắc chí mạng:**\n  - Để tính $P(x_d | x_1, \\dots, x_{d-1}, Y)$, ta cần đếm tần suất một chuỗi $d$ từ xuất hiện cùng nhau trong dữ liệu huấn luyện.\n  - Nếu từ vựng có kích thước $|V| = 10,000$ từ và văn bản chỉ dài $d = 20$ từ, số trường hợp tổ hợp có thể xảy ra là $|V|^d = 10000^{20} = 10^{80}$ (nhiều hơn toàn bộ số hạt nguyên tử trong vũ trụ!).\n  - Hầu như không có chuỗi văn bản nào lặp lại y hệt trong thực tế $\\implies$ Xác suất sẽ bị bằng 0 ở khắp mọi nơi!\n\n---\n\n**2. Giả định độc lập 'ngây thơ' (Conditional Independence Assumption):**\nCác nhà khoa học máy tính đã đưa ra một giả định cực kỳ táo bạo:\n**'Khi ĐÃ BIẾT đối tượng thuộc nhãn $Y$, ta giả định tất cả các đặc trưng $x_1, x_2, \\dots, x_d$ hoàn toàn độc lập với nhau!'**\n\nNhờ giả định này, xác suất đồng thời phức tạp của cả một đoạn văn dài lập tức biến thành **TÍCH CỦA CÁC XÁC SUẤT ĐƠN TỪ ĐỘC LẬP**:\n$$P(x_1, x_2, \\dots, x_d | Y) = \\prod_{i=1}^d P(x_i | Y) = P(x_1|Y) \\cdot P(x_2|Y) \\cdot P(x_3|Y) \\dots P(x_d|Y)$$\n\n---\n\n**3. Tại sao gọi là 'Ngây thơ' (Naive)?**\n- Giả định này được gọi là 'ngây thơ' (ngây ngô) vì trong thực tế, các từ ngữ trong ngôn ngữ con người **KHÔNG HỀ ĐỘC LẬP**!\n  - Từ 'Hà' xuất hiện thì từ tiếp theo gần như chắc chắn là 'Nội'.\n  - Từ 'trúng' xuất hiện thì rất có khả năng từ 'thưởng' đi kèm.\n  - Naive Bayes hoàn toàn phớt lờ ngữ pháp, thứ tự từ, và ngữ cảnh cú pháp. Nó xem văn bản như một 'Túi đựng từ' (Bag of Words) bị xáo trộn lung tung!\n\n**4. Nhưng tại sao 'Ngây thơ' mà Naive Bayes vẫn hoạt động cực kỳ xuất sắc?**\n1. **Mục đích là Phân loại, không phải ước lượng xác suất:** Để phân loại đúng nhãn, mô hình chỉ cần tính xem nhãn nào có điểm số LỚN HƠN, chứ không cần biết con số xác suất tuyệt đối chính xác đến từng chữ số thập phân. Dù các xác suất bị phóng đại hay thu nhỏ do bỏ qua tương quan, thứ tự xếp hạng giữa các nhãn hầu như không bị đảo lộn!\n2. **Không bị Quá khớp (Overfitting):** Vì không cố gắng ghi nhớ các mối liên hệ phức tạp giữa các cụm từ, Naive Bayes cực kỳ kiên cường khi tập dữ liệu huấn luyện có kích thước nhỏ.\n3. **Tốc độ tính toán ánh sáng:** Huấn luyện Naive Bayes chỉ đơn giản là một phép đếm tần suất trên bảng dữ liệu, không cần chạy đạo hàm hay lan truyền ngược tốn kém như Deep Learning!",
+        "formula": "P(x_1, x_2, \\dots, x_d | Y) \\stackrel{\\text{Naive}}{=} \\prod_{i=1}^d P(x_i | Y) \\implies \\hat{y} = \\arg\\max_{y} \\left[ P(y) \\prod_{i=1}^d P(x_i | y) \\right]",
+        "mathExplainer": [
+          {
+            "sym": "\\\\prod_{i=1}^d",
+            "name": "Ký hiệu tích dồn",
+            "mean": "Nhân liên tiếp các giá trị từ i = 1 đến d: P(x₁) · P(x₂) · ... · P(x_d)."
+          },
+          {
+            "sym": "Conditional Independence",
+            "name": "Độc lập có điều kiện",
+            "mean": "P(x_i, x_j | Y) = P(x_i | Y) · P(x_j | Y). Các đặc trưng độc lập với nhau KHI ĐÃ BIẾT nhãn Y."
+          },
+          {
+            "sym": "Bag of Words (BoW)",
+            "name": "Mô hình túi từ",
+            "mean": "Giả định coi văn bản như một tập hợp các từ độc lập, bỏ qua hoàn toàn thứ tự ngữ pháp."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Central Class Node -->\n                      <g transform=\"translate(310, 35)\">\n                        <circle cx=\"0\" cy=\"0\" r=\"26\" fill=\"#111\"/>\n                        <text x=\"0\" y=\"5\" font-family=\"Georgia\" font-size=\"13\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Nhãn Y</text>\n                      </g>\n\n                      <!-- Feature Nodes -->\n                      <!-- Node x1 -->\n                      <g transform=\"translate(80, 130)\">\n                        <circle cx=\"0\" cy=\"0\" r=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"0\" y=\"4\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Từ x₁</text>\n                      </g>\n                      <!-- Node x2 -->\n                      <g transform=\"translate(195, 130)\">\n                        <circle cx=\"0\" cy=\"0\" r=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"0\" y=\"4\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Từ x₂</text>\n                      </g>\n                      <!-- Node x3 -->\n                      <g transform=\"translate(310, 130)\">\n                        <circle cx=\"0\" cy=\"0\" r=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"0\" y=\"4\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Từ x₃</text>\n                      </g>\n                      <!-- Node x4 -->\n                      <g transform=\"translate(425, 130)\">\n                        <circle cx=\"0\" cy=\"0\" r=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"0\" y=\"4\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Từ x₄</text>\n                      </g>\n                      <!-- Node xd -->\n                      <g transform=\"translate(540, 130)\">\n                        <circle cx=\"0\" cy=\"0\" r=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"0\" y=\"4\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Từ x_d</text>\n                      </g>\n\n                      <!-- Directed Edges -->\n                      <line x1=\"290\" y1=\"50\" x2=\"100\" y2=\"115\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <polygon points=\"100,115 110,110 106,120\" fill=\"#111\"/>\n\n                      <line x1=\"298\" y1=\"58\" x2=\"210\" y2=\"112\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <polygon points=\"210,112 220,108 217,118\" fill=\"#111\"/>\n\n                      <line x1=\"310\" y1=\"61\" x2=\"310\" y2=\"108\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <polygon points=\"310,108 306,98 314,98\" fill=\"#111\"/>\n\n                      <line x1=\"322\" y1=\"58\" x2=\"410\" y2=\"112\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <polygon points=\"410,112 403,118 400,108\" fill=\"#111\"/>\n\n                      <line x1=\"330\" y1=\"50\" x2=\"520\" y2=\"115\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <polygon points=\"520,115 514,120 510,110\" fill=\"#111\"/>\n\n                      <!-- Text label -->\n                      <text x=\"310\" y=\"170\" font-family=\"Georgia\" font-size=\"10\" fill=\"#444\" text-anchor=\"middle\">Mô hình đồ thị có hướng: Khi biết Nhãn Y, không có bất kỳ mũi tên nào nối giữa các từ xᵢ với nhau!</text>\n                    </svg>",
+          "caption": "Mô hình đồ thị xác suất Naive Bayes: Nhãn Y là cha độc lập sinh ra từng đặc trưng x_i. Không có liên kết qua lại giữa các x_i."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa Độc lập biên (Marginal Independence) và Độc lập có điều kiện (Conditional Independence): Trong Naive Bayes, các từ $x_1$ và $x_2$ KHÔNG độc lập với nhau trong đời sống bình thường. Chúng chỉ được giả định độc lập KHI VÀ CHỈ KHI nhãn $Y$ đã được cố định!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Giả sử một văn bản chứa 3 từ đặc trưng x₁, x₂, x₃. Theo giả định độc lập có điều kiện của Naive Bayes, công thức tính xác suất xuất hiện của cả 3 từ này khi biết nhãn là Spam P(x₁, x₂, x₃ | Spam) bằng biểu thức nào sau đây?",
+          "options": [
+            "A. P(x₁|Spam) + P(x₂|Spam) + P(x₃|Spam)",
+            "B. P(x₁|Spam) × P(x₂|Spam) × P(x₃|Spam)",
+            "C. P(Spam) × P(x₁|Spam) × P(x₂|x₁)",
+            "D. [P(x₁|Spam) × P(x₂|Spam) × P(x₃|Spam)] / P(Spam)"
+          ],
+          "correctIndex": 1,
+          "hint": "Giả định Naive biến xác suất đồng thời thành TÍCH của các xác suất thành phần riêng lẻ có điều kiện theo Spam.",
+          "solution": [
+            "Bước 1: Áp dụng trực tiếp định nghĩa giả định độc lập có điều kiện của Naive Bayes:",
+            "  P(x₁, x₂, x₃ | Y) = P(x₁|Y) × P(x₂|Y) × P(x₃|Y).",
+            "Bước 2: Thay nhãn Y = Spam:",
+            "  P(x₁, x₂, x₃ | Spam) = P(x₁|Spam) × P(x₂|Spam) × P(x₃|Spam).",
+            "Kết luận: Đáp án chính xác là B."
+          ]
+        }
+      },
+      {
+        "heading": "3.4. Ba Biến Thể Naive Bayes Cốt Lõi: Bernoulli, Multinomial & Gaussian",
+        "content": "Dữ liệu trong thế giới thực vô cùng đa dạng: Có lúc là từ ngữ văn bản, có lúc là số đếm tần suất, có lúc là các con số thực đo lường liên tục (huyết áp, nhiệt độ). Để xử lý từng dạng dữ liệu, Naive Bayes phân nhánh thành 3 biến thể chuyên biệt.",
+        "deepDive": "**1. Bernoulli Naive Bayes (Dành cho đặc trưng Nhị phân 0 / 1):**\n- **Đặc điểm dữ liệu:** Mỗi đặc trưng $x_i \\in \\{0, 1\\}$ chỉ cho biết thuộc tính đó **CÓ XUẤT HIỆN HAY KHÔNG**, hoàn toàn không quan tâm xuất hiện bao nhiêu lần.\n  - Ví dụ: Trong email, $x_{\\text{bitcoin}} = 1$ (có từ bitcoin), $x_{\\text{khuyến mãi}} = 0$ (không có).\n- **Mô hình xác suất:** Tuân theo phân phối Bernoulli:\n  $$P(x_i | Y) = p_{yi}^{x_i} (1 - p_{yi})^{1 - x_i}$$\n  - Nếu $x_i = 1$: $P(x_i=1|Y) = p_{yi}$ (xác suất xuất hiện).\n  - Nếu $x_i = 0$: $P(x_i=0|Y) = 1 - p_{yi}$ (xác suất KHÔNG xuất hiện).\n- **Điểm đặc biệt cần lưu ý:** Bernoulli Naive Bayes tính toán cả sự **VẮNG MẶT** của từ ngữ! Một từ không xuất hiện cũng là bằng chứng quan trọng để suy đoán.\n- **Ứng dụng:** Phân loại văn bản rất ngắn (tin nhắn SMS, bình luận Twitter/X).\n\n---\n\n**2. Multinomial Naive Bayes (Tiêu chuẩn vàng cho Xử lý Ngôn ngữ Tự nhiên - NLP):**\n- **Đặc điểm dữ liệu:** Mỗi đặc trưng $x_i \\in \\{0, 1, 2, 3, \\dots\\}$ là **TẦN SUẤT SỐ LẦN XUẤT HIỆN** của từ $w_i$ trong văn bản (Mô hình Bag-of-Words).\n  - Một email chứa từ 'khuyến mãi' 5 lần sẽ có trọng lượng cảnh báo mạnh hơn nhiều so với email chỉ chứa từ đó 1 lần.\n- **Mô hình xác suất:** Tuân theo phân phối Đa thức (Multinomial Distribution):\n  $$P(X | Y) = \\frac{(\\sum_{i=1}^d x_i)!}{\\prod_{i=1}^d x_i!} \\prod_{i=1}^d P(w_i | Y)^{x_i}$$\n- Khi phân loại, phần giai thừa là hằng số với mọi nhãn, nên ta chỉ cần tính tích có lũy thừa số mũ:\n  $$\\hat{y} = \\arg\\max_y \\left[ P(y) \\prod_{i=1}^d P(w_i | y)^{x_i} \\right]$$\n- **Ứng dụng:** Phân loại tài liệu, lọc thư rác, phân tích sắc thái cảm xúc (Sentiment Analysis: Khen vs Chê).\n\n---\n\n**3. Gaussian Naive Bayes (Dành cho dữ liệu Số thực liên tục $\\mathbb{R}$):**\n- **Đặc điểm dữ liệu:** Các đặc trưng là các số đo lường liên tục $x_i \\in \\mathbb{R}$ (Ví dụ: Chiều cao, Cân nặng, Huyết áp, Nồng độ đường trong máu, Nhiệt độ môi trường).\n  - Ta không thể đếm số lần xuất hiện của số thực (ví dụ nhiệt độ $37.245^\\circ\\text{C}$ có thể chỉ xuất hiện đúng 1 lần duy nhất trong toàn bộ tập dữ liệu!).\n- **Mô hình xác suất:** Giả định rằng trong mỗi lớp $Y$, đặc trưng $x_i$ tuân theo **Phân Phối Chuẩn (Phân phối hình chuông Gauss)** với giá trị trung bình $\\mu_{yi}$ và phương sai $\\sigma_{yi}^2$:\n  $$P(x_i | Y) = \\frac{1}{\\sqrt{2\\pi \\sigma_{yi}^2}} \\exp \\left( - \\frac{(x_i - \\mu_{yi})^2}{2\\sigma_{yi}^2} \\right)$$\n- **Cách huấn luyện:**\n  1. Với mỗi lớp $y$, tính trung bình mẫu $\\mu_{yi} = \\frac{1}{N_y} \\sum_{k=1}^{N_y} x_{ik}$.\n  2. Tính phương sai mẫu $\\sigma_{yi}^2 = \\frac{1}{N_y} \\sum_{k=1}^{N_y} (x_{ik} - \\mu_{yi})^2$.\n  3. Khi có mẫu mới $x_i^*$, thay trực tiếp vào hàm mật độ xác suất Gauss ở trên!\n- **Ứng dụng:** Chẩn đoán y khoa, nhận dạng chữ số viết tay MNIST (độ xám pixel từ 0 đến 255), phân loại loài hoa Iris.\n\n---\n\n**Bảng so sánh đối đầu 3 biến thể:**\n\n| Tiêu chí | Bernoulli Naive Bayes | Multinomial Naive Bayes | Gaussian Naive Bayes |\n| :--- | :--- | :--- | :--- |\n| **Kiểu dữ liệu đầu vào** | Nhị phân $x_i \\in \\{0, 1\\}$ | Số đếm tần suất $x_i \\in \\mathbb{N}$ | Số thực liên tục $x_i \\in \\mathbb{R}$ |\n| **Ý nghĩa đặc trưng** | Từ có mặt hay vắng mặt | Số lần từ xuất hiện trong bài | Giá trị đo lường liên tục |\n| **Xử lý sự vắng mặt** | CÓ (nhân cả $1 - p$) | KHÔNG (chỉ tính từ có mặt) | Không áp dụng |\n| **Bài toán tiêu biểu** | Phân loại tin nhắn SMS ngắn | Phân loại văn bản dài, email | Chẩn đoán y khoa, cảm biến IoT |",
+        "formula": "\\text{Gaussian: } P(x_i|Y) = \\frac{1}{\\sqrt{2\\pi\\sigma_{yi}^2}} e^{-\\frac{(x_i-\\mu_{yi})^2}{2\\sigma_{yi}^2}} \\quad \\text{vs} \\quad \\text{Multinomial: } P(X|Y) \\propto \\prod_{i=1}^d P(w_i|Y)^{x_i}",
+        "mathExplainer": [
+          {
+            "sym": "\\\\mu_{yi}",
+            "name": "Giá trị trung bình lớp y",
+            "mean": "Điểm tâm trung tâm của phân phối chuẩn Gaussian đối với đặc trưng i trong lớp y."
+          },
+          {
+            "sym": "\\\\sigma_{yi}^2",
+            "name": "Phương sai của lớp y",
+            "mean": "Độ phân tán, đo độ dàn trải của dữ liệu đặc trưng i quanh giá trị trung bình."
+          },
+          {
+            "sym": "x_i \\\\in \\\\{0, 1\\\\}",
+            "name": "Đặc trưng nhị phân",
+            "mean": "Dạng dữ liệu 0/1 của mô hình Bernoulli, chỉ ra sự xuất hiện hoặc không xuất hiện."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Bernoulli Panel -->\n                      <g transform=\"translate(25, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"170\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"85\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Bernoulli NB</text>\n                        <text x=\"85\" y=\"42\" font-family=\"Georgia\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\">Dữ liệu Nhị phân {0, 1}</text>\n                        <!-- Binary bars -->\n                        <rect x=\"35\" y=\"60\" width=\"30\" height=\"55\" fill=\"#111\"/>\n                        <text x=\"50\" y=\"130\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Có (1)</text>\n                        <rect x=\"105\" y=\"85\" width=\"30\" height=\"30\" fill=\"#bbb\"/>\n                        <text x=\"120\" y=\"130\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Không (0)</text>\n                      </g>\n\n                      <!-- Multinomial Panel -->\n                      <g transform=\"translate(225, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"170\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"85\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Multinomial NB</text>\n                        <text x=\"85\" y=\"42\" font-family=\"Georgia\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\">Số đếm tần suất {0, 1, 2...}</text>\n                        <!-- Histogram bars -->\n                        <rect x=\"25\" y=\"70\" width=\"20\" height=\"45\" fill=\"#555\"/>\n                        <rect x=\"55\" y=\"55\" width=\"20\" height=\"60\" fill=\"#111\"/>\n                        <rect x=\"85\" y=\"85\" width=\"20\" height=\"30\" fill=\"#888\"/>\n                        <rect x=\"115\" y=\"65\" width=\"20\" height=\"50\" fill=\"#333\"/>\n                        <text x=\"85\" y=\"130\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Đếm từ (Bag-of-Words)</text>\n                      </g>\n\n                      <!-- Gaussian Panel -->\n                      <g transform=\"translate(425, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"170\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"85\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Gaussian NB</text>\n                        <text x=\"85\" y=\"42\" font-family=\"Georgia\" font-size=\"10\" fill=\"#666\" text-anchor=\"middle\">Số thực liên tục x ∈ ℝ</text>\n                        <!-- Bell curve -->\n                        <path d=\"M 20 115 Q 60 115 75 80 Q 85 45 95 80 Q 110 115 150 115\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <line x1=\"85\" y1=\"45\" x2=\"85\" y2=\"115\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <text x=\"85\" y=\"130\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Phân phối chuẩn (μ, σ²)</text>\n                      </g>\n                    </svg>",
+          "caption": "Ba biến thể Naive Bayes thích ứng với 3 kiểu dữ liệu: Nhị phân (Bernoulli), Tần suất đếm (Multinomial), và Số thực liên tục (Gaussian)."
+        },
+        "commonPitfalls": "Chọn sai biến thể Naive Bayes: Trong đề thi thực tế, nếu bài toán yêu cầu phân loại bệnh nhân theo các chỉ số xét nghiệm huyết áp (ví dụ 120.5 mmHg), đường huyết (5.4 mmol/L) mà học sinh lại chọn Multinomial Naive Bayes là sai hoàn toàn! Bắt buộc phải dùng Gaussian Naive Bayes cho dữ liệu liên tục.",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Một hệ thống AI được xây dựng để dự đoán bệnh Tiểu đường dựa trên 3 thông tin của bệnh nhân: (1) Chỉ số đường huyết đo lúc đói (mg/dL), (2) Chỉ số huyết áp tâm thu (mmHg), và (3) Độ tuổi (năm). Cả 3 đặc trưng này đều là các đại lượng số thực đo lường liên tục. Biến thể Naive Bayes nào là sự lựa chọn phù hợp nhất?",
+          "options": [
+            "A. Multinomial Naive Bayes",
+            "B. Bernoulli Naive Bayes",
+            "C. Gaussian Naive Bayes",
+            "D. Categorical Naive Bayes"
+          ],
+          "correctIndex": 2,
+          "hint": "Dữ liệu là các số thực đo lường liên tục (huyết áp, đường huyết), phù hợp với mô hình phân phối chuẩn đường cong chuông Gaussian.",
+          "solution": [
+            "Bước 1: Phân tích bản chất dữ liệu đầu vào:",
+            "  - Các đại lượng đường huyết (ví dụ: 105.2 mg/dL) và huyết áp (ví dụ: 125.8 mmHg) là các biến ngẫu nhiên liên tục (thuộc tập số thực R).",
+            "Bước 2: Đối chiếu với các biến thể Naive Bayes:",
+            "  - Bernoulli NB: Chỉ dành cho dữ liệu nhị phân {0, 1}.",
+            "  - Multinomial NB: Chỉ dành cho dữ liệu số nguyên đếm tần suất {0, 1, 2, ...}.",
+            "  - Gaussian NB: Giả định các đặc trưng liên tục tuân theo phân phối chuẩn Gaussian N(μ, σ²).",
+            "Kết luận: Gaussian Naive Bayes là biến thể phù hợp nhất. Đáp án đúng là C."
+          ]
+        }
+      },
+      {
+        "heading": "3.5. Hai Kỹ Thuật Sinh Tử Trong Cài Đặt: Tràn Số Dưới (Underflow) & Làm Mịn Laplace (Laplace Smoothing)",
+        "content": "Khi chuyển giao công thức Naive Bayes từ sách giáo khoa vào code máy tính thực tế, mô hình của bạn sẽ lập tức bị sụp đổ nếu không trang bị hai kỹ thuật sống còn này.",
+        "deepDive": "**1. Vấn đề thứ nhất: Hiện tượng Tràn số dưới (Numerical Underflow):**\n\n- **Bản chất vấn đề:**\n  - Trong phân loại văn bản, mỗi từ $w_i$ có xác suất xuất hiện rất nhỏ, ví dụ $P(w_i|Y) \\approx 0.0001 = 10^{-4}$.\n  - Một văn bản thông thường chứa khoảng $d = 200$ từ. Khi nhân dồn 200 xác suất này với nhau:\n    $$P(X|Y) = \\prod_{i=1}^{200} P(w_i|Y) \\approx (10^{-4})^{200} = 10^{-800}!$$\n  - Tuy nhiên, chuẩn biểu diễn số thực 64-bit IEEE 754 trên mọi máy tính hiện đại chỉ hỗ trợ số nhỏ nhất tới khoảng $10^{-324}$.\n  - Hậu quả: Bất kỳ số nào nhỏ hơn $10^{-324}$ sẽ bị máy tính làm tròn thành đúng **SỐ 0 TUYỆT ĐỐI (Underflow)**!\n  - Cả hai lớp Spam và Ham đều ra kết quả 0, máy tính không thể so sánh và toàn bộ hệ thống tê liệt!\n\n- **Vũ khí cứu cánh: Chuyển sang không gian Log-Likelihood:**\n  - Vì hàm logarit tự nhiên $\\ln(x)$ (hoặc $\\log_{10}$) là một **hàm đồng biến nghiêm ngặt** trên khoảng $(0, \\infty)$:\n    $$A > B \\iff \\log(A) > \\log(B)$$\n  - Thay vì nhân các xác suất, ta lấy logarit hai vế. Phép nhân lập tức biến thành **PHÉP CỘNG CÁC CON SỐ ÂM HIỀN HÒA**:\n    $$\\log \\left( P(Y) \\prod_{i=1}^d P(x_i|Y) \\right) = \\log P(Y) + \\sum_{i=1}^d \\log P(x_i|Y)$$\n  - Ví dụ: Thay vì nhân $10^{-4} \\times 10^{-4}$, ta tính $(-4) + (-4) = -8$. Máy tính xử lý phép cộng số âm siêu nhanh, cực kỳ chính xác và không bao giờ lo bị tràn số!\n\n---\n\n**2. Vấn đề thứ hai: Tần suất bằng 0 (Zero-Frequency Problem / Out-of-Vocabulary):**\n\n- **Bản chất thảm họa:**\n  - Giả sử trong tập huấn luyện, từ 'bitcoin' xuất hiện 50 lần trong lớp Spam, nhưng xuất hiện **0 lần** trong lớp Ham ($N_{\\text{bitcoin, Ham}} = 0$).\n  - Khi ước lượng theo tần suất cực đại (MLE):\n    $$P(\\text{bitcoin} | \\text{Ham}) = \\frac{0}{N_{\\text{Ham}}} = 0$$\n  - Bây giờ, một email từ người bạn thân gửi đến với nội dung: 'Hôm nay tớ đọc báo thấy có bài viết hay về bitcoin, cậu xem nhé'. Đây rõ ràng là thư thường (Ham) 100%!\n  - Nhưng khi Naive Bayes tính xác suất lớp Ham:\n    $$P(\\text{Email}|\\text{Ham}) = P(\\text{hôm nay}|\\text{Ham}) \\dots \\times \\mathbf{P(\\text{bitcoin}|\\text{Ham})} \\dots = (\\dots) \\times \\mathbf{0} \\times (\\dots) = \\mathbf{0}!$$\n  - **Chỉ đúng 1 con số 0 duy nhất đã xóa sổ sạch sành sanh mọi bằng chứng khác!** Dù 99 từ còn lại đều chứng minh email này là thư thường, chỉ vì có đúng từ 'bitcoin', mô hình kết luận xác suất Ham = 0 và tống thẳng thư của bạn vào thùng rác!\n\n- **Vũ khí cứu cánh: Làm mịn Laplace (Laplace / Add-1 Smoothing):**\n  - **Ý tưởng:** Giả định rằng mỗi từ trong từ điển đã từng xuất hiện ít nhất một số lần ảo trước đó!\n  - **Công thức Laplace Smoothing ($\\alpha = 1$):**\n    $$\\hat{P}(w_i | Y) = \\frac{N_{w_i, Y} + 1}{N_Y + |V|}$$\n    - $N_{w_i, Y}$: Số lần từ $w_i$ thực tế xuất hiện trong lớp $Y$.\n    - $N_Y$: Tổng số từ của toàn bộ lớp $Y$.\n    - $|V|$: **Tổng số từ vựng duy nhất trong toàn hệ thống (Kích thước từ điển).**\n\n- **Tại sao mẫu số bắt buộc phải cộng $|V|$ mà không phải cộng 1?**\n  - Đây là câu hỏi kinh điển trong các kỳ thi học sinh giỏi!\n  - Để đảm bảo tính chất thiêng liêng của xác suất: Tổng xác suất của tất cả các từ trong từ điển phải luôn luôn bằng đúng 1:\n    $$\\sum_{w \\in V} \\hat{P}(w|Y) = \\sum_{w \\in V} \\frac{N_{w, Y} + 1}{N_Y + |V|} = \\frac{\\sum_{w \\in V} N_{w, Y} + \\sum_{w \\in V} 1}{N_Y + |V|} = \\frac{N_Y + |V|}{N_Y + |V|} = 1$$\n  - Nếu ở mẫu số không cộng $|V|$, tổng xác suất sẽ vượt quá 1 và phá hỏng toàn bộ lý thuyết xác suất!\n- **Làm mịn Lidstone (Add-$\\alpha$ Smoothing):** Tổng quát hóa khi cộng thêm một tham số thực $\\alpha \\in (0, 1]$ thay vì cố định bằng 1: $\\hat{P}(w_i|Y) = \\frac{N_{w_i, Y} + \\alpha}{N_Y + \\alpha |V|}$.",
+        "formula": "\\hat{P}(w_i | Y) = \\frac{N_{w_i, Y} + 1}{N_Y + |V|} \\quad \\Longleftrightarrow \\quad \\log P(Y|X) \\propto \\log P(Y) + \\sum_{i=1}^d \\log \\hat{P}(x_i | Y)",
+        "mathExplainer": [
+          {
+            "sym": "N_{w_i, Y} + 1",
+            "name": "Tử số làm mịn",
+            "mean": "Cộng thêm 1 lần xuất hiện ảo để đảm bảo xác suất không bao giờ bị rơi về số 0 tuyệt đối."
+          },
+          {
+            "sym": "N_Y + |V|",
+            "name": "Mẫu số làm mịn",
+            "mean": "Cộng thêm kích thước từ điển |V| để bảo toàn tính chất tổng xác suất toàn từ điển luôn bằng 1."
+          },
+          {
+            "sym": "\\\\sum \\\\log P(x_i|Y)",
+            "name": "Tổng Log-Likelihood",
+            "mean": "Chuyển phép nhân dãy số thực cực nhỏ thành phép cộng các số âm, triệt tiêu lỗi tràn số dưới."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left side: Zero probability disaster -->\n                      <g transform=\"translate(25, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"260\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"130\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Thảm Họa Xác Suất = 0</text>\n                        <text x=\"20\" y=\"55\" font-family=\"Georgia\" font-size=\"11\">P(từ 1) = 0.05</text>\n                        <text x=\"20\" y=\"75\" font-family=\"Georgia\" font-size=\"11\">P(từ 2) = 0.08</text>\n                        <text x=\"20\" y=\"95\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">P(từ mới) = 0.00  (Chưa gặp)</text>\n                        <line x1=\"20\" y1=\"105\" x2=\"240\" y2=\"105\" stroke=\"#111\"/>\n                        <text x=\"130\" y=\"125\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Tích = 0.05 × 0.08 × 0 = 0 !</text>\n                      </g>\n\n                      <!-- Arrow transition -->\n                      <g transform=\"translate(295, 75)\">\n                        <line x1=\"0\" y1=\"15\" x2=\"25\" y2=\"15\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <polygon points=\"25,15 15,10 15,20\" fill=\"#111\"/>\n                      </g>\n\n                      <!-- Right side: Laplace solution -->\n                      <g transform=\"translate(330, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"265\" height=\"140\" fill=\"#111\"/>\n                        <text x=\"132\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Cứu Tinh: Làm Mịn Laplace</text>\n                        <text x=\"20\" y=\"55\" font-family=\"Georgia\" font-size=\"11\" fill=\"#eee\">Cộng 1 vào tử số: N_từ + 1</text>\n                        <text x=\"20\" y=\"75\" font-family=\"Georgia\" font-size=\"11\" fill=\"#eee\">Cộng |V| vào mẫu số: N_lớp + |V|</text>\n                        <line x1=\"20\" y1=\"90\" x2=\"245\" y2=\"90\" stroke=\"#888\"/>\n                        <text x=\"132\" y=\"112\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">P(từ mới) = (0 + 1) / (N + |V|) > 0</text>\n                        <text x=\"132\" y=\"130\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\" text-anchor=\"middle\">Xóa bỏ hoàn toàn số 0, mô hình sống sót!</text>\n                      </g>\n                    </svg>",
+          "caption": "Sự kỳ diệu của Laplace Smoothing: Chuyển xác suất 0 thành một giá trị dương nhỏ hợp lý, cứu vãn toàn bộ tích xác suất của bài toán."
+        },
+        "commonPitfalls": "Cạm bẫy tính mẫu số Laplace: Đề thi thường gài bẫy bằng cách cho $N_{\\text{Spam}}$ là tổng số từ của lớp Spam, và cho thêm số văn bản $D$ của lớp đó. Rất nhiều bạn lấy mẫu số là $N_{\\text{Spam}} + D$ thay vì $N_{\\text{Spam}} + |V|$. Hãy khắc cốt ghi tâm: Mẫu số luôn luôn cộng với kích thước toàn bộ TẬP TỪ VỰNG DUY NHẤT $|V|$!",
+        "practiceQuestion": {
+          "level": "Nâng cao",
+          "question": "Trong một tập dữ liệu phân loại tin tức, lớp 'Thể thao' có tổng cộng N = 800 từ. Toàn bộ tập dữ liệu có tổng cộng |V| = 200 từ vựng duy nhất. Từ 'VAR' xuất hiện đúng 2 lần trong lớp Thể thao. Áp dụng kỹ thuật làm mịn Laplace (Add-1), xác suất P('VAR' | Thể thao) bằng bao nhiêu?",
+          "options": [
+            "A. 3 / 801 (khoảng 0.0037)",
+            "B. 3 / 1000 (chính xác 0.0030)",
+            "C. 2 / 1000 (chính xác 0.0020)",
+            "D. 3 / 200 (chính xác 0.0150)"
+          ],
+          "correctIndex": 1,
+          "hint": "Công thức Laplace: P = (N_từ + 1) / (N_lớp + |V|). Thay số: (2 + 1) / (800 + 200).",
+          "solution": [
+            "Bước 1: Xác định các thành phần của công thức làm mịn Laplace:",
+            "  - Số lần từ 'VAR' xuất hiện trong lớp Thể thao: N_VAR = 2.",
+            "  - Tổng số từ của lớp Thể thao: N_lớp = 800.",
+            "  - Kích thước từ vựng toàn cục: |V| = 200.",
+            "Bước 2: Thay vào công thức Laplace Smoothing:",
+            "  P('VAR' | Thể thao) = (N_VAR + 1) / (N_lớp + |V|)",
+            "  P('VAR' | Thể thao) = (2 + 1) / (800 + 200) = 3 / 1000 = 0.0030.",
+            "Kết luận: Đáp án chính xác là B (3 / 1000)."
+          ]
+        }
+      },
+      {
+        "heading": "3.6. Bài Toán Tính Tay Chuẩn Đề Thi VAIO: Huấn Luyện & Dự Đoán Bộ Lọc Spam Email Hoàn Chỉnh",
+        "content": "Để thực sự làm chủ Naive Bayes và tự tin 100% trong phòng thi Olympic AI, hãy cùng thực hiện toàn bộ quy trình tính tay từ A đến Z trên một tập dữ liệu mẫu mini hoàn chỉnh.",
+        "deepDive": "**ĐỀ BÀI THỰC HÀNH CHUẨN:**\nCho một tập dữ liệu huấn luyện gồm $5$ email ngắn đã được dán nhãn như sau:\n\n| Email ID | Nhãn | Nội dung email |\n| :---: | :---: | :--- |\n| **D1** | **Spam** | 'tiền thưởng miễn phí' |\n| **D2** | **Spam** | 'ưu đãi tiền mặt' |\n| **D3** | **Spam** | 'miễn phí tiền thưởng ưu đãi' |\n| **D4** | **Ham** | 'họp dự án tiền lương' |\n| **D5** | **Ham** | 'báo cáo dự án' |\n\nHãy huấn luyện mô hình Multinomial Naive Bayes có làm mịn Laplace ($\\alpha = 1$) và phân loại một email kiểm thử mới:\n$$\\mathbf{D_{\\text{test}}} = \\text{'ưu đãi dự án tiền thưởng'}$$\n\n---\n\n**BƯỚC 1: XÂY DỰNG TẬP TỪ VỰNG TOÀN CỤC (VOCABULARY $V$)**\nTa gom tất cả các từ duy nhất xuất hiện trong toàn bộ 5 văn bản:\n$V = \\{$tiền, thưởng, miễn, phí, ưu, đãi, mặt, họp, dự, án, lương, báo, cáo$\\}$.\n*(Để đơn giản, ta coi các từ ghép 'miễn phí', 'tiền thưởng', 'ưu đãi', 'dự án' là các token đơn lẻ):*\n- $V = \\{$tiền, thưởng, miễn phí, ưu đãi, mặt, họp, dự án, lương, báo cáo$\\}$.\n- Đếm tổng số từ vựng duy nhất: **$|V| = 9$ từ**.\n\n---\n\n**BƯỚC 2: TÍNH XÁC SUẤT TIÊN NGHIỆM (PRIOR PROBABILITIES)**\n- Tổng số email: $N = 5$.\n- Số email Spam: $3$ (D1, D2, D3) $\\implies P(\\text{Spam}) = \\frac{3}{5} = \\mathbf{0.6}$.\n- Số email Ham: $2$ (D4, D5) $\\implies P(\\text{Ham}) = \\frac{2}{5} = \\mathbf{0.4}$.\n\n---\n\n**BƯỚC 3: ĐẾM TỔNG SỐ TỪ VÀ LẬP BẢNG TẦN SUẤT CHO TỪNG LỚP**\n- **Lớp Spam:**\n  - D1: tiền (1), thưởng (1), miễn phí (1) $\\implies 3$ từ.\n  - D2: ưu đãi (1), tiền (1), mặt (1) $\\implies 3$ từ.\n  - D3: miễn phí (1), tiền (1), thưởng (1), ưu đãi (1) $\\implies 4$ từ.\n  - $\\implies$ Tổng số từ của lớp Spam: **$N_{\\text{Spam}} = 3 + 3 + 4 = 10$ từ**.\n- **Lớp Ham:**\n  - D4: họp (1), dự án (1), tiền (1), lương (1) $\\implies 4$ từ.\n  - D5: báo cáo (1), dự án (1) $\\implies 2$ từ.\n  - $\\implies$ Tổng số từ của lớp Ham: **$N_{\\text{Ham}} = 4 + 2 = 6$ từ**.\n\n---\n\n**BƯỚC 4: TÍNH CÁC XÁC SUẤT LIKELIHOOD CÓ LÀM MỊN LAPLACE CHO CÁC TỪ TRONG EMAIL TEST**\nEmail kiểm thử gồm 4 từ: $D_{\\text{test}} = \\{$ưu đãi, dự án, tiền, thưởng$\\}$.\nÁp dụng công thức: $P(w|Y) = \\frac{N_{w, Y} + 1}{N_Y + |V|}$ (với mẫu số Spam là $10 + 9 = \\mathbf{19}$; mẫu số Ham là $6 + 9 = \\mathbf{15}$):\n\n1. **Từ 'ưu đãi':**\n   - Trong Spam: xuất hiện 2 lần (D2, D3) $\\implies P(\\text{ưu đãi}|\\text{Spam}) = \\frac{2 + 1}{19} = \\frac{3}{19}$.\n   - Trong Ham: xuất hiện 0 lần $\\implies P(\\text{ưu đãi}|\\text{Ham}) = \\frac{0 + 1}{15} = \\frac{1}{15}$.\n2. **Từ 'dự án':**\n   - Trong Spam: xuất hiện 0 lần $\\implies P(\\text{dự án}|\\text{Spam}) = \\frac{0 + 1}{19} = \\frac{1}{19}$.\n   - Trong Ham: xuất hiện 2 lần (D4, D5) $\\implies P(\\text{dự án}|\\text{Ham}) = \\frac{2 + 1}{15} = \\frac{3}{15}$.\n3. **Từ 'tiền':**\n   - Trong Spam: xuất hiện 3 lần (D1, D2, D3) $\\implies P(\\text{tiền}|\\text{Spam}) = \\frac{3 + 1}{19} = \\frac{4}{19}$.\n   - Trong Ham: xuất hiện 1 lần (D4) $\\implies P(\\text{tiền}|\\text{Ham}) = \\frac{1 + 1}{15} = \\frac{2}{15}$.\n4. **Từ 'thưởng':**\n   - Trong Spam: xuất hiện 2 lần (D1, D3) $\\implies P(\\text{thưởng}|\\text{Spam}) = \\frac{2 + 1}{19} = \\frac{3}{19}$.\n   - Trong Ham: xuất hiện 0 lần $\\implies P(\\text{thưởng}|\\text{Ham}) = \\frac{0 + 1}{15} = \\frac{1}{15}$.\n\n---\n\n**BƯỚC 5: TÍNH TỬ SỐ BAYES CHO TỪNG LỚP VÀ KẾT LUẬN**\n\n- **Điểm số cho lớp Spam:**\n  $$\\text{Score}(\\text{Spam}) = P(\\text{Spam}) \\times P(\\text{ưu đãi}|\\text{Spam}) \\times P(\\text{dự án}|\\text{Spam}) \\times P(\\text{tiền}|\\text{Spam}) \\times P(\\text{thưởng}|\\text{Spam})$$\n  $$\\text{Score}(\\text{Spam}) = 0.6 \\times \\frac{3}{19} \\times \\frac{1}{19} \\times \\frac{4}{19} \\times \\frac{3}{19} = 0.6 \\times \\frac{36}{130,321} \\approx \\mathbf{1.657 \\times 10^{-4}}$$\n\n- **Điểm số cho lớp Ham:**\n  $$\\text{Score}(\\text{Ham}) = P(\\text{Ham}) \\times P(\\text{ưu đãi}|\\text{Ham}) \\times P(\\text{dự án}|\\text{Ham}) \\times P(\\text{tiền}|\\text{Ham}) \\times P(\\text{thưởng}|\\text{Ham})$$\n  $$\\text{Score}(\\text{Ham}) = 0.4 \\times \\frac{1}{15} \\times \\frac{3}{15} \\times \\frac{2}{15} \\times \\frac{1}{15} = 0.4 \\times \\frac{6}{50,625} \\approx \\mathbf{4.741 \\times 10^{-5}}$$\n\n---\n\n**BƯỚC 6: SO SÁNH VÀ KẾT LUẬN PHÂN LOẠI**\n- Ta thấy: $\\text{Score}(\\text{Spam}) \\approx 1.657 \\times 10^{-4} > \\text{Score}(\\text{Ham}) \\approx 4.741 \\times 10^{-5}$.\n- Tỷ lệ vượt trội: $\\frac{\\text{Score}(\\text{Spam})}{\\text{Score}(\\text{Ham})} \\approx \\frac{16.57}{4.74} \\approx \\mathbf{3.5 \\text{ lần}}$!\n- **Xác suất phần trăm chuẩn hóa:**\n  $$P(\\text{Spam}|D_{\\text{test}}) = \\frac{1.657}{1.657 + 0.474} \\approx \\mathbf{77.75\\%}$$\n  $$P(\\text{Ham}|D_{\\text{test}}) = \\frac{0.474}{1.657 + 0.474} \\approx \\mathbf{22.25\\%}$$\n\n**KẾT LUẬN CỦA MÔ HÌNH AI:** Email này được phân loại chính xác là **THƯ RÁC (SPAM)** với độ tin cậy $77.75\\%$!",
+        "formula": "\\text{Score}(Y) = P(Y) \\prod_{w \\in D_{\\text{test}}} \\frac{N_{w, Y} + 1}{N_Y + |V|} \\implies \\hat{y} = \\arg\\max \\{\\text{Score}(\\text{Spam}), \\text{Score}(\\text{Ham})\\}",
+        "mathExplainer": [
+          {
+            "sym": "D_{\\\\text{test}}",
+            "name": "Văn bản thử nghiệm",
+            "mean": "Mẫu dữ liệu mới cần đưa qua mô hình để dự đoán phân loại nhãn."
+          },
+          {
+            "sym": "\\\\text{Score}(Y)",
+            "name": "Tử số quyết định MAP",
+            "mean": "Tích của xác suất tiên nghiệm và các xác suất thành phần của các từ có trong văn bản."
+          },
+          {
+            "sym": "P(\\\\text{Spam}|D)",
+            "name": "Độ tự tin chuẩn hóa",
+            "mean": "Lấy Score(Spam) chia cho tổng [Score(Spam) + Score(Ham)] để đưa về thang đo phần trăm 0% - 100%."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 185\" width=\"100%\" height=\"185\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"185\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Training phase -->\n                      <g transform=\"translate(20, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"140\" height=\"145\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"70\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">1. Huấn Luyện</text>\n                        <text x=\"15\" y=\"50\" font-family=\"Georgia\" font-size=\"10\">• 5 Email mẫu</text>\n                        <text x=\"15\" y=\"70\" font-family=\"Georgia\" font-size=\"10\">• Đếm Prior: P(S)=0.6</text>\n                        <text x=\"15\" y=\"90\" font-family=\"Georgia\" font-size=\"10\">• Đếm từ vựng: |V|=9</text>\n                        <text x=\"15\" y=\"110\" font-family=\"Georgia\" font-size=\"10\">• Lập bảng Laplace</text>\n                        <text x=\"15\" y=\"130\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">N_Spam=10, N_Ham=6</text>\n                      </g>\n\n                      <line x1=\"165\" y1=\"92\" x2=\"190\" y2=\"92\" stroke=\"#111\" stroke-width=\"2\"/>\n                      <polygon points=\"190,92 182,88 182,96\" fill=\"#111\"/>\n\n                      <!-- Testing phase -->\n                      <g transform=\"translate(195, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"180\" height=\"145\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"90\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">2. Tính Toán Email Mới</text>\n                        <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">Email: 'ưu đãi dự án tiền thưởng'</text>\n                        <text x=\"15\" y=\"70\" font-family=\"Georgia\" font-size=\"10\">Score(Spam) = 0.6 × 3/19</text>\n                        <text x=\"25\" y=\"85\" font-family=\"Georgia\" font-size=\"9\" fill=\"#444\">× 1/19 × 4/19 × 3/19 ≈ 1.66e-4</text>\n                        <text x=\"15\" y=\"108\" font-family=\"Georgia\" font-size=\"10\">Score(Ham) = 0.4 × 1/15</text>\n                        <text x=\"25\" y=\"123\" font-family=\"Georgia\" font-size=\"9\" fill=\"#444\">× 3/15 × 2/15 × 1/15 ≈ 0.47e-4</text>\n                      </g>\n\n                      <line x1=\"380\" y1=\"92\" x2=\"405\" y2=\"92\" stroke=\"#111\" stroke-width=\"2\"/>\n                      <polygon points=\"405,92 397,88 397,96\" fill=\"#111\"/>\n\n                      <!-- Decision phase -->\n                      <g transform=\"translate(410, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"190\" height=\"145\" fill=\"#111\"/>\n                        <text x=\"95\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">3. Quyết Định MAP</text>\n                        <text x=\"95\" y=\"55\" font-family=\"Georgia\" font-size=\"11\" fill=\"#eee\" text-anchor=\"middle\">Score(Spam) > Score(Ham)</text>\n                        <rect x=\"25\" y=\"70\" width=\"140\" height=\"30\" fill=\"#fff\"/>\n                        <text x=\"95\" y=\"90\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#111\" text-anchor=\"middle\">KẾT QUẢ: SPAM</text>\n                        <text x=\"95\" y=\"125\" font-family=\"Georgia\" font-size=\"11\" fill=\"#fff\" text-anchor=\"middle\">Độ tin cậy: 77.75%</text>\n                      </g>\n                    </svg>",
+          "caption": "Sơ đồ dòng dữ liệu hoàn chỉnh của bộ phân loại Naive Bayes: Từ tập huấn luyện mini đến quyết định nhãn email thử nghiệm."
+        },
+        "commonPitfalls": "Bỏ quên các từ vắng mặt nhưng có trong câu test: Khi tính điểm số cho lớp Spam, từ 'dự án' không có trong các email Spam huấn luyện. Một số bạn quên tính từ này hoặc gán bằng 0. Nhớ rằng nhờ Laplace smoothing, từ 'dự án' vẫn có xác suất là (0 + 1)/19! Tương tự cho các từ 'ưu đãi' và 'thưởng' trong lớp Ham.",
+        "practiceQuestion": {
+          "level": "Nâng cao",
+          "question": "Giả sử một email kiểm thử khác chỉ chứa đúng 1 từ duy nhất: 'họp'. Dựa vào bảng dữ liệu huấn luyện ở trên, tỷ số tử số Bayes giữa lớp Ham so với lớp Spam [Score(Ham) / Score(Spam)] xấp xỉ bằng bao nhiêu?",
+          "options": [
+            "A. Khoảng 1.05 lần",
+            "B. Khoảng 1.69 lần (Ham chiến thắng)",
+            "C. Khoảng 0.50 lần (Spam chiến thắng)",
+            "D. Khoảng 3.25 lần"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính Score(Ham) = 0.4 × P('họp'|Ham) = 0.4 × (1+1)/(6+9) = 0.4 × 2/15. Score(Spam) = 0.6 × P('họp'|Spam) = 0.6 × (0+1)/(10+9) = 0.6 × 1/19.",
+          "solution": [
+            "Bước 1: Tính Score cho lớp Ham:",
+            "  Từ 'họp' xuất hiện 1 lần trong lớp Ham (D4).",
+            "  P('họp'|Ham) = (1 + 1) / (6 + 9) = 2 / 15.",
+            "  Score(Ham) = P(Ham) × P('họp'|Ham) = 0.4 × (2/15) = 0.8 / 15 ≈ 0.05333.",
+            "Bước 2: Tính Score cho lớp Spam:",
+            "  Từ 'họp' xuất hiện 0 lần trong lớp Spam.",
+            "  P('họp'|Spam) = (0 + 1) / (10 + 9) = 1 / 19.",
+            "  Score(Spam) = P(Spam) × P('họp'|Spam) = 0.6 × (1/19) = 0.6 / 19 ≈ 0.03158.",
+            "Bước 3: Lập tỉ số Score(Ham) / Score(Spam):",
+            "  Tỉ số = 0.05333 / 0.03158 ≈ 1.6888 ≈ 1.69 lần.",
+            "Kết luận: Score(Ham) lớn hơn Score(Spam) khoảng 1.69 lần, email được phân loại là Ham. Đáp án đúng là B."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-naive-bayes",
+    "examConnection": {
+      "questionTitle": "Điểm Trọng Tâm Về Xác Suất & NLP Trong Đề Thi VAIO 2025",
+      "items": [
+        {
+          "code": "Xác Suất Hậu Nghiệm (Posterior)",
+          "problem": "Tại sao Naive Bayes thường được dùng làm mô hình Baseline (đối chuẩn cơ sở) đầu tiên trong mọi cuộc thi AI xử lý văn bản?",
+          "solution": [
+            "1. Tốc độ cực nhanh: Thời gian huấn luyện O(N·d), chỉ là đếm tần suất trên một vòng lặp duyệt dữ liệu.",
+            "2. Khả năng chống quá khớp tốt với tập dữ liệu ít mẫu nhờ giả định độc lập làm giảm số lượng tham số cần ước lượng từ hàm mũ 2^d xuống tuyến tính O(d).",
+            "3. Dễ diễn giải (Explainability): Mỗi từ đóng góp trực tiếp một lượng log-odds vào quyết định phân loại, giúp kỹ sư dễ dàng kiểm tra từ khóa nào gây ra dự đoán sai."
+          ]
+        },
+        {
+          "code": "Laplace Smoothing & Underflow",
+          "problem": "Hai lỗi lập trình phổ biến nhất khiến mô hình Naive Bayes tự viết bị crash điểm trong phần thi thực hành là gì?",
+          "solution": [
+            "1. Không lấy Log-Likelihood: Nhân liên tiếp các xác suất thực dẫn đến Underflow làm tròn về 0.0, khiến mô hình gán nhãn ngẫu nhiên hoặc crash chia cho 0.",
+            "2. Quên cộng kích thước từ điển |V| ở mẫu số khi làm mịn Laplace, làm vi phạm điều kiện tiên quyết của phân phối xác suất (tổng xác suất không bằng 1)."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Định lý Bayes là cơ chế cập nhật niềm tin: Posterior ∝ Prior × Likelihood.",
+      "Giả định Naive độc lập có điều kiện: P(x₁, ..., x_d | Y) = ∏ P(x_i | Y), biến bài toán nổ tung tổ hợp thành phép nhân đơn giản.",
+      "3 Biến thể: Bernoulli (nhị phân 0/1), Multinomial (đếm tần suất văn bản Bag-of-Words), Gaussian (số thực liên tục hình chuông).",
+      "Làm mịn Laplace (Add-1 Smoothing): P(w|Y) = (N_w + 1) / (N_Y + |V|), cứu mô hình khỏi thảm họa xác suất 0.",
+      "Log-Likelihood: Chuyển phép nhân dãy số nhỏ thành phép cộng số âm log P(Y) + ∑ log P(x_i|Y) để dập tắt nguy cơ tràn số dưới (Underflow)."
+    ]
+  },
+  {
+    "id": "lesson-4",
+    "title": "4. Gradient Descent & Các Bộ Tối Ưu Hóa (SGD, Momentum, Adam)",
+    "syllabusBadge": "BUỔI 3: THUẬT TOÁN TỐI ƯU HÓA & GRADIENT DESCENT",
+    "summary": "Trái tim của việc học trong Trí tuệ Nhân tạo: Hiểu thấu đáo cách một cỗ máy tự điều chỉnh hàng triệu tham số để giảm thiểu sai số. Dẫn dắt từng bước từ chu trình 5 bước huấn luyện chuẩn mực, vai trò sống còn của Learning Rate, sự khác biệt giữa Batch/SGD/Mini-batch, đến các bộ tối ưu thích ứng hiện đại: Momentum, RMSProp và Adam thống trị thế giới.",
+    "intuition": {
+      "title": "Trực giác thực tế: Lái xe thể thao qua hẻm vực dốc đứng trong sương mù",
+      "content": "Hãy tưởng tượng bạn đang điều khiển một chiếc xe chạy xuống chân núi vào ban đêm trong làn sương mù dày đặc:\n- **Nếu bạn đi quá thận trọng (Tốc độ học $\\eta$ quá nhỏ):** Xe nhích từng milimet một. Bạn phải mất hàng tháng trời mới xuống được tới chân núi, xe cạn sạch nhiên liệu giữa đường (mô hình học quá chậm, tốn kém hàng triệu đô tiền điện toán mà không hội tụ).\n- **Nếu bạn nhấn lút chân ga (Tốc độ học $\\eta$ quá lớn):** Xe sẽ lao thẳng qua khúc cua, văng ra khỏi vách núi và nổ tung (mô hình bị phân kỳ, Loss nổ tung thành NaN/Inf)!\n- **Nếu gặp địa hình Hẻm vực (Ravine):** Con đường hẹp nằm giữa hai vách đá dốc đứng, nhưng con đường thoải dần về phía trước. Nếu chỉ rẽ theo hướng dốc nhất tại chỗ, xe của bạn sẽ liên tục lao đầu sang vách đá bên trái, rồi văng sang vách đá bên phải như một quả bóng bàn, tiến về phía trước cực kỳ khổ sở!\n\nĐể giải quyết vấn đề này, các kỹ sư gắn thêm hai bộ phận cơ khí thần kỳ:\n1. **Bộ tích lũy Quán tính (Momentum):** Giống như gắn một bánh đà nặng. Khi xe rung lắc trái-phải, các lực đối nghịch tự triệt tiêu lẫn nhau, trong khi vận tốc lao về phía trước được tích lũy liên tục $\\implies$ Xe lướt thẳng băng qua hẻm vực!\n2. **Bộ điều tốc Thích ứng từng bánh (RMSProp / Adam):** Tự động hãm phanh ở những hướng dốc đứng nguy hiểm và nhấn ga tăng tốc ở những hướng thoai thoải an toàn.\n\nĐây chính là hành trình tiến hóa vĩ đại từ Gradient Descent cổ điển lên bộ tối ưu **Adam** - bộ não điều khiển việc học của mọi siêu mô hình AI hiện đại như ChatGPT, Gemini hay Claude!"
+    },
+    "sections": [
+      {
+        "heading": "4.1. Bản Chất Của Tối Ưu Hóa & Chu Trình 5 Bước Huấn Luyện Học Máy Chuẩn Mực",
+        "content": "Một cỗ máy làm thế nào để 'học'? Nó không có ý thức, không biết suy ngẫm. Quá trình học của máy tính thực chất là một bài toán tối ưu toán học: Tìm bộ tham số w sao cho Hàm Mất Mát L(w) đạt giá trị nhỏ nhất có thể.",
+        "deepDive": "**1. Phân biệt cốt tử: Tham số (Parameters) vs Siêu tham số (Hyperparameters):**\nTrước khi viết bất kỳ dòng lệnh nào, học sinh bắt buộc phải phân biệt rạch ròi hai khái niệm này:\n- **Tham số (Parameters - $\\mathbf{w}, b$):**\n  - Là những con số nằm BÊN TRONG mô hình (trọng số kết nối giữa các nơ-ron, hệ số góc, độ lệch bias).\n  - **Mô hình TỰ HỌC và TỰ CẬP NHẬT** thông qua dữ liệu và thuật toán tối ưu.\n  - Ban đầu được khởi tạo ngẫu nhiên, sau khi huấn luyện xong sẽ trở thành 'tri thức' của mô hình.\n- **Siêu tham số (Hyperparameters - $\\eta$, Batch size, Epochs, $\\beta_1, \\beta_2$):**\n  - Là những 'nút vặn' bên ngoài do **KỸ SƯ CON NGƯỜI TỰ CHỌN TRƯỚC** khi bắt đầu bấm nút huấn luyện.\n  - Thuật toán Gradient Descent KHÔNG THỂ tự học các giá trị này. Kỹ sư phải dùng kinh nghiệm, thử nghiệm (Grid Search, Random Search) để tìm ra bộ siêu tham số tốt nhất.\n\n---\n\n**2. Chu trình 5 bước kinh điển trong mỗi bước lặp huấn luyện:**\nMọi mô hình Machine Learning và Deep Learning trên thế giới (từ Hồi quy tuyến tính đơn giản cho đến Transformer nghìn tỷ tham số) đều bắt buộc phải lặp đi lặp lại một chu trình 5 bước không bao giờ thay đổi:\n\n```\n[1. Forward Pass] ──> [2. Compute Loss] ──> [3. zero_grad()] ──> [4. Backward Pass] ──> [5. Optimizer Step]\n```\n\n- **Bước 1: Lan truyền tiến (Forward Pass):**\n  - Đưa lô dữ liệu đầu vào $\\mathbf{x}$ qua mô hình toán học để sinh ra dự đoán:\n    $$\\hat{\\mathbf{y}} = f(\\mathbf{x}; \\mathbf{w})$$\n- **Bước 2: Đo lường sai số (Compute Loss):**\n  - So sánh đầu ra dự đoán $\\hat{\\mathbf{y}}$ với nhãn thực tế của dữ liệu $\\mathbf{y}$ thông qua Hàm Mất Mát (Loss Function $\\mathcal{L}(\\hat{\\mathbf{y}}, \\mathbf{y})$):\n    $$\\mathcal{L} = \\frac{1}{B} \\sum_{i=1}^B \\ell(\\hat{y}_i, y_i)$$\n  - Con số Loss này là thước đo duy nhất để đánh giá mô hình đang 'ngu ngơ' (Loss cao) hay 'thông minh' (Loss thấp).\n- **Bước 3: Xóa sạch đạo hàm cũ (Zero Gradients):**\n  - Trong các thư viện lập trình như PyTorch, gradient được thiết kế mặc định là **cộng dồn tích lũy** (`acc_grad += new_grad`) để hỗ trợ huấn luyện trên nhiều GPU.\n  - Nếu không gọi `optimizer.zero_grad()`, gradient của bước hiện tại sẽ bị cộng đè lên gradient của các bước trước đó, khiến bước chân bị phóng đại sai lệch và nổ tung!\n- **Bước 4: Lan truyền ngược (Backward Pass):**\n  - Sử dụng Quy tắc chuỗi giải tích (Chain Rule) để tính vector đạo hàm riêng của Loss đối với từng tham số:\n    $$\\mathbf{g}_t = \\nabla_\\mathbf{w} \\mathcal{L} = \\left[ \\frac{\\partial \\mathcal{L}}{\\partial w_1}, \\frac{\\partial \\mathcal{L}}{\\partial w_2}, \\dots, \\frac{\\partial \\mathcal{L}}{\\partial w_d} \\right]^T$$\n  - Vector này chỉ ra hướng làm sai số tăng nhanh nhất tại vị trí hiện tại.\n- **Bước 5: Cập nhật trọng số (Optimizer Step):**\n  - Bộ tối ưu thực hiện bước đi **ngược chiều gradient** để hạ dốc sai số:\n    $$\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\eta \\mathbf{g}_t$$\n  - Sau bước này, giá trị Loss ở lần dự đoán tiếp theo sẽ giảm xuống!",
+        "formula": "\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\eta \\nabla_{\\mathbf{w}} \\mathcal{L}(\\mathbf{w}_t) \\quad \\text{với } \\eta > 0",
+        "mathExplainer": [
+          {
+            "sym": "\\mathbf{w}_t",
+            "name": "Bộ trọng số tại bước t",
+            "mean": "Tọa độ vị trí hiện tại của các tham số mô hình trong không gian đa chiều."
+          },
+          {
+            "sym": "\\eta \\text{ (Eta)}",
+            "name": "Tốc độ học (Learning Rate)",
+            "mean": "Siêu tham số quyết định độ dài bước nhảy trong mỗi lần cập nhật trọng số."
+          },
+          {
+            "sym": "\\nabla_{\\mathbf{w}} \\mathcal{L}",
+            "name": "Vector Gradient của Loss",
+            "mean": "Vector chỉ hướng leo dốc mạnh nhất của hàm mất mát. Dấu trừ (-) bảo đảm ta bước ngược chiều dốc để hạ dốc."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Loop block 1 -->\n                      <g transform=\"translate(15, 30)\">\n                        <rect x=\"0\" y=\"25\" width=\"95\" height=\"55\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"47\" y=\"48\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Forward</text>\n                        <text x=\"47\" y=\"66\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">ŷ = f(x; w)</text>\n                      </g>\n                      <!-- Arrow 1-2 -->\n                      <line x1=\"110\" y1=\"57\" x2=\"135\" y2=\"57\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <polygon points=\"135,57 127,53 127,61\" fill=\"#111\"/>\n\n                      <!-- Loop block 2 -->\n                      <g transform=\"translate(135, 30)\">\n                        <rect x=\"0\" y=\"25\" width=\"95\" height=\"55\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"47\" y=\"48\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">2. Loss L</text>\n                        <text x=\"47\" y=\"66\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">So sánh ŷ vs y</text>\n                      </g>\n                      <!-- Arrow 2-3 -->\n                      <line x1=\"230\" y1=\"57\" x2=\"255\" y2=\"57\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <polygon points=\"255,57 247,53 247,61\" fill=\"#111\"/>\n\n                      <!-- Loop block 3 -->\n                      <g transform=\"translate(255, 30)\">\n                        <rect x=\"0\" y=\"25\" width=\"105\" height=\"55\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"52\" y=\"48\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">3. zero_grad()</text>\n                        <text x=\"52\" y=\"66\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Xóa sạch vết cũ</text>\n                      </g>\n                      <!-- Arrow 3-4 -->\n                      <line x1=\"360\" y1=\"57\" x2=\"385\" y2=\"57\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <polygon points=\"385,57 377,53 377,61\" fill=\"#111\"/>\n\n                      <!-- Loop block 4 -->\n                      <g transform=\"translate(385, 30)\">\n                        <rect x=\"0\" y=\"25\" width=\"100\" height=\"55\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"50\" y=\"48\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">4. Backward</text>\n                        <text x=\"50\" y=\"66\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Tính ∇_w L</text>\n                      </g>\n                      <!-- Arrow 4-5 -->\n                      <line x1=\"485\" y1=\"57\" x2=\"510\" y2=\"57\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                      <polygon points=\"510,57 502,53 502,61\" fill=\"#111\"/>\n\n                      <!-- Loop block 5 -->\n                      <g transform=\"translate(510, 30)\">\n                        <rect x=\"0\" y=\"25\" width=\"95\" height=\"55\" fill=\"#111\"/>\n                        <text x=\"47\" y=\"48\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">5. Step</text>\n                        <text x=\"47\" y=\"66\" font-family=\"Georgia\" font-size=\"9\" fill=\"#eee\" text-anchor=\"middle\">w ← w - ηg</text>\n                      </g>\n\n                      <!-- Bottom feedback loop arrow -->\n                      <path d=\"M 557 85 L 557 140 L 62 140 L 62 85\" fill=\"none\" stroke=\"#888\" stroke-width=\"1.5\" stroke-dasharray=\"4,4\"/>\n                      <polygon points=\"62,85 58,95 66,95\" fill=\"#888\"/>\n                      <text x=\"310\" y=\"160\" font-family=\"Georgia\" font-size=\"11\" font-style=\"italic\" text-anchor=\"middle\">Vòng lặp tối ưu hóa: Lặp lại hàng triệu lần cho đến khi Loss tiệm cận cực tiểu</text>\n                    </svg>",
+          "caption": "Chu trình 5 bước kinh điển của quá trình huấn luyện: Dữ liệu lan truyền tiến, tính sai số, xóa đạo hàm cũ, tính gradient ngược và bước chân cập nhật."
+        },
+        "commonPitfalls": "Quên xóa gradient trước khi backward: Trong phòng thi thực hành, lỗi phổ biến nhất khiến code chạy ra kết quả vô lý hoặc nổ gradient là quên lệnh `optimizer.zero_grad()`. Khi đó PyTorch sẽ âm thầm cộng dồn gradient của bước này vào bước trước, biến bước chân thành khổng lồ!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong quy trình huấn luyện mạng nơ-ron tiêu chuẩn, tại sao bước xóa gradient (zero_grad) bắt buộc phải được thực hiện trước khi thực hiện lan truyền ngược (backward)?",
+          "options": [
+            "A. Để giải phóng bộ nhớ RAM của máy tính",
+            "B. Vì các thư viện Deep Learning mặc định cộng dồn gradient qua các lần gọi backward, cần xóa để tránh tích lũy sai lệch",
+            "C. Để đặt lại giá trị của các trọng số w về bằng 0",
+            "D. Để đưa hàm mất mát Loss về giá trị nhỏ nhất"
+          ],
+          "correctIndex": 1,
+          "hint": "Cơ chế mặc định của các framework tự động tính đạo hàm là tích lũy gradient (accumulate gradients).",
+          "solution": [
+            "Bước 1: Phân tích cơ chế tính đạo hàm tự động (Autograd):",
+            "  - PyTorch và TensorFlow hỗ trợ tính năng tích lũy gradient khi huấn luyện mô hình lớn vượt quá VRAM.",
+            "  - Do đó toán tử đạo hàm mặc định thực hiện: grad = grad + new_grad.",
+            "Bước 2: Nếu không gọi zero_grad(), gradient của mẻ dữ liệu hiện tại sẽ bị cộng dồn với mẻ dữ liệu trước, khiến giá trị gradient bị phóng to sai lệch hoàn toàn.",
+            "Kết luận: Cần xóa để tránh cộng dồn tích lũy. Đáp án chính xác là B."
+          ]
+        }
+      },
+      {
+        "heading": "4.2. Tốc Độ Học (Learning Rate η) & 4 Kịch Bản Sống Còn Của Quá Trình Hội Tụ",
+        "content": "Tốc độ học η (Learning Rate) là siêu tham số quan trọng số 1 trong toàn bộ thế giới AI. Chọn sai η là nguyên nhân trực tiếp dẫn tới 95% thất bại khi huấn luyện mô hình.",
+        "deepDive": "**1. Phân tích toán học trên hàm lồi bậc hai $\\mathcal{L}(w) = w^2$:**\nHãy xét hàm mất mát đơn giản nhất để thấy chính xác toán học vận hành như thế nào:\n- Hàm mục tiêu: $\\mathcal{L}(w) = w^2$. Cực tiểu toàn cục nằm tại $w^* = 0$ (với $\\mathcal{L}(0) = 0$).\n- Đạo hàm tại điểm $w$: $\\mathcal{L}'(w) = 2w$.\n- Công thức bước đi Gradient Descent:\n  $$w_{t+1} = w_t - \\eta (2w_t) = (1 - 2\\eta) w_t$$\n- Sau $T$ bước lặp, vị trí trọng số sẽ là:\n  $$w_T = (1 - 2\\eta)^T w_0$$\n\nĐể mô hình **Hội tụ về đích $w^* = 0$ khi $T \\to \\infty$**, điều kiện bắt buộc là hệ số nhân phải có độ lớn nhỏ hơn 1:\n$$|1 - 2\\eta| < 1 \\iff -1 < 1 - 2\\eta < 1 \\iff \\mathbf{0 < \\eta < 1}$$\n\n---\n\n**2. Bốn kịch bản sống còn khi chọn giá trị $\\eta$:**\n\n1. **Kịch bản 1: $\\eta$ quá nhỏ ($\\eta = 0.001 \\implies 1 - 2\\eta = 0.998$):**\n   - Trọng số giảm cực kỳ chậm chạp: $w_1 = 0.998 w_0$, sau 1000 bước $w_{1000} \\approx 0.135 w_0$.\n   - **Hậu quả:** Tốn hàng triệu chu kỳ tính toán, dễ bị 'chết đứng' khi gặp các vùng cao nguyên thoai thoải (Plateau).\n2. **Kịch bản 2: $\\eta$ tối ưu hoàn hảo ($\\eta = 0.5 \\implies 1 - 2\\eta = 0$):**\n   - Ngay ở bước đầu tiên: $w_1 = (1 - 2(0.5)) w_0 = 0 \\cdot w_0 = 0$!\n   - Mô hình chạm đúng đáy cực tiểu chỉ sau **ĐÚNG 1 BƯỚC DUY NHẤT**! (Trong thực tế ta không thể biết trước điểm đáy nên không thể chọn được $\\eta$ thần thánh này).\n3. **Kịch bản 3: $\\eta$ hơi lớn ($0.5 < \\eta < 1$, ví dụ $\\eta = 0.9 \\implies 1 - 2\\eta = -0.8$):**\n   - Dấu của $w$ bị đảo liên tục: $w_1 = -0.8 w_0$, $w_2 = +0.64 w_0$, $w_3 = -0.512 w_0 \\dots$\n   - Vị trí nhảy qua nhảy lại hai bên miệng hố (Overshooting), tuy vẫn từ từ tiến về 0 nhưng quỹ đạo bị rung lắc dữ dội.\n4. **Kịch bản 4: $\\eta$ quá lớn ($\\eta > 1$, ví dụ $\\eta = 1.5 \\implies 1 - 2\\eta = -2$):**\n   - $w_1 = -2 w_0$, $w_2 = +4 w_0$, $w_3 = -8 w_0$, $w_{10} = 1024 w_0$!\n   - Trọng số bị văng ra xa vô tận với cấp số nhân!\n   - **Hậu quả:** Hàm mất mát nổ tung thành `Loss: inf` rồi chuyển sang `Loss: nan` (Phân kỳ - Divergence)!\n\n---\n\n**3. Ba cái bẫy địa hình hiểm trở trong không gian hàm mất mát:**\n- **Cực tiểu cục bộ (Local Minima):** Điểm đáy của một hố nhỏ, đạo hàm bằng 0 khiến GD dừng bước dù vẫn còn một hố cực tiểu toàn cục (Global Minimum) sâu hơn ở đằng xa.\n- **Điểm yên ngựa (Saddle Point):** Điểm có hình dáng giống yên ngựa (một chiều cong lên, một chiều cong xuống). Đạo hàm tại đây bằng 0 ($\\nabla \\mathcal{L} = \\mathbf{0}$) nhưng không phải là cực tiểu! Trong không gian hàng triệu chiều của Deep Learning, điểm yên ngựa xuất hiện nhiều gấp ngàn lần cực tiểu cục bộ!\n- **Vùng bình nguyên (Plateau):** Mặt đất bằng phẳng rộng lớn, gradient xấp xỉ bằng $0 \\implies$ Bước chân $\\Delta w = -\\eta g \\approx 0$, mô hình tưởng đã học xong và dừng lại!\n\n---\n\n**4. Kỹ thuật Lịch trình Tốc độ học (Learning Rate Scheduling):**\nKhông bao giờ giữ nguyên $\\eta$ cố định từ đầu đến cuối! Ta dùng chiến lược:\n- **Lúc đầu:** Dùng $\\eta$ tương đối lớn (hoặc Warmup tăng dần từ 0 trong vài epoch đầu) để thoát nhanh khỏi vùng yên ngựa.\n- **Về sau:** Giảm dần $\\eta$ (Cosine Annealing hoặc Step Decay) để bước chân ngắn lại, giúp mô hình từ từ hạ cánh chính xác vào tâm đáy hố sâu nhất mà không bị văng ra ngoài!",
+        "formula": "w_{t+1} = (1 - 2\\eta) w_t \\implies \\text{Hội tụ khi: } 0 < \\eta < 1 \\quad \\text{vs} \\quad \\text{Phân kỳ khi: } \\eta > 1",
+        "mathExplainer": [
+          {
+            "sym": "Overshooting",
+            "name": "Nhảy vượt qua miệng đáy",
+            "mean": "Hiện tượng bước chân quá dài khiến mô hình nhảy vọt qua điểm cực tiểu sang sườn dốc bên kia."
+          },
+          {
+            "sym": "Divergence (Phân kỳ)",
+            "name": "Loss nổ tung ra vô cực",
+            "mean": "Khi tốc độ học quá lớn, mỗi bước chân đẩy mô hình văng ngày càng xa điểm đáy, Loss tăng lên vô hạn."
+          },
+          {
+            "sym": "Saddle Point",
+            "name": "Điểm yên ngựa",
+            "mean": "Điểm có đạo hàm bằng 0 nhưng là cực đại theo chiều này và cực tiểu theo chiều khác."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Small lr -->\n                      <g transform=\"translate(20, 20)\">\n                        <path d=\"M 10 30 Q 65 130 120 30\" fill=\"none\" stroke=\"#bbb\" stroke-width=\"1.5\"/>\n                        <circle cx=\"20\" cy=\"45\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"26\" cy=\"56\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"33\" cy=\"68\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"41\" cy=\"80\" r=\"3\" fill=\"#111\"/>\n                        <text x=\"65\" y=\"145\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">η quá nhỏ</text>\n                        <text x=\"65\" y=\"160\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">Nhích từng milimet</text>\n                      </g>\n\n                      <!-- Good lr -->\n                      <g transform=\"translate(170, 20)\">\n                        <path d=\"M 10 30 Q 65 130 120 30\" fill=\"none\" stroke=\"#bbb\" stroke-width=\"1.5\"/>\n                        <circle cx=\"20\" cy=\"45\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"45\" cy=\"88\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"65\" cy=\"105\" r=\"4\" fill=\"#111\"/>\n                        <text x=\"65\" y=\"145\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">η vừa vặn</text>\n                        <text x=\"65\" y=\"160\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">Hội tụ êm vào đáy</text>\n                      </g>\n\n                      <!-- Oscillating lr -->\n                      <g transform=\"translate(320, 20)\">\n                        <path d=\"M 10 30 Q 65 130 120 30\" fill=\"none\" stroke=\"#bbb\" stroke-width=\"1.5\"/>\n                        <circle cx=\"20\" cy=\"45\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"105\" cy=\"50\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"35\" cy=\"72\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"90\" cy=\"78\" r=\"3\" fill=\"#111\"/>\n                        <line x1=\"20\" y1=\"45\" x2=\"105\" y2=\"50\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <line x1=\"105\" y1=\"50\" x2=\"35\" y2=\"72\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <text x=\"65\" y=\"145\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">η hơi lớn</text>\n                        <text x=\"65\" y=\"160\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">Dao động qua lại</text>\n                      </g>\n\n                      <!-- Diverging lr -->\n                      <g transform=\"translate(470, 20)\">\n                        <path d=\"M 10 30 Q 65 130 120 30\" fill=\"none\" stroke=\"#bbb\" stroke-width=\"1.5\"/>\n                        <circle cx=\"40\" cy=\"80\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"105\" cy=\"50\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"15\" cy=\"38\" r=\"3\" fill=\"#111\"/>\n                        <line x1=\"40\" y1=\"80\" x2=\"105\" y2=\"50\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"105\" y1=\"50\" x2=\"15\" y2=\"38\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"15\" y1=\"38\" x2=\"135\" y2=\"10\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"65\" y=\"145\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">η quá lớn</text>\n                        <text x=\"65\" y=\"160\" font-family=\"Georgia\" font-size=\"9\" fill=\"#c00\" font-weight=\"bold\" text-anchor=\"middle\">Văng ra ngoài (Phân kỳ!)</text>\n                      </g>\n                    </svg>",
+          "caption": "Bốn kịch bản của quá trình tối ưu: Quá nhỏ (chậm chạp), Vừa vặn (hội tụ êm), Hơi lớn (rung lắc), và Quá lớn (phân kỳ nổ tung)."
+        },
+        "commonPitfalls": "Tăng vọt learning rate khi thấy mô hình không học: Khi thấy hàm mất mát không giảm ở vài epoch đầu, người mới thường vội vàng tăng learning rate từ 0.001 lên 0.1. Kết quả là mô hình lập tức bị phân kỳ và văng ra xa! Hãy kiểm tra pipeline tiền xử lý dữ liệu hoặc giảm learning rate trước khi tăng.",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Cho hàm mất mát L(w) = w². Bắt đầu từ trọng số ban đầu w₀ = 4.0 và áp dụng Gradient Descent với tốc độ học η = 0.6. Giá trị trọng số w₁ sau bước lặp thứ nhất bằng bao nhiêu?",
+          "options": [
+            "A. w₁ = 1.6",
+            "B. w₁ = -0.8",
+            "C. w₁ = -1.6",
+            "D. w₁ = 2.4"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính đạo hàm L'(w₀) = 2w₀ = 2(4.0) = 8.0. Sau đó áp dụng công thức w₁ = w₀ - η L'(w₀).",
+          "solution": [
+            "Bước 1: Tính đạo hàm của hàm mất mát tại w₀ = 4.0:",
+            "  L'(w) = 2w => L'(4.0) = 2 × 4.0 = 8.0.",
+            "Bước 2: Áp dụng công thức cập nhật Gradient Descent:",
+            "  w₁ = w₀ - η × L'(w₀)",
+            "  w₁ = 4.0 - 0.6 × 8.0 = 4.0 - 4.8 = -0.8.",
+            "Nhận xét: Vì η = 0.6 nằm trong khoảng (0.5, 1.0), trọng số đã nhảy vượt qua điểm đáy 0 sang bờ dốc bên kia (từ +4.0 sang -0.8).",
+            "Đáp án chính xác: B (w₁ = -0.8)."
+          ]
+        }
+      },
+      {
+        "heading": "4.3. Ba Chiến Lược Lấy Mẫu: Batch GD vs Stochastic GD vs Mini-Batch GD",
+        "content": "Trong một tập dữ liệu có 1 triệu bức ảnh, ta nên đưa bao nhiêu ảnh vào tính đạo hàm cho mỗi lần bước chân? Dựa vào số lượng mẫu (Batch size B) đưa vào mỗi lần cập nhật, thuật toán Gradient Descent chia thành 3 biến thể mang bản chất hoàn toàn khác nhau.",
+        "deepDive": "**1. Phân tích đối đầu 3 biến thể:**\n\n1. **Batch Gradient Descent (Toàn bộ dữ liệu - $B = N$):**\n   - **Cách làm:** Gom **TOÀN BỘ 1 TRIỆU MẪU** vào, tính trung bình đạo hàm của cả 1 triệu mẫu, rồi mới bước đúng **1 BƯỚC DUY NHẤT**!\n     $$\\mathbf{g} = \\frac{1}{N} \\sum_{i=1}^N \\nabla \\mathcal{L}_i(\\mathbf{w})$$\n   - **Ưu điểm:** Gradient cực kỳ chính xác và mượt mà, đường đi thẳng tắp về cực tiểu.\n   - **Nhược điểm:** Cực kỳ chậm chạp. 1 triệu ảnh không thể nhét vừa vào bộ nhớ VRAM của GPU. Hơn nữa, vì đường đi quá trơn tru, nó dễ dàng bị mắc kẹt vĩnh viễn ở các hố cực tiểu cục bộ xấu hoặc điểm yên ngựa!\n\n2. **Stochastic Gradient Descent thuần túy (SGD - $B = 1$):**\n   - **Cách làm:** Bốc ngẫu nhiên **ĐÚNG 1 MẪU DUY NHẤT**, tính đạo hàm trên mẫu đó và bước chân ngay lập tức!\n     $$\\mathbf{g} = \\nabla \\mathcal{L}_i(\\mathbf{w})$$\n   - **Ưu điểm:** Tính toán siêu nhanh, tốn rất ít bộ nhớ. Độ rung lắc ngẫu nhiên (Stochastic Noise) đóng vai trò như một cú hích giúp mô hình nhảy vọt ra khỏi các hố cực tiểu cục bộ cạn!\n   - **Nhược điểm:** Quỹ đạo di chuyển cực kỳ hỗn loạn, nhảy giật cục lung tung vì một mẫu đơn lẻ có thể chứa nhiễu (nhãn sai, ảnh mờ). Do đó nó không bao giờ hội tụ tĩnh tại đáy nếu không giảm dần $\\eta$.\n\n3. **Mini-Batch Gradient Descent (Tiêu chuẩn vàng thực tế - $B = 32, 64, 128, 256$):**\n   - **Cách làm:** Chia 1 triệu mẫu thành các lô nhỏ (Mini-batches) kích thước thường là lũy thừa của 2 ($B = 32, 64, 128$). Tính trung bình đạo hàm trên lô này rồi cập nhật trọng số.\n     $$\\mathbf{g} = \\frac{1}{B} \\sum_{i \\in \\mathcal{B}} \\nabla \\mathcal{L}_i(\\mathbf{w})$$\n   - **Ưu điểm tuyệt đối:**\n     - **Khai thác tối đa sức mạnh phần cứng:** Các vi xử lý GPU và TPU được thiết kế với hàng ngàn nhân song song (SIMD), tính toán 64 ảnh cùng lúc có tốc độ gần như tương đương tính 1 ảnh!\n     - **Cân bằng hoàn hảo:** Gradient đủ ổn định để đi đúng hướng, đồng thời vẫn giữ được độ rung lắc vừa phải để thoát khỏi điểm yên ngựa.\n\n---\n\n**2. Công thức liên hệ sống còn: Epoch, Batch Size và Iterations:**\nĐây là câu hỏi thường xuyên xuất hiện trong các bài thi Olympic AI:\n- **Epoch:** Một vòng duyệt qua toàn bộ 100% mẫu trong tập dữ liệu huấn luyện.\n- **Batch Size ($B$):** Số lượng mẫu trong một mẻ tính toán.\n- **Iteration (Bước lặp cập nhật):** Mỗi lần bộ tối ưu cập nhật trọng số $\\mathbf{w}$ được tính là 1 Iteration.\n$$\\text{Số bước lặp trong 1 Epoch} = \\frac{N}{B}$$\n$$\\text{Tổng số bước lặp (Total Steps)} = \\text{Số Epochs} \\times \\frac{N}{B}$$\n\n*Ví dụ:* Tập dữ liệu có $N = 64,000$ mẫu. Chọn Batch size $B = 128$.\n- Trong 1 Epoch, mô hình cập nhật: $64,000 / 128 = \\mathbf{500 \\text{ lần}}$!\n- Nếu huấn luyện qua $10$ Epochs, tổng số lần cập nhật trọng số là: $10 \\times 500 = \\mathbf{5,000 \\text{ lần}}$.\n\n---\n\n**3. Tại sao BẮT BUỘC phải Shuffle (Xáo trộn) dữ liệu trước mỗi Epoch?**\nNếu dữ liệu không được xáo trộn ngẫu nhiên trước mỗi vòng Epoch, mô hình sẽ tiếp xúc với các mẫu theo một thứ tự cố định lặp lại tuần hoàn.\nĐiều này tạo ra một vòng lặp thiên vị định kiến (Periodic Gradient Loop), khiến trọng số bị dao động tuần hoàn và không bao giờ hội tụ về cực tiểu tối ưu!",
+        "formula": "\\mathbf{g}_{\\text{Mini-Batch}} = \\frac{1}{B} \\sum_{i \\in \\mathcal{B}} \\nabla \\mathcal{L}_i(\\mathbf{w}) \\quad \\text{với } \\text{Iterations/Epoch} = \\left\\lceil \\frac{N}{B} \\right\\rceil",
+        "mathExplainer": [
+          {
+            "sym": "Batch Size (B)",
+            "name": "Kích thước mẻ",
+            "mean": "Số lượng mẫu đưa vào tính toán đồng thời trong một bước cập nhật (thường chọn 32, 64, 128)."
+          },
+          {
+            "sym": "Epoch",
+            "name": "Chu kỳ huấn luyện",
+            "mean": "Một lượt duyệt trọn vẹn qua toàn bộ tất cả các mẫu dữ liệu huấn luyện."
+          },
+          {
+            "sym": "Iteration (Step)",
+            "name": "Bước cập nhật trọng số",
+            "mean": "Mỗi một lần bộ tối ưu thực hiện w ← w - ηg."
+          },
+          {
+            "sym": "Shuffle",
+            "name": "Xáo trộn ngẫu nhiên",
+            "mean": "Đảo lộn vị trí các mẫu trước mỗi epoch để loại bỏ tính chu kỳ thiên lệch."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Batch GD -->\n                      <g transform=\"translate(30, 20)\">\n                        <ellipse cx=\"70\" cy=\"70\" rx=\"60\" ry=\"40\" fill=\"none\" stroke=\"#bbb\" stroke-dasharray=\"2,2\"/>\n                        <ellipse cx=\"70\" cy=\"70\" rx=\"35\" ry=\"20\" fill=\"none\" stroke=\"#777\"/>\n                        <circle cx=\"70\" cy=\"70\" r=\"3\" fill=\"#111\"/>\n                        <path d=\"M 15 35 Q 40 50 70 70\" fill=\"none\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"70\" y=\"130\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Batch GD (B = N)</text>\n                        <text x=\"70\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Thẳng tắp, cực chậm</text>\n                      </g>\n\n                      <!-- SGD -->\n                      <g transform=\"translate(230, 20)\">\n                        <ellipse cx=\"70\" cy=\"70\" rx=\"60\" ry=\"40\" fill=\"none\" stroke=\"#bbb\" stroke-dasharray=\"2,2\"/>\n                        <ellipse cx=\"70\" cy=\"70\" rx=\"35\" ry=\"20\" fill=\"none\" stroke=\"#777\"/>\n                        <circle cx=\"70\" cy=\"70\" r=\"3\" fill=\"#111\"/>\n                        <path d=\"M 15 35 L 35 20 L 25 60 L 55 45 L 45 80 L 70 70\" fill=\"none\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"70\" y=\"130\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">SGD thuần túy (B = 1)</text>\n                        <text x=\"70\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Rung lắc mạnh, hỗn loạn</text>\n                      </g>\n\n                      <!-- Mini-batch GD -->\n                      <g transform=\"translate(430, 20)\">\n                        <ellipse cx=\"70\" cy=\"70\" rx=\"60\" ry=\"40\" fill=\"none\" stroke=\"#bbb\" stroke-dasharray=\"2,2\"/>\n                        <ellipse cx=\"70\" cy=\"70\" rx=\"35\" ry=\"20\" fill=\"none\" stroke=\"#777\"/>\n                        <circle cx=\"70\" cy=\"70\" r=\"3\" fill=\"#111\"/>\n                        <path d=\"M 15 35 Q 35 40 45 55 Q 60 60 70 70\" fill=\"none\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"70\" y=\"130\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Mini-Batch GD (B = 64)</text>\n                        <text x=\"70\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Chuẩn mực: Nhanh &amp; Ổn định</text>\n                      </g>\n                    </svg>",
+          "caption": "Quỹ đạo di chuyển trên đường đồng mức hàm Loss của 3 biến thể: Batch GD đi êm nhưng chậm; SGD rung lắc hỗn loạn; Mini-Batch GD kết hợp hoàn hảo ưu điểm của cả hai."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa Epoch và Iteration: Một số học sinh lầm tưởng rằng '1 Epoch là 1 lần cập nhật trọng số'. Hãy nhớ: 1 Epoch là 1 vòng duyệt hết TOÀN BỘ dữ liệu. Nếu tập dữ liệu có 10,000 mẫu và Batch size là 100, thì trong 1 Epoch mô hình thực hiện 100 lần cập nhật trọng số!",
+        "practiceQuestion": {
+          "level": "Vận dụng",
+          "question": "Một tập dữ liệu huấn luyện thị giác máy tính gồm N = 120,000 ảnh. Mô hình được huấn luyện bằng thuật toán Mini-Batch Gradient Descent với Batch size B = 64 trong 15 Epochs. Hỏi bộ tối ưu hóa đã thực hiện tổng cộng bao nhiêu bước cập nhật trọng số (Iterations)?",
+          "options": [
+            "A. 1,875 bước",
+            "B. 15 bước",
+            "C. 28,125 bước",
+            "D. 120,000 bước"
+          ],
+          "correctIndex": 2,
+          "hint": "Số bước trong 1 Epoch = 120,000 / 64. Sau đó nhân với 15 Epochs.",
+          "solution": [
+            "Bước 1: Tính số bước lặp (iterations) trong 1 Epoch:",
+            "  Số bước trong 1 Epoch = N / B = 120,000 / 64 = 1,875 bước.",
+            "Bước 2: Tính tổng số bước cập nhật sau 15 Epochs:",
+            "  Tổng số bước = 1,875 × 15 = 28,125 bước.",
+            "Kết luận: Đáp án chính xác là C (28,125 bước)."
+          ]
+        }
+      },
+      {
+        "heading": "4.4. Bộ Tối Ưu Bổ Sung Quán Tính: SGD with Momentum & Nesterov Accelerated Gradient",
+        "content": "Tại sao Gradient Descent thông thường lại thất bại thảm hại khi gặp khe núi hẹp (Hẻm vực)? Làm thế nào một định luật vật lý cơ bản từ thời Newton lại cứu rỗi tốc độ học của AI?",
+        "deepDive": "**1. Vấn đề Hẻm vực dốc đứng (The Ravine Problem):**\nTrong các bài toán thực tế, mặt cong của hàm mất mát thường có dạng **Hẻm vực hẹp (Ravine)**:\n- Theo chiều $w_1$: Vách đá dựng đứng cực kỳ dốc $\\implies$ Gradient $|\\frac{\\partial \\mathcal{L}}{\\partial w_1}|$ rất lớn.\n- Theo chiều $w_2$: Đáy hẻm dốc thoai thoải thoai thoải dẫn tới cực tiểu $\\implies$ Gradient $|\\frac{\\partial \\mathcal{L}}{\\partial w_2}|$ rất nhỏ.\n\nKhi chạy Gradient Descent thông thường:\n- Vì gradient theo chiều $w_1$ quá lớn, bước chân bị giật sang vách bên trái, rồi lại giật sang vách bên phải (dao động ngang dữ dội).\n- Vì gradient theo chiều $w_2$ quá nhỏ, bước chân tiến về phía trước cực kỳ chậm chạp.\n- Kết quả: 99% năng lượng tính toán bị lãng phí vào việc đập đầu qua lại giữa hai vách đá!\n\n---\n\n**2. SGD with Momentum (Bổ sung Quán tính bánh đà):**\n- **Ý tưởng vật lý:** Tưởng tượng một hòn bi sắt lăn xuống sườn núi. Khi lăn, nó tích lũy **Vận tốc (Velocity $\\mathbf{v}_t$)**.\n- **Công thức cập nhật:**\n  $$\\mathbf{v}_t = \\beta \\mathbf{v}_{t-1} + (1 - \\beta) \\mathbf{g}_t$$\n  $$\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\eta \\mathbf{v}_t$$\n  *(Trong đó $\\beta \\in [0, 1)$, thường chọn chuẩn $\\beta = 0.9$).*\n\n- **Cơ chế triệt tiêu dao động thần kỳ:**\n  - Theo chiều rung lắc $w_1$: Ở bước này gradient chỉ sang trái ($+g$), bước sau gradient chỉ sang phải ($-g$). Khi cộng dồn qua vận tốc $\\mathbf{v}_t$, **hai vector ngược chiều tự triệt tiêu lẫn nhau về gần bằng 0**!\n  - Theo chiều tiến tới $w_2$: Gradient các bước đều cùng chỉ về phía trước ($+g$). Khi cộng dồn, **vận tốc liên tục tăng dần theo cấp số nhân**, giúp chiếc xe phóng vun vút về phía trước!\n  - Nhờ Momentum, tốc độ hội tụ nhanh gấp $5 - 10$ lần so với SGD thuần túy!\n\n---\n\n**3. Nesterov Accelerated Gradient (NAG - Nhìn trước tương lai):**\n- **Điểm yếu của Momentum cổ điển:** Khi hòn bi lao xuống đáy thung lũng với vận tốc quá lớn, theo quán tính nó sẽ leo tuốt lên sườn dốc bên kia rồi mới chịu quay đầu lại (hiện tượng vọt lố).\n- **Ý tưởng cải tiến của Yuri Nesterov:**\n  - Thay vì đứng yên ở vị trí hiện tại $\\mathbf{w}_t$ để tính độ dốc, ta **nhìn trước một bước theo đà quán tính** đến điểm dự kiến $\\mathbf{w}_t - \\beta \\mathbf{v}_{t-1}$.\n  - Sau đó, ta tính gradient ngay tại điểm dự kiến này:\n    $$\\mathbf{g}_{\\text{ahead}} = \\nabla \\mathcal{L}(\\mathbf{w}_t - \\beta \\mathbf{v}_{t-1})$$\n    $$\\mathbf{v}_t = \\beta \\mathbf{v}_{t-1} + \\eta \\mathbf{g}_{\\text{ahead}}$$\n    $$\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\mathbf{v}_t$$\n- **Tác dụng:** NAG đóng vai trò như một chiếc **Phanh thông minh**. Nếu biết trước theo đà mình sắp lao lên dốc, nó sẽ chủ động hãm tốc độ lại trước khi chạm đáy, giúp hạ cánh chính xác hơn nhiều!",
+        "formula": "\\mathbf{v}_t = \\beta \\mathbf{v}_{t-1} + (1 - \\beta) \\mathbf{g}_t \\quad \\Longleftrightarrow \\quad \\mathbf{w}_{t+1} = \\mathbf{w}_t - \\eta \\mathbf{v}_t",
+        "mathExplainer": [
+          {
+            "sym": "\\mathbf{v}_t",
+            "name": "Vector Vận tốc (Velocity)",
+            "mean": "Trung bình trượt có trọng số của các gradient trong quá khứ, lưu giữ quán tính di chuyển."
+          },
+          {
+            "sym": "\\beta \\text{ (Beta)}",
+            "name": "Hệ số suy giảm quán tính",
+            "mean": "Thường chọn 0.9, đại diện cho việc giữ lại 90% vận tốc cũ và chỉ lấy 10% gradient mới."
+          },
+          {
+            "sym": "Ravine / Hẻm vực",
+            "name": "Địa hình hẹp dốc không đều",
+            "mean": "Mặt cong có độ dốc theo chiều này lớn gấp hàng trăm lần chiều khác, khiến GD thông thường bị rung lắc."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left side: Without Momentum -->\n                      <g transform=\"translate(30, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"250\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"125\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Không Có Quán Tính (SGD)</text>\n                        <!-- Ravine contours -->\n                        <ellipse cx=\"125\" cy=\"80\" rx=\"100\" ry=\"25\" fill=\"none\" stroke=\"#ddd\"/>\n                        <ellipse cx=\"125\" cy=\"80\" rx=\"50\" ry=\"12\" fill=\"none\" stroke=\"#aaa\"/>\n                        <!-- Zigzag path -->\n                        <path d=\"M 35 60 L 55 95 L 75 62 L 95 95 L 115 65 L 125 80\" fill=\"none\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"125\" y=\"130\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Rung lắc dữ dội giữa hai vách đá</text>\n                      </g>\n\n                      <!-- Right side: With Momentum -->\n                      <g transform=\"translate(340, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"250\" height=\"140\" fill=\"#111\"/>\n                        <text x=\"125\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Có Quán Tính (Momentum)</text>\n                        <!-- Ravine contours -->\n                        <ellipse cx=\"125\" cy=\"80\" rx=\"100\" ry=\"25\" fill=\"none\" stroke=\"#444\"/>\n                        <ellipse cx=\"125\" cy=\"80\" rx=\"50\" ry=\"12\" fill=\"none\" stroke=\"#666\"/>\n                        <!-- Smooth path -->\n                        <path d=\"M 35 60 Q 60 85 85 80 Q 110 78 125 80\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.5\"/>\n                        <text x=\"125\" y=\"130\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\" text-anchor=\"middle\">Triệt tiêu rung lắc, lướt thẳng về đích</text>\n                      </g>\n                    </svg>",
+          "caption": "Sức mạnh của Quán tính Momentum: Dập tắt hoàn toàn hiện tượng rung lắc zig-zag trong hẻm vực dốc đứng, tăng tốc hội tụ gấp nhiều lần."
+        },
+        "commonPitfalls": "Nhầm lẫn vai trò của tham số quán tính beta: Khi beta = 0, thuật toán Momentum trở về đúng bằng SGD tiêu chuẩn (không có quán tính). Khi beta càng gần 1 (như 0.99), quán tính càng nặng, xe lăn càng nhanh nhưng sẽ khó bẻ lái hơn khi gặp góc cua gấp.",
+        "practiceQuestion": {
+          "level": "Nâng cao",
+          "question": "Giả sử một mô hình sử dụng bộ tối ưu SGD with Momentum với hệ số quán tính β = 0.9. Tại bước t = 1, vector vận tốc cũ v₀ = 0 và gradient g₁ = [10, 2]. Tại bước t = 2, gradient đổi hướng đột ngột do gặp vách đá đối diện thành g₂ = [-8, 2]. Vector vận tốc v₂ tại bước 2 bằng bao nhiêu (sử dụng công thức v_t = β v_{t-1} + (1 - β) g_t)?",
+          "options": [
+            "A. v₂ = [1.0, 0.2]",
+            "B. v₂ = [0.1, 0.38]",
+            "C. v₂ = [-8.0, 2.0]",
+            "D. v₂ = [1.8, 0.4]"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính v₁ = 0.9(0) + 0.1(g₁) = [1.0, 0.2]. Sau đó tính v₂ = 0.9(v₁) + 0.1(g₂).",
+          "solution": [
+            "Bước 1: Tính vận tốc ở bước 1:",
+            "  v₁ = 0.9 × [0, 0] + 0.1 × [10, 2] = [1.0, 0.2].",
+            "Bước 2: Tính vận tốc ở bước 2:",
+            "  v₂ = 0.9 × v₁ + 0.1 × g₂",
+            "  v₂ = 0.9 × [1.0, 0.2] + 0.1 × [-8, 2]",
+            "  v₂ = [0.9, 0.18] + [-0.8, 0.2] = [0.1, 0.38].",
+            "Nhận xét sâu sắc: Thành phần thứ nhất dao động từ +10 sang -8 đã bị triệt tiêu gần sạch (từ 1.0 giảm xuống chỉ còn 0.1). Thành phần thứ hai giữ nguyên dấu +2 đã được tích lũy tăng từ 0.2 lên 0.38! Quán tính đã hoạt động hoàn hảo!",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "4.5. Các Bộ Tối Ưu Thích Ứng Từng Chiều: AdaGrad, RMSProp & Thuật Toán Thống Trị ADAM",
+        "content": "Trong một mô hình ngôn ngữ lớn, có từ xuất hiện hàng triệu lần (từ 'và', 'của'), có từ chỉ xuất hiện đúng 2 lần trong toàn bộ sách báo (từ ngữ chuyên ngành y khoa). Dùng chung một tốc độ học η duy nhất cho mọi tham số là một sai lầm chết người. Đó là lý do kỷ nguyên Tối ưu hóa Thích ứng ra đời.",
+        "deepDive": "**1. Bước đệm lịch sử: AdaGrad (Tự động thích ứng bước đi):**\n- **Ý tưởng:** Tham số nào có gradient xuất hiện nhiều và dốc thì tự động **giảm bước chân** lại; tham số nào hiếm gặp thì **bước dài hơn**.\n- **Cơ chế:** Tích lũy tổng bình phương gradient lịch sử:\n  $$G_t = G_{t-1} + \\mathbf{g}_t^2 \\implies \\mathbf{w}_{t+1} = \\mathbf{w}_t - \\frac{\\eta}{\\sqrt{G_t + \\epsilon}} \\mathbf{g}_t$$\n- **Tử huyệt của AdaGrad:** Vì $G_t$ là tổng cộng dồn các số dương ($\\mathbf{g}_t^2 \\ge 0$), $G_t$ sẽ **TĂNG VÔ HẠN THEO THỜI GIAN**. Mẫu số ngày càng khổng lồ khiến tốc độ học hiệu dụng $\\frac{\\eta}{\\sqrt{G_t}}$ bị teo tóp về $0$ quá sớm (Premature Stopping), mô hình ngừng học hoàn toàn khi chưa tới được cực tiểu!\n\n---\n\n**2. Khắc phục tử huyệt: RMSProp (Geoffrey Hinton phát minh):**\n- Thay vì cộng dồn vô hạn từ đầu chí cuối, RMSProp sử dụng **Trung bình trượt có trọng số hàm mũ (Exponential Moving Average)** chỉ để nhớ các bình phương gradient gần đây nhất:\n  $$s_t = \\gamma s_{t-1} + (1 - \\gamma) \\mathbf{g}_t^2 \\quad (\\text{thường chọn } \\gamma = 0.99)$$\n  $$\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\frac{\\eta}{\\sqrt{s_t + \\epsilon}} \\mathbf{g}_t$$\n- Mẫu số $s_t$ không còn tăng vô hạn nữa! Nếu gradient nhỏ lại, $s_t$ sẽ tự động giảm xuống, cho phép tốc độ học phục hồi và tiếp tục bước đi!\n\n---\n\n**3. Đỉnh cao hội tụ: Thuật toán ADAM (Adaptive Moment Estimation):**\nĐược công bố năm 2014 bởi Kingma & Ba, Adam hiện là bộ tối ưu hóa **phổ biến nhất và thành công nhất lịch sử Trí tuệ Nhân tạo**.\n- **Bản chất của Adam:** Là sự kết hợp hoàn hảo giữa:\n  1. **Momentum (Mô-men bậc 1 - $\\mathbf{m}_t$):** Ước lượng trung bình có trọng số của Gradient (đóng vai trò Quán tính hướng đi).\n  2. **RMSProp (Mô-men bậc 2 - $\\mathbf{v}_t$):** Ước lượng trung bình có trọng số của Bình phương Gradient (đóng vai trò Co giãn bước đi thích ứng theo từng chiều).\n\n- **Thuật toán chi tiết 4 bước của Adam:**\n  1. *Cập nhật mô-men bậc 1:* $\\mathbf{m}_t = \\beta_1 \\mathbf{m}_{t-1} + (1 - \\beta_1) \\mathbf{g}_t$  (với $\\beta_1 = 0.9$)\n  2. *Cập nhật mô-men bậc 2:* $\\mathbf{v}_t = \\beta_2 \\mathbf{v}_{t-1} + (1 - \\beta_2) \\mathbf{g}_t^2$  (với $\\beta_2 = 0.999$)\n  3. *Hiệu chỉnh thiên lệch ban đầu (Bias Correction):*\n     Vì $\\mathbf{m}_0 = \\mathbf{0}$ và $\\mathbf{v}_0 = \\mathbf{0}$, ở những bước lặp đầu tiên ($t = 1, 2$), $\\mathbf{m}_t$ và $\\mathbf{v}_t$ bị thiên lệch rất nặng về số 0. Ta hiệu chỉnh bằng cách chia cho $(1 - \\beta^t)$:\n     $$\\hat{\\mathbf{m}}_t = \\frac{\\mathbf{m}_t}{1 - \\beta_1^t}, \\quad \\hat{\\mathbf{v}}_t = \\frac{\\mathbf{v}_t}{1 - \\beta_2^t}$$\n  4. *Cập nhật trọng số cuối cùng:*\n     $$\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\frac{\\eta}{\\sqrt{\\hat{\\mathbf{v}}_t} + \\epsilon} \\hat{\\mathbf{m}}_t \\quad (\\epsilon = 10^{-8})$$\n\n---\n\n**4. Tại sao Transformer và LLM hiện đại đều dùng AdamW thay vì Adam gốc?**\nTrong Adam gốc, kỹ thuật phạt độ lớn trọng số $L_2$ Regularization (Weight Decay) được cộng trực tiếp vào gradient $\\mathbf{g}_t$.\nDo bị chia cho $\\sqrt{\\mathbf{v}_t}$, các trọng số lớn lại bị phạt ít hơn, làm hỏng mục đích chống quá khớp!\n**AdamW (Decoupled Weight Decay)** đã tách riêng phần phạt trọng số ra khỏi gradient, giúp các siêu mô hình ngôn ngữ (như LLaMA, GPT-4) hội tụ bền bỉ và tổng quát hóa vượt trội!",
+        "formula": "\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\frac{\\eta}{\\sqrt{\\hat{\\mathbf{v}}_t} + \\epsilon} \\hat{\\mathbf{m}}_t \\quad \\text{với } \\hat{\\mathbf{m}}_t = \\frac{\\mathbf{m}_t}{1 - \\beta_1^t}, \\; \\hat{\\mathbf{v}}_t = \\frac{\\mathbf{v}_t}{1 - \\beta_2^t}",
+        "mathExplainer": [
+          {
+            "sym": "\\mathbf{m}_t \\text{ (First Moment)}",
+            "name": "Mô-men bậc 1",
+            "mean": "Ước lượng quán tính hướng đi của gradient (thừa kế từ thuật toán Momentum)."
+          },
+          {
+            "sym": "\\mathbf{v}_t \\text{ (Second Moment)}",
+            "name": "Mô-men bậc 2",
+            "mean": "Ước lượng độ lớn bình phương gradient để co giãn bước nhảy từng chiều (thừa kế từ RMSProp)."
+          },
+          {
+            "sym": "1 - \\beta^t",
+            "name": "Hiệu chỉnh thiên lệch (Bias Correction)",
+            "mean": "Hệ số triệt tiêu độ lệch về số 0 do khởi tạo ở những bước lặp đầu tiên khi t còn nhỏ."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(30, 25)\">\n                        <!-- Momentum component -->\n                        <rect x=\"0\" y=\"0\" width=\"150\" height=\"80\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"75\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Momentum (m_t)</text>\n                        <text x=\"75\" y=\"46\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Mô-men bậc 1: Quán tính</text>\n                        <text x=\"75\" y=\"65\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">Dập tắt dao động ngang</text>\n\n                        <!-- Plus sign -->\n                        <text x=\"180\" y=\"48\" font-family=\"Georgia\" font-size=\"22\" font-weight=\"bold\" text-anchor=\"middle\">+</text>\n\n                        <!-- RMSProp component -->\n                        <rect x=\"210\" y=\"0\" width=\"150\" height=\"80\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"285\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">RMSProp (v_t)</text>\n                        <text x=\"285\" y=\"46\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Mô-men bậc 2: Bình phương</text>\n                        <text x=\"285\" y=\"65\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">Co giãn tốc độ từng chiều</text>\n\n                        <!-- Equals sign -->\n                        <text x=\"390\" y=\"48\" font-family=\"Georgia\" font-size=\"22\" font-weight=\"bold\" text-anchor=\"middle\">=</text>\n\n                        <!-- Adam Master -->\n                        <rect x=\"420\" y=\"0\" width=\"140\" height=\"80\" fill=\"#111\"/>\n                        <text x=\"490\" y=\"30\" font-family=\"Georgia\" font-size=\"14\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">ADAM</text>\n                        <text x=\"490\" y=\"52\" font-family=\"Georgia\" font-size=\"9\" fill=\"#eee\" text-anchor=\"middle\">+ Bias Correction</text>\n                        <text x=\"490\" y=\"68\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\" text-anchor=\"middle\">Tiêu chuẩn số 1 AI</text>\n                      </g>\n\n                      <!-- Bottom description -->\n                      <text x=\"310\" y=\"135\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Bộ siêu tham số vàng mặc định: η = 0.001, β₁ = 0.9, β₂ = 0.999, ε = 10⁻⁸</text>\n                      <text x=\"310\" y=\"155\" font-family=\"Georgia\" font-size=\"10\" fill=\"#555\" text-anchor=\"middle\">Trong các mô hình LLM lớn, biến thể AdamW được ưu tiên để tối ưu hóa khả năng Regularization.</text>\n                    </svg>",
+          "caption": "Kiến trúc tích hợp của Adam: Hội tụ tinh hoa giữa Quán tính Momentum và Thích ứng RMSProp, giải quyết triệt để bài toán tối ưu đa chiều."
+        },
+        "commonPitfalls": "Lầm tưởng Adam không cần chỉnh learning rate: Nhiều học sinh nghĩ rằng vì Adam 'thích ứng' nên đặt learning rate nào cũng được. Thực tế, Adam vẫn cần một tốc độ học ban đầu η (thường chọn 0.001 hoặc 0.0003). Nếu đặt η ban đầu = 1.0, Adam vẫn làm nổ tung mô hình như thường!",
+        "practiceQuestion": {
+          "level": "Nâng cao",
+          "question": "Trong thuật toán tối ưu hóa Adam, mục đích cốt lõi của bước hiệu chỉnh sai lệch ban đầu (Bias Correction: m̂_t = m_t / (1 - β₁^t) và v̂_t = v_t / (1 - β₂^t)) là gì?",
+          "options": [
+            "A. Để tránh chia cho số 0 khi gradient bằng 0",
+            "B. Để triệt tiêu độ lệch về số 0 do khởi tạo m₀ = 0 và v₀ = 0 trong những bước lặp đầu tiên khi t còn nhỏ",
+            "C. Để làm cho hàm mất mát luôn luôn giảm đơn điệu qua từng epoch",
+            "D. Để biến đổi gradient thành phân phối chuẩn tắc N(0, 1)"
+          ],
+          "correctIndex": 1,
+          "hint": "Khi t = 1, m₁ = 0.1 g₁. Nếu không chia cho (1 - 0.9¹) = 0.1, giá trị m₁ sẽ bị bé đi 10 lần một cách nhân tạo.",
+          "solution": [
+            "Bước 1: Xét bước đầu tiên t = 1 với β₁ = 0.9 và m₀ = 0:",
+            "  m₁ = 0.9(m₀) + 0.1(g₁) = 0.1 g₁.",
+            "Bước 2: Rõ ràng m₁ bị thu nhỏ nhân tạo đi 10 lần chỉ vì khởi tạo m₀ = 0 (bị thiên lệch về 0).",
+            "Bước 3: Chia cho (1 - β₁¹) = 1 - 0.9 = 0.1:",
+            "  m̂₁ = m₁ / 0.1 = (0.1 g₁) / 0.1 = g₁ (trả lại đúng độ lớn kỳ vọng ban đầu!).",
+            "Kết luận: Bước hiệu chỉnh này triệt tiêu độ lệch ban đầu về 0. Đáp án đúng là B."
+          ]
+        }
+      },
+      {
+        "heading": "4.6. Bài Toán Tính Tay Chuẩn Đề Thi VAIO: Tối Ưu Hóa Tuyến Tính & Đếm Tham Số",
+        "content": "Để thực sự nắm chắc điểm trong các kỳ thi học sinh giỏi Tin học và Olympic AI, bạn không chỉ cần hiểu lý thuyết mà bắt buộc phải biết tính tay từng bước cập nhật tham số trên giấy.",
+        "deepDive": "**ĐỀ BÀI THỰC HÀNH TÍNH TAY KINH ĐIỂN:**\nCho một mô hình Hồi quy tuyến tính một biến số đơn giản không có hệ số bias:\n$$\\hat{y} = w \\cdot x$$\nHàm mất mát cho một mẫu dữ liệu là sai số bình phương:\n$$\\mathcal{L}_i(w) = \\frac{1}{2} (\\hat{y}_i - y_i)^2 = \\frac{1}{2} (w x_i - y_i)^2$$\n\nTập dữ liệu huấn luyện gồm đúng $2$ điểm mẫu ($N = 2$):\n- Mẫu 1: $x_1 = 1.0, \\quad y_1 = 3.0$\n- Mẫu 2: $x_2 = 2.0, \\quad y_2 = 5.0$\n\nKhởi tạo trọng số ban đầu: **$w_0 = 1.0$**.\nTốc độ học được chọn là: **$\\eta = 0.1$**.\n\nHãy thực hiện tính toán chi tiết:\n1. **Bước 1:** Tính giá trị dự đoán $\\hat{y}_1, \\hat{y}_2$ và tổng mất mát ban đầu $\\mathcal{L}_{\\text{total}}$.\n2. **Bước 2:** Tính đạo hàm riêng (gradient) trên từng mẫu và đạo hàm trung bình toàn tập.\n3. **Bước 3:** Cập nhật trọng số lên $w_1$ theo thuật toán Batch Gradient Descent.\n4. **Bước 4:** Kiểm tra xem sau bước cập nhật, hàm mất mát có thực sự giảm xuống hay không!\n\n---\n\n**LỜI GIẢI CHI TIẾT TỪNG BƯỚC:**\n\n**1. Tính dự đoán và Loss ban đầu (tại $w_0 = 1.0$):**\n- Mẫu 1: $\\hat{y}_1 = w_0 \\cdot x_1 = 1.0 \\times 1.0 = \\mathbf{1.0}$.\n  - Sai số: $e_1 = \\hat{y}_1 - y_1 = 1.0 - 3.0 = -2.0$.\n  - Mất mát mẫu 1: $\\mathcal{L}_1 = \\frac{1}{2} (-2.0)^2 = \\mathbf{2.0}$.\n- Mẫu 2: $\\hat{y}_2 = w_0 \\cdot x_2 = 1.0 \\times 2.0 = \\mathbf{2.0}$.\n  - Sai số: $e_2 = \\hat{y}_2 - y_2 = 2.0 - 5.0 = -3.0$.\n  - Mất mát mẫu 2: $\\mathcal{L}_2 = \\frac{1}{2} (-3.0)^2 = \\mathbf{4.5}$.\n- Tổng mất mát trung bình ban đầu:\n  $$\\mathcal{L}_{\\text{avg}}(w_0) = \\frac{\\mathcal{L}_1 + \\mathcal{L}_2}{2} = \\frac{2.0 + 4.5}{2} = \\mathbf{3.25}$$\n\n---\n\n**2. Tính Gradient của hàm mất mát:**\nĐạo hàm riêng theo $w$ của từng mẫu theo Quy tắc chuỗi:\n$$\\frac{\\partial \\mathcal{L}_i}{\\partial w} = (\\hat{y}_i - y_i) \\cdot x_i$$\n- Mẫu 1: $g_1 = (\\hat{y}_1 - y_1) \\cdot x_1 = (-2.0) \\times 1.0 = \\mathbf{-2.0}$.\n- Mẫu 2: $g_2 = (\\hat{y}_2 - y_2) \\cdot x_2 = (-3.0) \\times 2.0 = \\mathbf{-6.0}$.\n- Gradient trung bình của toàn tập (Batch Gradient):\n  $$g_{\\text{batch}} = \\frac{g_1 + g_2}{2} = \\frac{-2.0 + (-6.0)}{2} = \\frac{-8.0}{2} = \\mathbf{-4.0}$$\n\n---\n\n**3. Cập nhật trọng số theo Batch Gradient Descent:**\nÁp dụng công thức bước chân:\n$$w_1 = w_0 - \\eta \\cdot g_{\\text{batch}}$$\n$$w_1 = 1.0 - 0.1 \\times (-4.0) = 1.0 - (-0.4) = 1.0 + 0.4 = \\mathbf{1.4}$$\n\n*(Nhận xét: Vì gradient mang dấu âm $g = -4.0$, mô hình nhận biết rằng muốn giảm sai số thì phải TĂNG giá trị trọng số lên. Trọng số đã tăng từ 1.0 lên 1.4!).*\n\n---\n\n**4. Kiểm chứng sự sụt giảm của Hàm mất mát (tại $w_1 = 1.4$):**\n- Mẫu 1: $\\hat{y}_1 = 1.4 \\times 1.0 = 1.4 \\implies e_1 = 1.4 - 3.0 = -1.6 \\implies \\mathcal{L}_1 = \\frac{1}{2}(-1.6)^2 = \\mathbf{1.28}$.\n- Mẫu 2: $\\hat{y}_2 = 1.4 \\times 2.0 = 2.8 \\implies e_2 = 2.8 - 5.0 = -2.2 \\implies \\mathcal{L}_2 = \\frac{1}{2}(-2.2)^2 = \\mathbf{2.42}$.\n- Mất mát trung bình mới:\n  $$\\mathcal{L}_{\\text{avg}}(w_1) = \\frac{1.28 + 2.42}{2} = \\mathbf{1.85}$$\n\n**KẾT QUẢ KỲ DIỆU:** Hàm mất mát đã giảm ngoạn mục từ **$3.25$ xuống còn $1.85$**! Mô hình AI đã thực sự trở nên thông minh hơn sau đúng 1 bước chân!",
+        "formula": "\\frac{\\partial \\mathcal{L}_i}{\\partial w} = (\\hat{y}_i - y_i) x_i \\implies w_1 = w_0 - \\eta \\left( \\frac{1}{N} \\sum_{i=1}^N (\\hat{y}_i - y_i) x_i \\right)",
+        "mathExplainer": [
+          {
+            "sym": "(\\hat{y}_i - y_i) x_i",
+            "name": "Đạo hàm theo trọng số",
+            "mean": "Độ lớn gradient tỷ lệ thuận với mức độ sai số (ŷ - y) nhân với cường độ tín hiệu đầu vào x."
+          },
+          {
+            "sym": "\\mathcal{L}_{\\text{avg}}",
+            "name": "Mất mát trung bình",
+            "mean": "Thước đo tổng thể đánh giá mức độ sai lệch của mô hình trên toàn bộ tập dữ liệu."
+          },
+          {
+            "sym": "Dấu trừ nhân dấu trừ",
+            "name": "Cập nhật tăng trọng số",
+            "mean": "Khi đạo hàm âm, trừ cho số âm thành cộng, trọng số tự động tăng lên để kéo dự đoán lên."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Step 1: Initial state -->\n                      <g transform=\"translate(25, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"165\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"82\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Bước 1: Khởi Tạo</text>\n                        <text x=\"15\" y=\"52\" font-family=\"Georgia\" font-size=\"11\">• w₀ = 1.0</text>\n                        <text x=\"15\" y=\"75\" font-family=\"Georgia\" font-size=\"11\">• Loss ban đầu:</text>\n                        <text x=\"25\" y=\"95\" font-family=\"Georgia\" font-size=\"13\" font-weight=\"bold\">L_avg = 3.25</text>\n                        <text x=\"15\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">Mô hình dự đoán kém</text>\n                      </g>\n\n                      <!-- Arrow 1-2 -->\n                      <line x1=\"200\" y1=\"90\" x2=\"225\" y2=\"90\" stroke=\"#111\" stroke-width=\"2\"/>\n                      <polygon points=\"225,90 217,86 217,94\" fill=\"#111\"/>\n\n                      <!-- Step 2: Compute gradient -->\n                      <g transform=\"translate(230, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"165\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"82\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Bước 2: Tính Gradient</text>\n                        <text x=\"15\" y=\"52\" font-family=\"Georgia\" font-size=\"11\">• g₁ = (-2) × 1 = -2.0</text>\n                        <text x=\"15\" y=\"75\" font-family=\"Georgia\" font-size=\"11\">• g₂ = (-3) × 2 = -6.0</text>\n                        <text x=\"15\" y=\"98\" font-family=\"Georgia\" font-size=\"11\">• g_batch = -4.0</text>\n                        <text x=\"15\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">Δw = -0.1 × (-4) = +0.4</text>\n                      </g>\n\n                      <!-- Arrow 2-3 -->\n                      <line x1=\"405\" y1=\"90\" x2=\"430\" y2=\"90\" stroke=\"#111\" stroke-width=\"2\"/>\n                      <polygon points=\"430,90 422,86 422,94\" fill=\"#111\"/>\n\n                      <!-- Step 3: Updated state -->\n                      <g transform=\"translate(435, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"160\" height=\"140\" fill=\"#111\"/>\n                        <text x=\"80\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Bước 3: Cập Nhật</text>\n                        <text x=\"15\" y=\"52\" font-family=\"Georgia\" font-size=\"11\" fill=\"#eee\">• w₁ = 1.0 + 0.4 = 1.4</text>\n                        <text x=\"15\" y=\"75\" font-family=\"Georgia\" font-size=\"11\" fill=\"#eee\">• Loss mới:</text>\n                        <text x=\"25\" y=\"98\" font-family=\"Georgia\" font-size=\"14\" font-weight=\"bold\" fill=\"#fff\">L_avg = 1.85</text>\n                        <text x=\"15\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" fill=\"#bbb\">Loss giảm mạnh 43%!</text>\n                      </g>\n                    </svg>",
+          "caption": "Minh họa quá trình tính tay một bước cập nhật Gradient Descent: Sai số ban đầu đo được 3.25 được hạ xuống còn 1.85 chỉ sau 1 bước tối ưu."
+        },
+        "commonPitfalls": "Nhầm lẫn dấu khi gradient âm: Khi gradient âm ($g < 0$), công thức $w_{t+1} = w_t - \\eta g$ sẽ làm trọng số TĂNG lên ($w_{t+1} > w_t$). Nhiều học sinh nghĩ máy móc rằng 'hạ dốc' nghĩa là giá trị trọng số phải giảm đi, dẫn tới tính sai dấu!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Cho hàm số f(w) = w² - 6w + 9. Tại điểm w₀ = 1.0, vector gradient có giá trị bằng bao nhiêu và ta cần tăng hay giảm w để hạ dốc về cực tiểu?",
+          "options": [
+            "A. Gradient = +4; cần giảm w",
+            "B. Gradient = -4; cần tăng w",
+            "C. Gradient = -4; cần giảm w",
+            "D. Gradient = +2; cần tăng w"
+          ],
+          "correctIndex": 1,
+          "hint": "Đạo hàm f'(w) = 2w - 6. Thay w₀ = 1.0 vào tính f'(1.0). Vì đạo hàm âm, chiều dốc đi xuống yêu cầu ta đi ngược hướng gradient, tức là tăng w.",
+          "solution": [
+            "Bước 1: Tính đạo hàm của hàm mục tiêu:",
+            "  f'(w) = 2w - 6.",
+            "Bước 2: Thay w₀ = 1.0 vào:",
+            "  f'(1.0) = 2(1.0) - 6 = -4.",
+            "Bước 3: Xác định chiều bước đi:",
+            "  Chiều hạ dốc là ngược chiều gradient: -f'(1.0) = -(-4) = +4 > 0 => Cần TĂNG w.",
+            "  (Thực tế cực tiểu của f(w) = (w-3)² nằm tại w = 3. Đi từ w = 1 đến w = 3 rõ ràng là phải tăng w).",
+            "Đáp án chính xác: B."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-gradient-descent",
+    "examConnection": {
+      "questionTitle": "Điểm Trọng Tâm Về Tối Ưu Hóa Trong Đề Thi VAIO 2025",
+      "items": [
+        {
+          "code": "Thuật Toán Tối Ưu Hóa",
+          "problem": "Khi huấn luyện các mô hình AI lớn, tại sao Mini-batch Gradient Descent luôn được chọn thay vì Batch GD hay SGD thuần túy?",
+          "solution": [
+            "1. Mini-batch tận dụng được kiến trúc tính toán song song ma trận trên GPU (Tensor Cores / SIMD).",
+            "2. Vừa có tính ổn định nhờ trung bình trên lô 64-128 mẫu, vừa giữ được độ rung lắc ngẫu nhiên vừa đủ để vượt qua các điểm yên ngựa (saddle points) và cực tiểu cục bộ cạn."
+          ]
+        },
+        {
+          "code": "Adam vs AdamW",
+          "problem": "Tại sao các kiến trúc Transformer hiện đại (như BERT, GPT, LLaMA) đều bắt buộc sử dụng AdamW thay vì Adam gốc?",
+          "solution": [
+            "Adam gốc cộng phần phạt Weight Decay L2 trực tiếp vào gradient, khiến việc chuẩn hóa bị méo mó khi chia cho căn bậc hai của mô-men bậc 2. AdamW tách rời hoàn toàn bước suy giảm trọng số ra khỏi gradient, bảo toàn tính chất chống học vẹt (Regularization)."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Chu trình 5 bước huấn luyện: Forward -> Compute Loss -> zero_grad() -> Backward -> Optimizer Step.",
+      "Tốc độ học η (Learning Rate): Nhỏ thì chậm, lớn thì phân kỳ nổ tung thành NaN; cần dùng Learning Rate Scheduler để giảm dần.",
+      "Batch GD (chậm, êm), SGD (nhanh, rung lắc), Mini-Batch GD (tiêu chuẩn vàng cân bằng hoàn hảo).",
+      "Momentum dập tắt dao động trong hẻm vực dốc đứng nhờ tích lũy vận tốc quán tính bánh đà.",
+      "Adam = Quán tính (Momentum m_t) + Thích ứng từng chiều (RMSProp v_t) + Hiệu chỉnh thiên lệch ban đầu (Bias Correction)."
+    ]
+  },
+  {
+    "id": "lesson-5",
+    "title": "5. Hồi Quy Tuyến Tính (Linear Regression) & Regularization",
+    "syllabusBadge": "BUỔI 3: HỒI QUY TUYẾN TÍNH & REGULARIZATION",
+    "summary": "Mô hình nền tảng của mọi bài toán dự đoán số thực: Dẫn dắt từ phương trình đường thẳng lớp 9, 4 giả định sống còn (LINE) của mô hình thống kê, giải mã hiện tượng Heteroscedasticity, hai con đường tìm nghiệm (Normal Equation vs Gradient Descent), và nghệ thuật co rút trọng số L1 Lasso vs L2 Ridge chống quá khớp.",
+    "intuition": {
+      "title": "Trực giác thực tế: Sợi dây thun đàn hồi giữ các tham số không bị nổi loạn",
+      "content": "Hãy tưởng tượng bạn đang cố gắng vẽ một đường thẳng đi qua một đám mây điểm dữ liệu phân tán trên giấy (ví dụ: mối quan hệ giữa Diện tích nhà và Giá bán).\n\nNếu bạn để mô hình hoàn toàn tự do điều chỉnh các trọng số $w$, nó sẽ tìm mọi cách uốn éo thành một đường cong zíc-zắc phức tạp bậc 15 để đi qua chính xác từng điểm nhiễu đơn lẻ (hiện tượng Quá khớp - Overfitting)! Khi có một căn nhà mới toanh xuất hiện, mô hình này sẽ dự đoán một con số hoàn toàn trên trời hoặc âm vô lý!\n\nLàm sao để kiềm chế mô hình, buộc nó phải vẽ một đường thẳng trơn tru, đơn giản?\nHãy buộc một **sợi dây thun đàn hồi** nối từ mỗi trọng số $w$ về gốc tọa độ 0:\n- Nếu mô hình muốn tăng vọt trọng số $w$ lên rất lớn để chiều chuộng các điểm nhiễu, sợi dây thun sẽ bị kéo căng cực độ và tạo ra một lực cản (Khoản phạt - Penalty) cộng thẳng vào hàm mất mát Loss!\n- Mô hình bị ép phải cân nhắc: 'Việc tăng trọng số này có thực sự giúp giảm sai số nhiều đến mức bù lại được lực căng của sợi dây thun hay không?'.\n- Nếu thuộc tính đó chỉ là nhiễu vu vơ, mô hình sẽ thả lỏng và kéo trọng số co rút về sát 0!\n\nSợi dây thun hình thoi kim cương gọi là **Lasso (L1)**: Có khả năng cắt phăng các trọng số của đặc trưng vô dụng về đúng bằng 0 tuyệt đối để tự động lọc biến!\nSợi dây thun hình tròn trơn gọi là **Ridge (L2)**: Co cụm đều tất cả các trọng số về rất nhỏ nhưng không triệt tiêu về 0, giải quyết dứt điểm thảm họa đa cộng tuyến!\nĐây chính là nghệ thuật **Regularization (Chính quy hóa / Co rút trọng số)** trong Machine Learning!"
+    },
+    "sections": [
+      {
+        "heading": "5.1. Khởi Đầu Từ Con Số 0: Hồi Quy Tuyến Tính Là Gì? Từ Đường Thẳng Lớp 9 Đến Không Gian Đa Chiều",
+        "content": "Hồi quy (Regression) là nhiệm vụ dự đoán một giá trị số thực liên tục (giá nhà, nhiệt độ, doanh thu, thời gian chạy). Mô hình đơn giản nhất, cổ xưa nhất nhưng mạnh mẽ nhất chính là Hồi quy tuyến tính.",
+        "deepDive": "**1. Từ phương trình đường thẳng hình học lớp 9:**\nỞ bậc trung học cơ sở, bạn đã quen thuộc với phương trình đường thẳng:\n$$y = a x + b$$\n- $a$: Hệ số góc (độ dốc của đường thẳng - dốc đứng hay thoai thoải).\n- $b$: Tung độ gốc (giao điểm của đường thẳng với trục tung khi $x = 0$).\n\nTrong Machine Learning, ta giữ nguyên bản chất đó nhưng đổi tên ký hiệu để chuẩn hóa theo quốc tế:\n$$\\hat{y} = w x + b$$\n- $x$: Biến độc lập (Feature / Thuộc tính đầu vào - ví dụ: Diện tích nhà tính bằng $m^2$).\n- $\\hat{y}$ (đọc là *y-mũ*): Giá trị dự đoán đầu ra (Predicted Value - ví dụ: Giá nhà dự đoán tính bằng tỷ VNĐ).\n- $w$ (Weight): Trọng số hay Hệ số góc (Slope) của mô hình.\n- $b$ (Bias): Độ chệch hay Hệ số chặn (Intercept) của mô hình.\n\n---\n\n**2. Ý nghĩa kinh tế và vật lý của từng tham số (Bắt buộc phải hiểu bản chất):**\n- **Ý nghĩa của trọng số $w$:**\n  $$w = \\frac{\\Delta \\hat{y}}{\\Delta x}$$\n  Trọng số $w$ cho biết: **Khi đặc trưng $x$ tăng thêm đúng 1 đơn vị, thì giá trị dự đoán $\\hat{y}$ sẽ tăng thêm (hoặc giảm bớt nếu $w < 0$) bao nhiêu đơn vị!**\n  *Ví dụ:* Nếu mô hình dự đoán giá nhà là $\\hat{y} = 0.05 x + 0.5$ (với $x$ là $m^2$ và $y$ là tỷ VNĐ), thì $w = 0.05$ nghĩa là: Cứ mỗi mét vuông diện tích tăng thêm, giá nhà dự kiến sẽ tăng thêm $0.05$ tỷ (tức 50 triệu VNĐ)!\n- **Ý nghĩa của hệ số chặn $b$:**\n  Là giá trị cơ sở của $\\hat{y}$ khi toàn bộ các đặc trưng đầu vào đều bằng 0 ($x = 0$). Trong ví dụ trên, $b = 0.5$ có thể hiểu là giá trị nền tảng tối thiểu của mảnh đất.\n\n---\n\n**3. Mở rộng lên không gian đa biến (Multiple Linear Regression):**\nTrong thực tế, giá nhà không chỉ phụ thuộc vào diện tích ($x_1$), mà còn phụ thuộc vào Số phòng ngủ ($x_2$), Khoảng cách tới trung tâm ($x_3$), Mặt tiền ($x_4$)...\nMô hình mở rộng thành tổ hợp tuyến tính của $d$ đặc trưng:\n$$\\hat{y} = w_1 x_1 + w_2 x_2 + \\dots + w_d x_d + b$$\n\nBiểu diễn gọn gàng bằng **Tích vô hướng hai vector**:\n$$\\hat{y} = \\mathbf{w}^T \\mathbf{x} + b \\quad \\text{với } \\mathbf{w} = \\begin{bmatrix} w_1 \\\\ w_2 \\\\ \\dots \\\\ w_d \\end{bmatrix}, \\; \\mathbf{x} = \\begin{bmatrix} x_1 \\\\ x_2 \\\\ \\dots \\\\ x_d \\end{bmatrix}$$\n\n---\n\n**4. Dạng ma trận cho toàn bộ tập dữ liệu (Matrix Formulation):**\nĐể xử lý cùng lúc $N$ mẫu dữ liệu, các kỹ sư AI dùng một mẹo đại số tuyệt đẹp: Gộp hệ số chặn $b$ vào thành phần đầu tiên của vector trọng số ($w_0 = b$), và chèn thêm một cột toàn số 1 vào đầu ma trận dữ liệu $\\mathbf{X}$:\n$$\\mathbf{X} = \\begin{bmatrix} 1 & x_{11} & x_{12} & \\dots & x_{1d} \\\\ 1 & x_{21} & x_{22} & \\dots & x_{2d} \\\\ \\vdots & \\vdots & \\vdots & \\ddots & \\vdots \\\\ 1 & x_{N1} & x_{N2} & \\dots & x_{Nd} \\end{bmatrix} \\in \\mathbb{R}^{N \\times (d+1)}, \\quad \\mathbf{w} = \\begin{bmatrix} b \\\\ w_1 \\\\ \\vdots \\\\ w_d \\end{bmatrix} \\in \\mathbb{R}^{(d+1) \\times 1}$$\n\nKhi đó, toàn bộ dự đoán cho $N$ mẫu được tính trong **ĐÚNG MỘT PHÉP NHÂN MA TRẬN DUY NHẤT**:\n$$\\hat{\\mathbf{y}} = \\mathbf{X} \\mathbf{w} \\in \\mathbb{R}^{N \\times 1}$$",
+        "formula": "\\hat{y} = \\mathbf{w}^T \\mathbf{x} + b \\quad \\Longleftrightarrow \\quad \\hat{\\mathbf{y}} = \\mathbf{X} \\mathbf{w}",
+        "mathExplainer": [
+          {
+            "sym": "\\hat{y} \\text{ (y-hat)}",
+            "name": "Giá trị dự đoán",
+            "mean": "Đầu ra ước lượng của mô hình, phân biệt với giá trị nhãn thực tế y (Ground Truth)."
+          },
+          {
+            "sym": "w_j \\text{ (Weight)}",
+            "name": "Trọng số đặc trưng j",
+            "mean": "Mức độ thay đổi của y khi đặc trưng x_j tăng 1 đơn vị và các đặc trưng khác cố định."
+          },
+          {
+            "sym": "b \\text{ (Bias)}",
+            "name": "Độ chệch / Hệ số chặn",
+            "mean": "Giá trị dự đoán cơ sở khi tất cả các đặc trưng đầu vào đều bằng 0."
+          },
+          {
+            "sym": "\\mathbf{X} \\in \\mathbb{R}^{N \\times (d+1)}",
+            "name": "Ma trận thiết kế (Design Matrix)",
+            "mean": "Bảng dữ liệu gồm N hàng (mẫu) và d+1 cột (cột 1 chứa toàn số 1 để nhân với bias b)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Axes -->\n                      <g transform=\"translate(40, 20)\">\n                        <line x1=\"20\" y1=\"130\" x2=\"240\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"20\" y1=\"10\" x2=\"20\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"235\" y=\"145\" font-family=\"Georgia\" font-size=\"11\">Diện tích x</text>\n                        <text x=\"10\" y=\"15\" font-family=\"Georgia\" font-size=\"11\">Giá y</text>\n\n                        <!-- Fitted line y = wx + b -->\n                        <line x1=\"20\" y1=\"105\" x2=\"220\" y2=\"25\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"215\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">ŷ = wx + b</text>\n\n                        <!-- Intercept b -->\n                        <circle cx=\"20\" cy=\"105\" r=\"3.5\" fill=\"#111\"/>\n                        <text x=\"5\" y=\"108\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">b</text>\n\n                        <!-- Data points with residuals -->\n                        <!-- pt 1 -->\n                        <circle cx=\"60\" cy=\"80\" r=\"3.5\" fill=\"#111\"/>\n                        <line x1=\"60\" y1=\"80\" x2=\"60\" y2=\"89\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <!-- pt 2 -->\n                        <circle cx=\"100\" cy=\"85\" r=\"3.5\" fill=\"#111\"/>\n                        <line x1=\"100\" y1=\"85\" x2=\"100\" y2=\"73\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <!-- pt 3 -->\n                        <circle cx=\"140\" cy=\"50\" r=\"3.5\" fill=\"#111\"/>\n                        <line x1=\"140\" y1=\"50\" x2=\"140\" y2=\"57\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <!-- pt 4 -->\n                        <circle cx=\"180\" cy=\"35\" r=\"3.5\" fill=\"#111\"/>\n                        <line x1=\"180\" y1=\"35\" x2=\"180\" y2=\"41\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n\n                        <text x=\"105\" y=\"65\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">Residual eᵢ = yᵢ - ŷᵢ</text>\n                      </g>\n\n                      <!-- Explanatory Panel -->\n                      <g transform=\"translate(320, 25)\">\n                        <text x=\"0\" y=\"20\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\">Mục tiêu của Hồi Quy Tuyến Tính:</text>\n                        <text x=\"0\" y=\"45\" font-family=\"Georgia\" font-size=\"11\">• Tìm cặp tham số (w, b) sao cho đường thẳng</text>\n                        <text x=\"15\" y=\"65\" font-family=\"Georgia\" font-size=\"11\" font-style=\"italic\">đi xuyên qua đám mây điểm dữ liệu tốt nhất.</text>\n                        <text x=\"0\" y=\"92\" font-family=\"Georgia\" font-size=\"11\">• 'Tốt nhất' được định nghĩa là: Tổng bình phương</text>\n                        <text x=\"15\" y=\"112\" font-family=\"Georgia\" font-size=\"11\">các đoạn thẳng đứt nét (Residuals) là nhỏ nhất!</text>\n                        <text x=\"0\" y=\"138\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">Phương pháp Bình Phương Tối Thiểu (OLS: Ordinary Least Squares)</text>\n                      </g>\n                    </svg>",
+          "caption": "Mô hình Hồi quy tuyến tính đơn biến: Tìm đường thẳng ŷ = wx + b sao cho tổng bình phương khoảng cách thẳng đứng (Residuals) từ các điểm tới đường thẳng là nhỏ nhất."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa khoảng cách vuông góc và khoảng cách thẳng đứng: Nhiều học sinh nhầm rằng OLS đo khoảng cách vuông góc từ điểm tới đường thẳng. SAI! OLS chỉ đo khoảng cách theo TRỤC THẲNG ĐỨNG (trục Y): e_i = y_i - ŷ_i, vì mục tiêu là giảm thiểu sai số dự đoán trên biến mục tiêu Y!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Một mô hình hồi quy tuyến tính dự đoán lượng tiêu thụ điện của gia đình có phương trình: ŷ = 15.0 × T + 120.0, trong đó T là nhiệt độ trung bình ngoài trời (°C) và ŷ là số số điện (kWh). Hệ số góc w = 15.0 mang ý nghĩa gì?",
+          "options": [
+            "A. Khi nhiệt độ bằng 0°C, lượng điện tiêu thụ là 15 kWh",
+            "B. Cứ khi nhiệt độ ngoài trời tăng thêm 1°C, lượng điện tiêu thụ dự kiến tăng thêm 15 kWh",
+            "C. Lượng điện tiêu thụ trung bình của gia đình luôn là 15 kWh mỗi ngày",
+            "D. Cứ mỗi 15 ngày, nhiệt độ sẽ tăng thêm 1°C"
+          ],
+          "correctIndex": 1,
+          "hint": "Hệ số góc w đo tỷ lệ thay đổi: Δŷ = w × ΔT. Khi ΔT = 1, Δŷ = 15.",
+          "solution": [
+            "Bước 1: Phân tích phương trình ŷ = 15.0 × T + 120.0:",
+            "  - Biến đầu vào: T (Nhiệt độ ngoài trời).",
+            "  - Biến dự đoán: ŷ (Lượng điện tiêu thụ).",
+            "  - Trọng số w = 15.0.",
+            "Bước 2: Theo định nghĩa toán học của hệ số góc: Đạo hàm dŷ / dT = 15.0.",
+            "  Nghĩa là khi nhiệt độ T tăng thêm 1 đơn vị (1°C), lượng điện dự đoán ŷ sẽ tăng thêm 15.0 đơn vị (15 kWh).",
+            "Kết luận: Đáp án đúng là B."
+          ]
+        }
+      },
+      {
+        "heading": "5.2. Bốn Giả Định Cốt Lõi (L.I.N.E) & Hiện Tượng Phương Sai Không Đồng Nhất (Heteroscedasticity)",
+        "content": "Hồi quy tuyến tính không chỉ là một công cụ máy tính để kẻ đường thẳng, mà là một mô hình suy diễn thống kê chuẩn mực. Để các kết luận, khoảng tin cậy 95% và giá trị p-value có giá trị khoa học, dữ liệu bắt buộc phải thỏa mãn 4 giả định sống còn.",
+        "deepDive": "**1. Bốn giả định kinh điển theo quy tắc nhớ L.I.N.E:**\n\nMô hình thực tế có dạng: $y = \\mathbf{w}^T \\mathbf{x} + b + \\epsilon$ (với $\\epsilon$ là sai số ngẫu nhiên). 4 giả định bao gồm:\n\n1. **L - Linearity (Tính tuyến tính của mối quan hệ):**\n   - Mối quan hệ kỳ vọng giữa các biến độc lập $X$ và biến phụ thuộc $y$ phải là tuyến tính: $\\mathbb{E}[y|X] = \\mathbf{w}^T \\mathbf{x} + b$.\n   - Nếu dữ liệu thực tế uốn lượn hình sin hoặc hàm mũ mà cố tình ép đường thẳng $\\implies$ Mô hình sẽ bị thiên lệch cực lớn (High Bias / Underfitting).\n\n2. **I - Independence (Tính độc lập của các sai số):**\n   - Các sai số thặng dư $e_i = y_i - \\hat{y}_i$ của từng mẫu dữ liệu phải **hoàn toàn độc lập với nhau**: $\\text{Cov}(e_i, e_j) = 0$ với mọi $i \\ne j$.\n   - *Vi phạm:* Thường gặp trong dữ liệu chuỗi thời gian (Time-series) hoặc chu kỳ kinh tế, nơi sai số của ngày hôm nay có liên quan chặt chẽ tới sai số của ngày hôm qua (hiện tượng Tự tương quan - Autocorrelation).\n\n3. **N - Normality of Residuals (Phân phối chuẩn của sai số):**\n   - Các sai số ngẫu nhiên $\\epsilon$ phải tuân theo **Phân Phối Chuẩn hình chuông Gauss** với kỳ vọng bằng 0: $\\epsilon \\sim \\mathcal{N}(0, \\sigma^2)$.\n   - *Cạm bẫy phòng thi:* Giả định phân phối chuẩn là dành cho **SAI SỐ DƯ $\\epsilon$**, TUYỆT ĐỐI KHÔNG PHẢI dành cho biến đầu vào $X$! Biến $X$ có thể là nhị phân 0/1, phân phối đều hay bất kỳ hình dạng nào!\n\n4. **E - Equal Variance / Homoscedasticity (Phương sai đồng nhất):**\n   - Phương sai của các sai số thặng dư phải giữ nguyên không đổi dọc theo toàn bộ dải giá trị của $X$: $\\text{Var}(\\epsilon | X) = \\sigma^2 = \\text{const}$.\n   - Dải phân tán của các điểm dữ liệu quanh đường hồi quy phải có độ dày đồng đều như một dải băng song song!\n\n---\n\n**2. Thảm họa Phương sai không đồng nhất (Heteroscedasticity):**\n- **Hiện tượng:** Khi giá trị $X$ hoặc $\\hat{y}$ càng lớn, độ phân tán của sai số càng **PHÌNH TO RA NHƯ CÁI LOA KÈN / CÁI PHỄU** (hoặc co hẹp lại)!\n- *Ví dụ đời sống kinh điển:*\n  - Khảo sát mối quan hệ giữa Thu nhập ($X$) và Chi tiêu ăn uống ($y$):\n  - Người có thu nhập 5 triệu/tháng: Chi tiêu bắt buộc phải dao động hẹp trong khoảng 3 - 4.5 triệu (độ phân tán rất nhỏ).\n  - Người có thu nhập 100 triệu/tháng: Có người chỉ tiêu 10 triệu, nhưng có người tiêu 80 triệu (độ phân tán cực kỳ khổng lồ!).\n- **Hậu quả nguy hiểm trong AI & Thống kê:**\n  - Đường thẳng hồi quy OLS tuy vẫn không bị lệch tâm, nhưng các ước lượng về **Sai số chuẩn (Standard Errors)** của trọng số sẽ bị SAI HOÀN TOÀN!\n  - Khoảng tin cậy $95\\%$ và các kiểm định giả thuyết thống kê (t-test, F-test, p-value) trở nên vô giá trị, khiến mô hình đưa ra những kết luận sai lệch nghiêm trọng!\n- **Cách khắc phục:** Lấy hàm logarit $\\ln(y)$, biến đổi căn bậc hai $\\sqrt{y}$, hoặc biến đổi Box-Cox để nén độ phân tán lại.\n\n---\n\n**3. Vấn đề Đa cộng tuyến (Multicollinearity):**\n- Xảy ra khi hai hoặc nhiều biến độc lập $X_i, X_j$ có mối tương quan tuyến tính rất mạnh với nhau (ví dụ: đưa cả $X_1$ là Diện tích $m^2$ và $X_2$ là Diện tích feet vuông vào cùng một mô hình!).\n- **Hậu quả:** Ma trận $\\mathbf{X}^T \\mathbf{X}$ gần như bị suy biến (định thức xấp xỉ 0), việc tính nghịch đảo $(\\mathbf{X}^T \\mathbf{X})^{-1}$ làm các trọng số bị bùng nổ dao động cực lớn $\\implies$ Đây là lý do sống còn cần đến **Ridge Regression (L2)**!",
+        "formula": "y = \\mathbf{w}^T \\mathbf{x} + b + \\epsilon, \\quad \\epsilon \\stackrel{\\text{iid}}{\\sim} \\mathcal{N}(0, \\sigma^2) \\quad \\text{với } \\text{Var}(\\epsilon|X) = \\sigma^2 \\text{ (Homoscedasticity)}",
+        "mathExplainer": [
+          {
+            "sym": "\\text{Homoscedasticity}",
+            "name": "Đồng nhất phương sai",
+            "mean": "Sai số có độ phân tán cố định không đổi trên toàn bộ dải giá trị (dải băng đều)."
+          },
+          {
+            "sym": "\\text{Heteroscedasticity}",
+            "name": "Không đồng nhất phương sai",
+            "mean": "Phương sai sai số bị phình to hoặc thu nhỏ theo biến X (hình cái phễu/loa kèn)."
+          },
+          {
+            "sym": "\\text{Multicollinearity}",
+            "name": "Đa cộng tuyến",
+            "mean": "Hiện tượng các biến đầu vào X tương quan mạnh với nhau làm ma trận X^T X khó nghịch đảo."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left Panel: Homoscedasticity -->\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"110\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Homoscedasticity (Đạt Chuẩn)</text>\n                        <line x1=\"20\" y1=\"130\" x2=\"210\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"20\" y1=\"20\" x2=\"20\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <!-- Center line -->\n                        <line x1=\"30\" y1=\"100\" x2=\"200\" y2=\"40\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <!-- Parallel bounds -->\n                        <line x1=\"30\" y1=\"80\" x2=\"200\" y2=\"20\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <line x1=\"30\" y1=\"120\" x2=\"200\" y2=\"60\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <!-- Points -->\n                        <circle cx=\"50\" cy=\"95\" r=\"3\" fill=\"#111\"/><circle cx=\"70\" cy=\"82\" r=\"3\" fill=\"#111\"/><circle cx=\"100\" cy=\"70\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"130\" cy=\"65\" r=\"3\" fill=\"#111\"/><circle cx=\"160\" cy=\"50\" r=\"3\" fill=\"#111\"/><circle cx=\"185\" cy=\"48\" r=\"3\" fill=\"#111\"/>\n                        <text x=\"110\" y=\"152\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Độ dày sai số đều đặn như dải băng</text>\n                      </g>\n\n                      <!-- Right Panel: Heteroscedasticity -->\n                      <g transform=\"translate(340, 20)\">\n                        <text x=\"110\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Heteroscedasticity (Lỗi Vi Phạm)</text>\n                        <line x1=\"20\" y1=\"130\" x2=\"210\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"20\" y1=\"20\" x2=\"20\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <!-- Center line -->\n                        <line x1=\"30\" y1=\"100\" x2=\"200\" y2=\"40\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <!-- Funnel bounds -->\n                        <line x1=\"30\" y1=\"95\" x2=\"200\" y2=\"10\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <line x1=\"30\" y1=\"105\" x2=\"200\" y2=\"70\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                        <!-- Points with widening spread -->\n                        <circle cx=\"45\" cy=\"98\" r=\"3\" fill=\"#111\"/><circle cx=\"65\" cy=\"92\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"110\" cy=\"82\" r=\"3\" fill=\"#111\"/><circle cx=\"120\" cy=\"60\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"170\" cy=\"22\" r=\"3\" fill=\"#111\"/><circle cx=\"185\" cy=\"65\" r=\"3\" fill=\"#111\"/><circle cx=\"195\" cy=\"30\" r=\"3\" fill=\"#111\"/>\n                        <text x=\"110\" y=\"152\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Sai số phình to thành hình cái phễu</text>\n                      </g>\n                    </svg>",
+          "caption": "Đối chiếu trực quan giữa Phương sai đồng nhất (Homoscedasticity) chuẩn mực và Phương sai không đồng nhất (Heteroscedasticity) hình cái phễu làm sai lệch khoảng tin cậy."
+        },
+        "commonPitfalls": "Cạm bẫy 'Phân phối chuẩn của dữ liệu X': Trong các câu hỏi lý thuyết trắc nghiệm, đề thi thường bẫy câu hỏi: 'Hồi quy tuyến tính bắt buộc biến đầu vào X phải có phân phối chuẩn?'. Hãy khẳng định ngay: SAI! Biến X không cần phân phối chuẩn. Chỉ có SAI SỐ DƯ (Residuals e = y - ŷ) mới cần tuân theo phân phối chuẩn N(0, σ²)!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong phân tích hồi quy tuyến tính, một nhà khoa học dữ liệu vẽ biểu đồ phần dư (Residual Plot) giữa giá trị dự đoán ŷ và sai số thặng dư e. Anh nhận thấy khi ŷ càng lớn, các điểm sai số càng tỏa rộng ra hai phía tạo thành hình cái phễu (funnel shape). Hiện tượng này được gọi là gì?",
+          "options": [
+            "A. Đa cộng tuyến hoàn hảo (Perfect Multicollinearity)",
+            "B. Phương sai không đồng nhất (Heteroscedasticity)",
+            "C. Sai số tự tương quan bậc một (First-order Autocorrelation)",
+            "D. Hiện tượng dưới khớp (Underfitting)"
+          ],
+          "correctIndex": 1,
+          "hint": "Hình cái phễu (funnel) là dấu hiệu nhận diện đặc trưng của phương sai sai số thay đổi dọc theo trục hoành.",
+          "solution": [
+            "Bước 1: Nhận diện hình dạng biểu đồ phần dư (Residual Plot):",
+            "  - Nếu phương sai đồng nhất (Homoscedasticity): Các điểm phần dư rải đều trong một dải băng nằm ngang có độ rộng không đổi.",
+            "  - Nếu các điểm tỏa rộng dần ra tạo thành hình cái phễu (funnel): Độ phân tán (phương sai) của sai số tăng dần theo giá trị dự đoán.",
+            "Bước 2: Đối chiếu định nghĩa: Đây chính là hiện tượng Heteroscedasticity (Phương sai không đồng nhất).",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "5.3. Hai Con Đường Tìm Nghiệm Tối Ưu: Phương Trình Pháp Tuyến (Normal Equation) vs Gradient Descent",
+        "content": "Để tìm bộ trọng số w sao cho tổng bình phương sai số là nhỏ nhất, toán học cung cấp cho chúng ta hai con đường hoàn toàn khác biệt: Một bước giải tích ăn ngay (Normal Equation) hoặc từng bước hạ dốc lặp đi lặp lại (Gradient Descent).",
+        "deepDive": "**1. Con đường 1: Phương trình giải tích đóng (The Normal Equation):**\n\nHàm mất mát bình phương tối thiểu (OLS Loss) dạng ma trận:\n$$\\mathcal{L}(\\mathbf{w}) = \\frac{1}{2} \\|\\mathbf{X}\\mathbf{w} - \\mathbf{y}\\|_2^2 = \\frac{1}{2} (\\mathbf{X}\\mathbf{w} - \\mathbf{y})^T (\\mathbf{X}\\mathbf{w} - \\mathbf{y})$$\n\nKhai triển đại số ma trận:\n$$\\mathcal{L}(\\mathbf{w}) = \\frac{1}{2} \\left( \\mathbf{w}^T \\mathbf{X}^T \\mathbf{X} \\mathbf{w} - 2 \\mathbf{y}^T \\mathbf{X} \\mathbf{w} + \\mathbf{y}^T \\mathbf{y} \\right)$$\n\nĐể tìm điểm cực tiểu toàn cục, ta lấy đạo hàm riêng theo vector $\\mathbf{w}$ và cho bằng vector $\\mathbf{0}$:\n$$\\nabla_{\\mathbf{w}} \\mathcal{L} = \\mathbf{X}^T \\mathbf{X} \\mathbf{w} - \\mathbf{X}^T \\mathbf{y} = \\mathbf{0}$$\n$$\\iff \\mathbf{X}^T \\mathbf{X} \\mathbf{w} = \\mathbf{X}^T \\mathbf{y}$$\n\nNhân cả hai vế với ma trận nghịch đảo $(\\mathbf{X}^T \\mathbf{X})^{-1}$ (nếu ma trận này khả nghịch):\n$$\\mathbf{w}^* = (\\mathbf{X}^T \\mathbf{X})^{-1} \\mathbf{X}^T \\mathbf{y}$$\n\n- **Ưu điểm thần kỳ:**\n  - **Chính xác tuyệt đối 100%:** Cho ngay nghiệm tối ưu toàn cục chỉ sau đúng 1 dòng code!\n  - **Không cần siêu tham số:** Không cần chọn Learning rate $\\eta$, không cần chọn Epochs, không cần kiểm tra hội tụ!\n- **Nhược điểm chết người:**\n  - Để tính $(\\mathbf{X}^T \\mathbf{X})^{-1}$, máy tính phải tính nghịch đảo một ma trận kích thước $d \\times d$ (với $d$ là số đặc trưng).\n  - Độ phức tạp tính toán là $\\mathcal{O}(d^3)$. Nếu $d = 100,000$ (trong bài toán văn bản hay ảnh), phép tính này đòi hỏi $10^{15}$ phép tính và hàng Terabyte RAM $\\implies$ Máy tính treo cứng ngay lập tức!\n  - Nếu các đặc trưng bị đa cộng tuyến, ma trận $\\mathbf{X}^T \\mathbf{X}$ bị suy biến (không khả nghịch), công thức hoàn toàn vô nghiệm!\n\n---\n\n**2. Con đường 2: Thuật toán Gradient Descent (Lặp từng bước):**\nKhởi tạo $\\mathbf{w}$ ngẫu nhiên và bước từng bước theo hướng ngược gradient:\n$$\\mathbf{w}_{t+1} = \\mathbf{w}_t - \\eta \\frac{1}{N} \\mathbf{X}^T (\\mathbf{X}\\mathbf{w}_t - \\mathbf{y})$$\n- **Ưu điểm:** Độ phức tạp mỗi bước chỉ là $\\mathcal{O}(N \\cdot d)$, chạy cực kỳ mượt mà ngay cả khi $d$ lên tới hàng triệu đặc trưng hoặc dữ liệu có hàng tỷ mẫu!\n- **Nhược điểm:** Cần dò tìm tốc độ học $\\eta$, phải lặp qua nhiều Epochs.\n\n---\n\n**Bảng so sánh đối đầu chiến lược:**\n\n| Tiêu chí | Normal Equation $(\\mathbf{X}^T\\mathbf{X})^{-1}\\mathbf{X}^T\\mathbf{y}$ | Gradient Descent |\n| :--- | :--- | :--- |\n| **Cách tìm nghiệm** | Giải tích một lần (Closed-form) | Thuật toán lặp qua từng bước |\n| **Cần chọn $\\eta$ không?** | KHÔNG | CÓ (bắt buộc phải tinh chỉnh $\\eta$) |\n| **Độ phức tạp tính toán** | $\\mathcal{O}(d^3)$ (Cực nặng theo số chiều $d$) | $\\mathcal{O}(k \\cdot N \\cdot d)$ (Tuyến tính theo $d$) |\n| **Khi $d$ nhỏ ($d < 2,000$)** | Lựa chọn số 1, nhanh và chính xác tuyệt đối | Chậm hơn, mất công tinh chỉnh |\n| **Khi $d$ khổng lồ ($d > 50,000$)** | Tràn RAM, không thể tính nổi | Hoạt động xuất sắc, tiêu chuẩn công nghiệp |",
+        "formula": "\\mathbf{w}^* = (\\mathbf{X}^T \\mathbf{X})^{-1} \\mathbf{X}^T \\mathbf{y} \\quad \\text{vs} \\quad \\mathbf{w}_{t+1} = \\mathbf{w}_t - \\frac{\\eta}{N} \\mathbf{X}^T (\\mathbf{X}\\mathbf{w}_t - \\mathbf{y})",
+        "mathExplainer": [
+          {
+            "sym": "(\\mathbf{X}^T \\mathbf{X})^{-1}",
+            "name": "Ma trận nghịch đảo",
+            "mean": "Thành phần nghẽn cổ chai tính toán O(d³), đòi hỏi ma trận vuông X^T X phải khả nghịch."
+          },
+          {
+            "sym": "\\mathbf{X}^T \\mathbf{y}",
+            "name": "Vector tương quan",
+            "mean": "Tích giữa ma trận dữ liệu chuyển vị và vector nhãn thực tế."
+          },
+          {
+            "sym": "\\mathcal{O}(d^3)",
+            "name": "Độ phức tạp lập phương",
+            "mean": "Khi số đặc trưng d tăng gấp đôi, thời gian tính nghịch đảo tăng gấp 8 lần (2³ = 8)!"
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Normal Equation -->\n                      <g transform=\"translate(30, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"250\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"125\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Normal Equation (Giải Tích)</text>\n                        <text x=\"20\" y=\"55\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">w* = (XᵀX)⁻¹ Xᵀy</text>\n                        <text x=\"20\" y=\"80\" font-family=\"Georgia\" font-size=\"10\">• Đúng 1 bước ăn ngay</text>\n                        <text x=\"20\" y=\"100\" font-family=\"Georgia\" font-size=\"10\">• Không cần chọn learning rate η</text>\n                        <text x=\"20\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" fill=\"#c00\">• Bế tắc khi d > 10,000 do tính O(d³)</text>\n                      </g>\n\n                      <!-- Right: Gradient Descent -->\n                      <g transform=\"translate(340, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"250\" height=\"140\" fill=\"#111\"/>\n                        <text x=\"125\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Gradient Descent (Hạ Dốc)</text>\n                        <text x=\"20\" y=\"55\" font-family=\"Georgia\" font-size=\"11\" fill=\"#fff\" font-weight=\"bold\">w ← w - η ∇L</text>\n                        <text x=\"20\" y=\"80\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\">• Lặp từng bước tiến về đáy</text>\n                        <text x=\"20\" y=\"100\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\">• Độ phức tạp tuyến tính O(N·d)</text>\n                        <text x=\"20\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\">• Xử lý mượt mà hàng triệu đặc trưng!</text>\n                      </g>\n                    </svg>",
+          "caption": "Hai triết lý tìm nghiệm: Normal Equation giải tích 1 bước nhưng nghẽn cổ chai O(d³); Gradient Descent lặp từng bước nhưng mở rộng không giới hạn cho Big Data."
+        },
+        "commonPitfalls": "Điều kiện để Normal Equation tồn tại nghiệm duy nhất: Ma trận vuông $\\mathbf{X}^T \\mathbf{X}$ phải KHẢ NGHỊCH (Invertible), tức là định thức $\\det(\\mathbf{X}^T \\mathbf{X}) \\ne 0$. Nếu số mẫu ít hơn số đặc trưng ($N < d$) hoặc có hai cột đặc trưng phụ thuộc tuyến tính, $\\mathbf{X}^T \\mathbf{X}$ sẽ bị suy biến và Normal Equation không thể tính được!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Khi xây dựng mô hình Hồi quy tuyến tính cho tập dữ liệu có N = 50,000 mẫu và số đặc trưng d = 80,000 (dữ liệu túi từ BoW trong văn bản), phương pháp nào sau đây là sự lựa chọn tối ưu nhất để tìm bộ trọng số w?",
+          "options": [
+            "A. Áp dụng phương trình pháp tuyến Normal Equation w = (XᵀX)⁻¹ Xᵀy",
+            "B. Thuật toán Mini-Batch Gradient Descent",
+            "C. Tính định thức ma trận nghịch đảo cấp 80,000 bằng tay",
+            "D. Khởi tạo ngẫu nhiên và không cần tối ưu hóa"
+          ],
+          "correctIndex": 1,
+          "hint": "Số đặc trưng d = 80,000 là cực kỳ lớn. Độ phức tạp tính nghịch đảo ma trận O(d³) sẽ đòi hỏi hàng triệu tỷ phép tính.",
+          "solution": [
+            "Bước 1: Đánh giá kích thước đặc trưng d = 80,000:",
+            "  - Nếu dùng Normal Equation: Cần nghịch đảo ma trận cấp 80,000 × 80,000. Độ phức tạp O(d³) ≈ 80,000³ ≈ 5.12 × 10¹⁴ phép tính, gây tràn RAM và sập hệ thống.",
+            "Bước 2: Gradient Descent chỉ có độ phức tạp O(B · d) trên mỗi mẻ dữ liệu, xử lý nhẹ nhàng và hội tụ ổn định.",
+            "Kết luận: Phải dùng Mini-Batch Gradient Descent. Đáp án đúng là B."
+          ]
+        }
+      },
+      {
+        "heading": "5.4. Các Hàm Mất Mát Hồi Quy (MSE, MAE, Huber) & Thước Đo Hệ Số Xác Định R² (R-squared)",
+        "content": "Làm thế nào để đánh giá một đường hồi quy khớp dữ liệu tốt đến đâu? Tại sao việc chỉ dùng MSE lại tiềm ẩn rủi ro chết người trước các điểm ngoại lai (Outliers)?",
+        "deepDive": "**1. Phân tích đối đầu 3 hàm mất mát hồi quy:**\n\n1. **MSE (Mean Squared Error - Sai số bình phương trung bình / $L_2$ Loss):**\n   $$\\text{MSE} = \\frac{1}{N} \\sum_{i=1}^N (y_i - \\hat{y}_i)^2$$\n   - **Ưu điểm:** Hàm số lồi trơn nhẵn, có đạo hàm liên tục tại mọi điểm $\\implies$ Cực kỳ thân thiện cho Gradient Descent.\n   - **Nhược điểm chí mạng:** Do có số mũ bình phương ($^2$), sai số càng lớn thì bị phạt theo hàm số mũ! Nếu trong tập dữ liệu có đúng 1 điểm ngoại lai (Outlier) bị lỗi cảm biến hoặc nhập nhầm số (ví dụ: nhà 3 tỷ gõ nhầm thành 300 tỷ), sai số $297^2 \\approx 88,209$ sẽ **kéo lệch toàn bộ đường thẳng hồi quy về phía điểm dị biệt đó**, làm hỏng kết quả dự đoán của 99% các mẫu bình thường còn lại!\n\n2. **MAE (Mean Absolute Error - Sai số tuyệt đối trung bình / $L_1$ Loss):**\n   $$\\text{MAE} = \\frac{1}{N} \\sum_{i=1}^N |y_i - \\hat{y}_i|$$\n   - **Ưu điểm:** Rất kiên cường trước Outliers (Robust to Outliers). Sai số tăng tuyến tính, không bị phóng đại bình phương.\n   - **Nhược điểm:** Đạo hàm tại điểm $e = 0$ không tồn tại (đồ thị có góc nhọn chữ V), gradient luôn là hằng số $\\pm 1$ dù ở rất gần đáy, khiến thuật toán khó hội tụ êm ái.\n\n3. **Huber Loss (Sự kết hợp tinh hoa):**\n   - Được thiết kế để lấy trọn ưu điểm của cả MSE và MAE thông qua ngưỡng ngưỡng $\\delta$:\n     $$\\mathcal{L}_{\\delta}(e) = \\begin{cases} \\frac{1}{2} e^2 & \\text{khi } |e| \\le \\delta \\quad (\\text{Vùng lỗi nhỏ: hoạt động như MSE}) \\\\ \\delta (|e| - \\frac{1}{2}\\delta) & \\text{khi } |e| > \\delta \\quad (\\text{Vùng lỗi lớn: hoạt động như MAE}) \\end{cases}$$\n   - Giúp mô hình vừa có đạo hàm trơn tru ở gần cực tiểu, vừa không bị bẻ cong bởi các điểm dị biệt ngoại lai!\n\n---\n\n**2. Thước đo Hệ số xác định $R^2$ (R-squared / Coefficient of Determination):**\nĐể biết mô hình hồi quy giải thích được bao nhiêu phần trăm sự biến thiên của dữ liệu thực tế, ta dùng chỉ số $R^2$:\n$$R^2 = 1 - \\frac{\\text{SS}_{\\text{res}}}{\\text{SS}_{\\text{tot}}} = 1 - \\frac{\\sum_{i=1}^N (y_i - \\hat{y}_i)^2}{\\sum_{i=1}^N (y_i - \\bar{y})^2}$$\n- $\\text{SS}_{\\text{res}}$ (Residual Sum of Squares): Tổng bình phương sai số thặng dư của mô hình hồi quy.\n- $\\text{SS}_{\\text{tot}}$ (Total Sum of Squares): Tổng bình phương sai số của một mô hình ngây thơ (Baseline Model) luôn luôn dự đoán bằng giá trị trung bình $\\bar{y}$.\n\n**Ý nghĩa các mức giá trị của $R^2$:**\n- **$R^2 = 1.0$ (100%):** Đường hồi quy đi qua chính xác tuyệt đối từng điểm dữ liệu, không có chút sai số nào.\n- **$R^2 = 0.85$ (85%):** Mô hình giải thích được 85% sự biến động của giá nhà dựa vào các đặc trưng đầu vào; 15% còn lại là do yếu tố ngẫu nhiên khác.\n- **$R^2 = 0.0$ (0%):** Mô hình chỉ có khả năng dự đoán tương đương việc đoán bừa giá trị trung bình $\\bar{y}$.\n- **$R^2 < 0$ (Âm):** Mô hình dự đoán tồi tệ đến mức còn tệ hơn cả việc lấy trung bình $\\bar{y}$! (Thường xảy ra khi đánh giá mô hình trên tập Test bị quá khớp nặng).",
+        "formula": "R^2 = 1 - \\frac{\\sum_{i=1}^N (y_i - \\hat{y}_i)^2}{\\sum_{i=1}^N (y_i - \\bar{y})^2} \\in (-\\infty, 1]",
+        "mathExplainer": [
+          {
+            "sym": "\\text{SS}_{\\text{res}}",
+            "name": "Tổng bình phương sai số mô hình",
+            "mean": "Đo lường lượng thông tin mà mô hình KHÔNG giải thích được (phần dư thừa)."
+          },
+          {
+            "sym": "\\text{SS}_{\\text{tot}}",
+            "name": "Tổng bình phương sai số toàn phần",
+            "mean": "Mức độ phân tán tự nhiên của dữ liệu y quanh giá trị trung bình y-ngang."
+          },
+          {
+            "sym": "R^2",
+            "name": "Hệ số xác định",
+            "mean": "Tỷ lệ phần trăm sự biến thiên của biến mục tiêu y được giải thích bởi các đặc trưng đầu vào X."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Outlier pulling MSE -->\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"110\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Hiệu Ứng Outlier Trên MSE vs MAE</text>\n                        <line x1=\"20\" y1=\"130\" x2=\"220\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"20\" y1=\"20\" x2=\"20\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <!-- Cluster points -->\n                        <circle cx=\"40\" cy=\"110\" r=\"3\" fill=\"#111\"/><circle cx=\"60\" cy=\"100\" r=\"3\" fill=\"#111\"/>\n                        <circle cx=\"80\" cy=\"95\" r=\"3\" fill=\"#111\"/><circle cx=\"100\" cy=\"85\" r=\"3\" fill=\"#111\"/>\n                        <!-- Outlier point -->\n                        <circle cx=\"190\" cy=\"25\" r=\"5\" fill=\"#111\"/>\n                        <text x=\"180\" y=\"15\" font-family=\"Georgia\" font-size=\"9\" fill=\"#c00\" font-weight=\"bold\">Outlier Dị Biệt!</text>\n                        <!-- MAE line (robust) -->\n                        <line x1=\"20\" y1=\"120\" x2=\"210\" y2=\"70\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"215\" y=\"73\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">MAE</text>\n                        <!-- MSE line (pulled up) -->\n                        <line x1=\"20\" y1=\"110\" x2=\"210\" y2=\"35\" stroke=\"#888\" stroke-width=\"1.5\" stroke-dasharray=\"3,3\"/>\n                        <text x=\"215\" y=\"38\" font-family=\"Georgia\" font-size=\"10\" fill=\"#666\">MSE (bị kéo)</text>\n                      </g>\n\n                      <!-- Right: R-squared breakdown -->\n                      <g transform=\"translate(340, 20)\">\n                        <text x=\"110\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Ý Nghĩa Của Hệ Số R²</text>\n                        <rect x=\"20\" y=\"35\" width=\"200\" height=\"25\" fill=\"#e5e5e5\" stroke=\"#111\"/>\n                        <rect x=\"20\" y=\"35\" width=\"160\" height=\"25\" fill=\"#111\"/>\n                        <text x=\"100\" y=\"52\" font-family=\"Georgia\" font-size=\"11\" fill=\"#fff\" text-anchor=\"middle\">R² = 80% (Giải thích được)</text>\n                        <text x=\"200\" y=\"52\" font-family=\"Georgia\" font-size=\"9\" fill=\"#111\" text-anchor=\"middle\">20%</text>\n\n                        <text x=\"20\" y=\"85\" font-family=\"Georgia\" font-size=\"10\">• R² = 1.0: Khớp hoàn hảo 100%</text>\n                        <text x=\"20\" y=\"105\" font-family=\"Georgia\" font-size=\"10\">• R² = 0.0: Bằng với việc đoán bừa trung bình</text>\n                        <text x=\"20\" y=\"125\" font-family=\"Georgia\" font-size=\"10\">• R² &lt; 0: Tệ hơn cả đoán giá trị trung bình!</text>\n                      </g>\n                    </svg>",
+          "caption": "So sánh hàm mất mát trước Outliers: MSE bị điểm dị biệt kéo lệch nghiêm trọng; MAE giữ vững đường hồi quy thực tế."
+        },
+        "commonPitfalls": "Nhầm lẫn giá trị R² luôn dương: R² trên tập Train của mô hình OLS tuyến tính luôn nằm trong [0, 1]. Tuy nhiên, khi áp dụng mô hình đó lên tập Test (hoặc với mô hình phi tuyến tính), R² HOÀN TOÀN CÓ THỂ BỊ ÂM (R² < 0) nếu tổng bình phương sai số dự đoán lớn hơn phương sai tự nhiên của tập dữ liệu!",
+        "practiceQuestion": {
+          "level": "Vận dụng",
+          "question": "Cho một tập dữ liệu nhỏ có các giá trị nhãn thực tế y = [2, 4, 6]. Giá trị trung bình y-ngang = 4. Một mô hình dự đoán ra ŷ = [3, 4, 5]. Hệ số xác định R² của mô hình này bằng bao nhiêu?",
+          "options": [
+            "A. R² = 0.50 (50%)",
+            "B. R² = 0.75 (75%)",
+            "C. R² = 0.25 (25%)",
+            "D. R² = 1.00 (100%)"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính SS_tot = ∑(y_i - 4)² = (2-4)² + (4-4)² + (6-4)². Tính SS_res = ∑(y_i - ŷ_i)² = (2-3)² + (4-4)² + (6-5)². R² = 1 - SS_res / SS_tot.",
+          "solution": [
+            "Bước 1: Tính tổng bình phương toàn phần SS_tot:",
+            "  y-ngang = 4.",
+            "  SS_tot = (2 - 4)² + (4 - 4)² + (6 - 4)² = (-2)² + 0² + 2² = 4 + 0 + 4 = 8.0.",
+            "Bước 2: Tính tổng bình phương phần dư SS_res:",
+            "  e₁ = 2 - 3 = -1 => e₁² = 1",
+            "  e₂ = 4 - 4 = 0  => e₂² = 0",
+            "  e₃ = 6 - 5 = 1  => e₃² = 1",
+            "  SS_res = 1 + 0 + 1 = 2.0.",
+            "Bước 3: Tính hệ số R²:",
+            "  R² = 1 - (SS_res / SS_tot) = 1 - (2.0 / 8.0) = 1 - 0.25 = 0.75 (75%).",
+            "Kết luận: Mô hình giải thích được 75% sự biến động của dữ liệu. Đáp án đúng là B."
+          ]
+        }
+      },
+      {
+        "heading": "5.5. Đánh Đổi Bias - Variance & Kỹ Thuật Co Rút Trọng Số (L1 Lasso, L2 Ridge & ElasticNet)",
+        "content": "Tại sao một mô hình học quá giỏi trên tập luyện tập lại thi trượt thảm hại trên tập thi cử thực tế? Làm thế nào các chuẩn độ dài vector L1 và L2 lại có thể biến thành những chiếc cùm khóa chân hiện tượng Quá khớp (Overfitting)?",
+        "deepDive": "**1. Sự đánh đổi Độ lệch - Phương sai (The Bias - Variance Tradeoff):**\nMọi sai số kiểm tra của một mô hình học máy đều phân rã thành 3 thành phần không thể tách rời:\n$$\\text{Expected Error} = \\text{Bias}^2 + \\text{Variance} + \\sigma_{\\text{noise}}^2$$\n\n- **Bias (Độ lệch / Thiên kiến):**\n  - Sai số do các giả định sai lầm hoặc quá đơn giản hóa bài toán.\n  - **High Bias $\\implies$ Underfitting (Chưa khớp):** Mô hình quá ngô nghê, không học được cấu trúc của dữ liệu (ví dụ: dùng đường thẳng bậc 1 cho dữ liệu hình lượn sóng). Cả Train Loss và Test Loss đều cao chót vót.\n- **Variance (Phương sai / Độ nhạy):**\n  - Mức độ dao động của mô hình khi được huấn luyện trên các tập dữ liệu khác nhau.\n  - **High Variance $\\implies$ Overfitting (Quá khớp):** Mô hình quá phức tạp (ví dụ: đa thức bậc 20), học thuộc lòng từng hạt nhiễu của tập Train. Train Loss gần bằng 0 nhưng Test Loss vọt lên mây xanh!\n- **Nhiễu không thể giảm thiểu ($\\sigma_{\\text{noise}}^2$):** Giới hạn tự nhiên của vũ trụ do sai số đo lường.\n\n---\n\n**2. Nghệ thuật Chính quy hóa (Regularization):**\nÝ tưởng cốt lõi: Ta cộng thêm một **Khoản phạt độ lớn trọng số (Penalty)** vào hàm mất mát để ép mô hình phải giữ cho các trọng số $\\mathbf{w}$ luôn nhỏ và đơn giản:\n$$\\mathcal{L}_{\\text{Reg}}(\\mathbf{w}) = \\text{MSE}(\\mathbf{w}) + \\lambda \\cdot \\Omega(\\mathbf{w})$$\n- $\\lambda \\ge 0$ (Lambda): **Siêu tham số điều chỉnh độ căng của hình phạt.**\n  - Nếu $\\lambda = 0$: Trở về mô hình OLS thông thường (không có phạt, dễ Overfitting).\n  - Nếu $\\lambda \\to \\infty$: Hình phạt quá nặng, ép toàn bộ trọng số $\\mathbf{w} \\to \\mathbf{0}$, mô hình biến thành đường thẳng nằm ngang (High Bias / Underfitting).\n\n---\n\n**3. Hồi quy Ridge (L2 Regularization - Chuẩn bình phương):**\nKhoản phạt là bình phương chuẩn $L_2$ của vector trọng số:\n$$\\mathcal{L}_{\\text{Ridge}} = \\text{MSE} + \\lambda \\|\\mathbf{w}\\|_2^2 = \\text{MSE} + \\lambda \\sum_{j=1}^d w_j^2$$\n- **Nghiệm giải tích đóng của Ridge:**\n  $$\\mathbf{w}_{\\text{Ridge}} = (\\mathbf{X}^T \\mathbf{X} + \\lambda \\mathbf{I})^{-1} \\mathbf{X}^T \\mathbf{y}$$\n  *(Trong đó $\\mathbf{I}$ là ma trận đơn vị).*\n- **Phép màu của Ridge đối với Đa cộng tuyến:**\n  Khi dữ liệu có đa cộng tuyến, $\\mathbf{X}^T \\mathbf{X}$ không khả nghịch. Nhưng khi cộng thêm $\\lambda \\mathbf{I}$, ma trận $(\\mathbf{X}^T \\mathbf{X} + \\lambda \\mathbf{I})$ **LUÔN LUÔN KHẢ NGHỊCH 100%**!\n- **Đặc điểm:** Ridge co nhỏ đều đặn tất cả các trọng số về sát 0, nhưng **KHÔNG BAO GIỜ ép trọng số về đúng bằng 0 tuyệt đối**.\n\n---\n\n**4. Hồi quy Lasso (L1 Regularization - Chuẩn trị tuyệt đối):**\nKhoản phạt là chuẩn $L_1$ của vector trọng số:\n$$\\mathcal{L}_{\\text{Lasso}} = \\text{MSE} + \\lambda \\|\\mathbf{w}\\|_1 = \\text{MSE} + \\lambda \\sum_{j=1}^d |w_j|$$\n- **Bản chất hình học tại sao Lasso triệt tiêu trọng số về 0 (Câu hỏi vàng Olympic):**\n  - Vùng ràng buộc của Ridge ($w_1^2 + w_2^2 \\le C$) là **Đường tròn trơn nhẵn**. Đường đồng mức của hàm Loss tiếp xúc với đường tròn tại một điểm ngẫu nhiên trên cung tròn, nơi cả $w_1$ và $w_2$ đều khác 0.\n  - Vùng ràng buộc của Lasso ($|w_1| + |w_2| \\le C$) là **Hình thoi kim cương có 4 ĐỈNH NHỌN nằm ngay trên các trục tọa độ**. Đường đồng mức Loss có xác suất cực cao tiếp xúc trúng ngay đỉnh nhọn trên trục tọa độ $\\implies$ Tại đỉnh này, **trọng số $w_1 = 0$ tuyệt đối**!\n- **Hệ quả cách mạng:** Lasso đóng vai trò như một **Bộ tự động chọn lọc đặc trưng (Feature Selection)**. Nó tự động gạt bỏ các thuộc tính vô dụng bằng cách gán trọng số đúng bằng 0, tạo ra ma trận trọng số thưa thớt (Sparse Model).\n\n---\n\n**5. Hồi quy ElasticNet (Kết hợp cả L1 và L2):**\n$$\\mathcal{L}_{\\text{ElasticNet}} = \\text{MSE} + \\lambda \\left( \\alpha \\|\\mathbf{w}\\|_1 + \\frac{1-\\alpha}{2} \\|\\mathbf{w}\\|_2^2 \\right)$$\nKhi có một nhóm đặc trưng tương quan mạnh với nhau, Lasso thường chỉ chọn ngẫu nhiên 1 đặc trưng và vứt bỏ các đặc trưng còn lại. ElasticNet dung hòa cả hai: vừa chọn lọc đặc trưng như Lasso, vừa giữ lại tính ổn định nhóm của Ridge!",
+        "formula": "\\mathcal{L}_{\\text{Ridge}} = \\text{MSE} + \\lambda \\|\\mathbf{w}\\|_2^2 \\quad \\text{vs} \\quad \\mathcal{L}_{\\text{Lasso}} = \\text{MSE} + \\lambda \\|\\mathbf{w}\\|_1",
+        "mathExplainer": [
+          {
+            "sym": "\\lambda \\text{ (Lambda)}",
+            "name": "Siêu tham số chính quy hóa",
+            "mean": "Hệ số phạt: λ càng lớn mô hình càng đơn giản (giảm variance, tăng bias)."
+          },
+          {
+            "sym": "\\|\\mathbf{w}\\|_2^2 = \\sum w_j^2",
+            "name": "Chuẩn L2 (Ridge Penalty)",
+            "mean": "Co nhỏ đều các trọng số, giải quyết đa cộng tuyến, không triệt tiêu về 0."
+          },
+          {
+            "sym": "\\|\\mathbf{w}\\|_1 = \\sum |w_j|",
+            "name": "Chuẩn L1 (Lasso Penalty)",
+            "mean": "Ép thẳng các trọng số không quan trọng về đúng bằng 0 (chọn lọc đặc trưng)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left Panel: Lasso L1 diamond -->\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"100\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Lasso L1: Hình Thoi Kim Cương</text>\n                        <line x1=\"10\" y1=\"80\" x2=\"190\" y2=\"80\" stroke=\"#888\"/>\n                        <line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"150\" stroke=\"#888\"/>\n                        <polygon points=\"100,40 140,80 100,120 60,80\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <ellipse cx=\"145\" cy=\"45\" rx=\"35\" ry=\"25\" fill=\"none\" stroke=\"#777\" stroke-dasharray=\"2,2\"/>\n                        <circle cx=\"100\" cy=\"40\" r=\"4.5\" fill=\"#111\"/>\n                        <text x=\"100\" y=\"140\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Chạm tại ĐỈNH trục ⇒ w₁ = 0</text>\n                        <text x=\"100\" y=\"155\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">(Tự động loại bỏ đặc trưng thừa)</text>\n                      </g>\n\n                      <!-- Right Panel: Ridge L2 circle -->\n                      <g transform=\"translate(360, 20)\">\n                        <text x=\"100\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Ridge L2: Hình Tròn Trơn</text>\n                        <line x1=\"10\" y1=\"80\" x2=\"190\" y2=\"80\" stroke=\"#888\"/>\n                        <line x1=\"100\" y1=\"10\" x2=\"100\" y2=\"150\" stroke=\"#888\"/>\n                        <circle cx=\"100\" cy=\"80\" r=\"40\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <ellipse cx=\"145\" cy=\"45\" rx=\"35\" ry=\"25\" fill=\"none\" stroke=\"#777\" stroke-dasharray=\"2,2\"/>\n                        <circle cx=\"128\" cy=\"52\" r=\"4.5\" fill=\"#111\"/>\n                        <text x=\"100\" y=\"140\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Chạm trên CUNG TRÒN ⇒ w₁, w₂ ≠ 0</text>\n                        <text x=\"100\" y=\"155\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">(Co nhỏ đều, giải quyết đa cộng tuyến)</text>\n                      </g>\n                    </svg>",
+          "caption": "Bản chất hình học giải mã sự khác biệt giữa L1 và L2: Hình thoi L1 có đỉnh nhọn nằm ngay trên trục tọa độ nên tiếp xúc tại điểm có w = 0; đường tròn L2 trơn nhẵn tiếp xúc ngoài trục nên không triệt tiêu về 0."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa mục đích của L1 và L2: Hãy khắc cốt ghi tâm: Nếu đề bài hỏi 'Phương pháp nào có khả năng tạo ra mô hình thưa thớt (Sparse Model) và tự động lựa chọn đặc trưng (Feature Selection)?', câu trả lời LUÔN LUÔN LÀ L1 LASSO! Ridge (L2) chỉ co nhỏ trọng số chứ không triệt tiêu biến nào về 0.",
+        "practiceQuestion": {
+          "level": "Nâng cao",
+          "question": "Trong một bài toán phân tích biểu hiện gen trong y sinh, bạn có 20,000 gen đầu vào nhưng chỉ có 100 bệnh nhân. Bạn biết rằng chỉ có một số ít gen thực sự gây bệnh, đa số còn lại là nhiễu. Thuật toán hồi quy nào sau đây là phù hợp nhất để vừa dự đoán bệnh vừa xác định chính xác danh sách các gen gây bệnh?",
+          "options": [
+            "A. Hồi quy tuyến tính thông thường OLS (Ordinary Least Squares)",
+            "B. Hồi quy Ridge (L2 Regularization)",
+            "C. Hồi quy Lasso (L1 Regularization)",
+            "D. Hồi quy đa thức bậc 5 không có regularization"
+          ],
+          "correctIndex": 2,
+          "hint": "Cần một thuật toán có khả năng ép các trọng số của hàng chục ngàn gen nhiễu về đúng bằng 0 và giữ lại các gen quan trọng.",
+          "solution": [
+            "Bước 1: Phân tích đặc thù dữ liệu: Số đặc trưng (d = 20,000) lớn hơn rất nhiều so với số mẫu (N = 100), dữ liệu có tính chất thưa thớt (sparse).",
+            "Bước 2: Hồi quy tuyến tính thông thường OLS sẽ bị quá khớp nghiêm trọng và ma trận X^T X bị suy biến không khả nghịch.",
+            "Bước 3: Hồi quy Ridge (L2) giữ lại toàn bộ 20,000 gen trong công thức, không thể chỉ ra gen nào gây bệnh.",
+            "Bước 4: Hồi quy Lasso (L1) ép các trọng số của gen không quan trọng về đúng bằng 0, chỉ giữ lại các gen có trọng số khác 0 (tự động lựa chọn đặc trưng).",
+            "Kết luận: Lasso Regression là lựa chọn tối ưu nhất. Đáp án đúng là C."
+          ]
+        }
+      },
+      {
+        "heading": "5.6. Bài Toán Tính Tay Chuẩn Đề Thi VAIO: Tính Hệ Số OLS & Hiệu Ứng Co Rút Ridge",
+        "content": "Để tự tin giành trọn điểm trong kỳ thi Olympic AI, hãy cùng thực hành tính toán từng bước phương trình hồi quy tuyến tính cổ điển OLS và phân tích cách trọng số bị co rút khi có Ridge Regularization.",
+        "deepDive": "**ĐỀ BÀI THỰC HÀNH KINH ĐIỂN:**\nCho tập dữ liệu nhỏ gồm $N = 3$ căn nhà:\n\n| Mẫu nhà | Diện tích $x$ ($100m^2$) | Giá bán thực tế $y$ (Tỷ VNĐ) |\n| :---: | :---: | :---: |\n| **Nhà 1** | $1.0$ | $2.0$ |\n| **Nhà 2** | $2.0$ | $3.0$ |\n| **Nhà 3** | $3.0$ | $5.0$ |\n\nHãy thực hiện tính toán:\n1. **Phần 1:** Tìm phương trình hồi quy tuyến tính chuẩn mực $\\hat{y} = w x + b$ bằng phương pháp OLS.\n2. **Phần 2:** Tính hệ số xác định $R^2$ của mô hình trên tập dữ liệu này.\n3. **Phần 3:** Dự đoán giá bán của một căn nhà mới có diện tích $x_{\\text{new}} = 4.0$ ($400m^2$).\n4. **Phần 4:** Giả sử mô hình hồi quy không có hệ số chặn $b$ ($\\hat{y} = w x$). So sánh nghiệm $w$ của OLS và nghiệm $w_{\\text{Ridge}}$ khi thêm chuẩn phạt Ridge với $\\lambda = 1.0$.\n\n---\n\n**LỜI GIẢI CHI TIẾT TỪNG BƯỚC:**\n\n**PHẦN 1: TÌM HỆ SỐ HỒI QUY OLS BẰNG TAY**\n- **Bước 1.1: Tính giá trị trung bình $\\bar{x}$ và $\\bar{y}$:**\n  $$\\bar{x} = \\frac{1.0 + 2.0 + 3.0}{3} = \\frac{6.0}{3} = \\mathbf{2.0}$$\n  $$\\bar{y} = \\frac{2.0 + 3.0 + 5.0}{3} = \\frac{10.0}{3} \\approx \\mathbf{3.333}$$\n\n- **Bước 1.2: Lập bảng tính hiệp phương sai và phương sai mẫu:**\n\n| $i$ | $x_i$ | $y_i$ | $x_i - \\bar{x}$ | $y_i - \\bar{y}$ | $(x_i - \\bar{x})^2$ | $(x_i - \\bar{x})(y_i - \\bar{y})$ |\n| :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n| 1 | 1.0 | 2.0 | -1.0 | -1.333 | 1.0 | +1.333 |\n| 2 | 2.0 | 3.0 | 0.0 | -0.333 | 0.0 | 0.0 |\n| 3 | 3.0 | 5.0 | +1.0 | +1.667 | 1.0 | +1.667 |\n| **Tổng $\\sum$** | | | | | **2.0** | **3.0** |\n\n- **Bước 1.3: Tính hệ số góc $w$:**\n  $$w = \\frac{\\sum_{i=1}^3 (x_i - \\bar{x})(y_i - \\bar{y})}{\\sum_{i=1}^3 (x_i - \\bar{x})^2} = \\frac{3.0}{2.0} = \\mathbf{1.5}$$\n\n- **Bước 1.4: Tính hệ số chặn $b$:**\n  $$b = \\bar{y} - w \\bar{x} = \\frac{10}{3} - 1.5(2.0) = 3.333 - 3.0 = \\frac{1}{3} \\approx \\mathbf{0.333}$$\n\n- **Kết luận phương trình hồi quy:**\n  $$\\mathbf{\\hat{y} = 1.5 x + 0.333}$$\n\n---\n\n**PHẦN 2: TÍNH HỆ SỐ XÁC ĐỊNH $R^2$**\n- **Tính các giá trị dự đoán $\\hat{y}_i$ và phần dư $e_i = y_i - \\hat{y}_i$:**\n  - Nhà 1 ($x=1$): $\\hat{y}_1 = 1.5(1) + 0.333 = 1.833 \\implies e_1 = 2.0 - 1.833 = +0.167 \\implies e_1^2 \\approx 0.0278$.\n  - Nhà 2 ($x=2$): $\\hat{y}_2 = 1.5(2) + 0.333 = 3.333 \\implies e_2 = 3.0 - 3.333 = -0.333 \\implies e_2^2 \\approx 0.1111$.\n  - Nhà 3 ($x=3$): $\\hat{y}_3 = 1.5(3) + 0.333 = 4.833 \\implies e_3 = 5.0 - 4.833 = +0.167 \\implies e_3^2 \\approx 0.0278$.\n- **Tổng bình phương phần dư:**\n  $$\\text{SS}_{\\text{res}} = 0.0278 + 0.1111 + 0.0278 = \\mathbf{0.1667}$$\n- **Tổng bình phương toàn phần:**\n  $$\\text{SS}_{\\text{tot}} = (2 - 3.333)^2 + (3 - 3.333)^2 + (5 - 3.333)^2 = 1.778 + 0.111 + 2.778 = \\mathbf{4.667}$$\n- **Hệ số xác định:**\n  $$R^2 = 1 - \\frac{\\text{SS}_{\\text{res}}}{\\text{SS}_{\\text{tot}}} = 1 - \\frac{0.1667}{4.667} = 1 - 0.0357 = \\mathbf{0.9643 \\quad (96.43\\%)}$$\n  *(Nhận xét: $R^2 = 96.43\\%$ cho thấy đường hồi quy khớp gần như hoàn hảo với dữ liệu thực tế!).*\n\n---\n\n**PHẦN 3: DỰ ĐOÁN NHÀ MỚI ($x_{\\text{new}} = 4.0$)**\n$$\\hat{y}_{\\text{new}} = 1.5(4.0) + 0.333 = 6.0 + 0.333 = \\mathbf{6.333 \\text{ tỷ VNĐ}}$$\n\n---\n\n**PHẦN 4: SO SÁNH HIỆU ỨNG CO RÚT CỦA RIDGE REGULARIZATION**\nXét mô hình hồi quy không có hệ số chặn: $\\hat{y} = w x$.\n- Vector dữ liệu: $\\mathbf{x} = [1, 2, 3]^T$, $\\mathbf{y} = [2, 3, 5]^T$.\n- $\\mathbf{x}^T \\mathbf{x} = 1^2 + 2^2 + 3^2 = 1 + 4 + 9 = \\mathbf{14}$.\n- $\\mathbf{x}^T \\mathbf{y} = 1(2) + 2(3) + 3(5) = 2 + 6 + 15 = \\mathbf{23}$.\n- **Nghiệm OLS chuẩn:**\n  $$w_{\\text{OLS}} = \\frac{\\mathbf{x}^T \\mathbf{y}}{\\mathbf{x}^T \\mathbf{x}} = \\frac{23}{14} \\approx \\mathbf{1.643}$$\n- **Nghiệm khi thêm Ridge Penalty với $\\lambda = 1.0$:**\n  Công thức giải tích: $w_{\\text{Ridge}} = \\frac{\\mathbf{x}^T \\mathbf{y}}{\\mathbf{x}^T \\mathbf{x} + \\lambda}$.\n  $$w_{\\text{Ridge}} = \\frac{23}{14 + 1.0} = \\frac{23}{15} \\approx \\mathbf{1.533}$$\n\n**KẾT LUẬN SÂU SẮC:**\nTrọng số $w$ đã bị sợi dây thun Ridge co rút từ **$1.643$ xuống còn $1.533$**! Hệ số góc bị ép giảm đi, làm đường hồi quy bớt dốc và ít nhạy cảm hơn trước các biến động nhiễu!",
+        "formula": "w_{\\text{OLS}} = \\frac{\\sum (x_i - \\bar{x})(y_i - \\bar{y})}{\\sum (x_i - \\bar{x})^2}, \\quad b = \\bar{y} - w \\bar{x}, \\quad w_{\\text{Ridge}} = \\frac{\\mathbf{x}^T \\mathbf{y}}{\\mathbf{x}^T \\mathbf{x} + \\lambda}",
+        "mathExplainer": [
+          {
+            "sym": "\\sum (x_i - \\bar{x})(y_i - \\bar{y})",
+            "name": "Hiệp phương sai tử số",
+            "mean": "Đo mức độ đồng biến thiên cùng chiều giữa diện tích và giá nhà."
+          },
+          {
+            "sym": "\\sum (x_i - \\bar{x})^2",
+            "name": "Phương sai mẫu mẫu số",
+            "mean": "Độ dàn trải của biến độc lập diện tích x quanh giá trị trung bình."
+          },
+          {
+            "sym": "\\frac{23}{14 + \\lambda}",
+            "name": "Mẫu số co rút Ridge",
+            "mean": "Cộng thêm λ vào mẫu số làm phân số nhỏ đi, trực tiếp ép trọng số w co nhỏ lại."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 620 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"620\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Step 1: OLS Line -->\n                      <g transform=\"translate(30, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"165\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"82\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">1. Nghiệm OLS Chuẩn</text>\n                        <text x=\"15\" y=\"52\" font-family=\"Georgia\" font-size=\"11\">• w = 3.0 / 2.0 = 1.5</text>\n                        <text x=\"15\" y=\"75\" font-family=\"Georgia\" font-size=\"11\">• b = 3.333 - 3.0 = 0.33</text>\n                        <text x=\"15\" y=\"100\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\">ŷ = 1.5x + 0.33</text>\n                        <text x=\"15\" y=\"125\" font-family=\"Georgia\" font-size=\"10\" fill=\"#555\">R² = 96.43% (Khớp cao)</text>\n                      </g>\n\n                      <!-- Arrow 1-2 -->\n                      <line x1=\"205\" y1=\"90\" x2=\"230\" y2=\"90\" stroke=\"#111\" stroke-width=\"2\"/>\n                      <polygon points=\"230,90 222,86 222,94\" fill=\"#111\"/>\n\n                      <!-- Step 2: Prediction -->\n                      <g transform=\"translate(235, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"165\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"82\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">2. Dự Đoán Nhà Mới</text>\n                        <text x=\"15\" y=\"52\" font-family=\"Georgia\" font-size=\"11\">• Diện tích x = 4.0</text>\n                        <text x=\"15\" y=\"75\" font-family=\"Georgia\" font-size=\"11\">• ŷ = 1.5(4) + 0.333</text>\n                        <text x=\"15\" y=\"100\" font-family=\"Georgia\" font-size=\"13\" font-weight=\"bold\">ŷ = 6.33 Tỷ VNĐ</text>\n                        <text x=\"15\" y=\"125\" font-family=\"Georgia\" font-size=\"10\" fill=\"#555\">Nội suy &amp; ngoại suy tuyến tính</text>\n                      </g>\n\n                      <!-- Arrow 2-3 -->\n                      <line x1=\"410\" y1=\"90\" x2=\"435\" y2=\"90\" stroke=\"#111\" stroke-width=\"2\"/>\n                      <polygon points=\"435,90 427,86 427,94\" fill=\"#111\"/>\n\n                      <!-- Step 3: Ridge shrinkage -->\n                      <g transform=\"translate(440, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"155\" height=\"140\" fill=\"#111\"/>\n                        <text x=\"77\" y=\"25\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">3. Co Rút Ridge (L2)</text>\n                        <text x=\"15\" y=\"52\" font-family=\"Georgia\" font-size=\"11\" fill=\"#eee\">• OLS: w = 23/14 ≈ 1.64</text>\n                        <text x=\"15\" y=\"75\" font-family=\"Georgia\" font-size=\"11\" fill=\"#eee\">• λ = 1.0 (Phạt L2)</text>\n                        <text x=\"15\" y=\"100\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\">w_Ridge = 23/15 ≈ 1.53</text>\n                        <text x=\"15\" y=\"125\" font-family=\"Georgia\" font-size=\"10\" fill=\"#bbb\">Trọng số co rút 6.7%!</text>\n                      </g>\n                    </svg>",
+          "caption": "Luồng tính toán thực hành trọn vẹn: Từ tìm hệ số hồi quy chuẩn OLS, tính độ khớp R², ngoại suy mẫu mới đến hiệu ứng co rút trọng số của Ridge Regularization."
+        },
+        "commonPitfalls": "Quên căn bậc hai khi chuyển đổi giữa R và R²: R² là hệ số xác định (bình phương hệ số tương quan Pearson r trong hồi quy đơn biến). Nếu r = 0.9 thì R² = 0.81 (chứ không phải 0.9). Ngược lại, nếu R² = 0.64 thì hệ số tương quan r có thể là +0.8 hoặc -0.8 tùy thuộc vào dấu của hệ số góc w!",
+        "practiceQuestion": {
+          "level": "Nâng cao",
+          "question": "Cho mô hình hồi quy đơn biến không có hệ số chặn ŷ = w x. Dữ liệu huấn luyện có xᵀx = 20 và xᵀy = 50. Nếu áp dụng Ridge Regression với hệ số phạt λ = 5, giá trị trọng số w_Ridge sẽ giảm đi bao nhiêu phần trăm so với trọng số OLS ban đầu?",
+          "options": [
+            "A. Giảm đúng 20%",
+            "B. Giảm đúng 25%",
+            "C. Giảm đúng 10%",
+            "D. Giảm đúng 50%"
+          ],
+          "correctIndex": 0,
+          "hint": "Tính w_OLS = 50 / 20 = 2.5. Tính w_Ridge = 50 / (20 + 5) = 50 / 25 = 2.0. Tỷ lệ giảm = (2.5 - 2.0) / 2.5.",
+          "solution": [
+            "Bước 1: Tính trọng số OLS ban đầu:",
+            "  w_OLS = xᵀy / xᵀx = 50 / 20 = 2.5.",
+            "Bước 2: Tính trọng số khi có Ridge Regularization với λ = 5:",
+            "  w_Ridge = xᵀy / (xᵀx + λ) = 50 / (20 + 5) = 50 / 25 = 2.0.",
+            "Bước 3: Tính tỷ lệ suy giảm của trọng số:",
+            "  Tỷ lệ giảm = (w_OLS - w_Ridge) / w_OLS = (2.5 - 2.0) / 2.5 = 0.5 / 2.5 = 1/5 = 0.20 = 20%.",
+            "Kết luận: Trọng số bị co rút giảm đúng 20%. Đáp án chính xác là A."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-linear-regression",
+    "examConnection": {
+      "questionTitle": "Điểm Trọng Tâm Về Hồi Quy & Co Rút Trong Đề Thi VAIO 2025",
+      "items": [
+        {
+          "code": "4 Giả Định LINE & Heteroscedasticity",
+          "problem": "Khi dữ liệu vi phạm giả định phương sai đồng nhất (xảy ra Heteroscedasticity), điều gì sẽ xảy ra và cách xử lý trong thực tế là gì?",
+          "solution": [
+            "1. Hậu quả: Dù đường hồi quy OLS vẫn không thiên lệch (unbiased), nhưng sai số chuẩn của các hệ số bị tính sai hoàn toàn, khiến các kiểm định thống kê và khoảng tin cậy 95% mất giá trị.",
+            "2. Cách xử lý: Sử dụng biến đổi Logarit (Log Transformation: ln(y)) hoặc biến đổi Box-Cox để nén phương sai, hoặc áp dụng Hồi quy bình phương tối thiểu có trọng số (Weighted Least Squares - WLS)."
+          ]
+        },
+        {
+          "code": "L1 Lasso vs L2 Ridge",
+          "problem": "Tại sao trong bài toán tuyển chọn đặc trưng gen hoặc từ vựng văn bản thưa thớt, Lasso lại được ưa chuộng tuyệt đối hơn Ridge?",
+          "solution": [
+            "Do hình học góc nhọn của hình thoi chuẩn L1, nghiệm của Lasso tiếp xúc ngay tại các đỉnh trên trục tọa độ, ép thẳng các hệ số của thuộc tính không quan trọng về đúng bằng 0. Ridge chỉ co nhỏ hệ số về gần 0 nhưng vẫn giữ lại tất cả đặc trưng, không có khả năng triệt tiêu biến thừa."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Mô hình Hồi quy tuyến tính: ŷ = w^T x + b (đơn biến là đường thẳng, đa biến là siêu phẳng).",
+      "4 Giả định cốt lõi L.I.N.E: Tuyến tính, Độc lập sai số, Phân phối chuẩn sai số N(0, σ²), và Phương sai đồng nhất (Homoscedasticity).",
+      "Normal Equation: w* = (X^T X)^{-1} X^T y giải tích một bước ăn ngay, nhưng bị nghẽn O(d³) khi số đặc trưng d lớn.",
+      "MSE nhạy cảm với Outliers; MAE kiên cường; Huber Loss kết hợp êm ái cả hai.",
+      "L1 Lasso ép trọng số về đúng 0 (Feature Selection); L2 Ridge co nhỏ đều các trọng số và giải quyết triệt để thảm họa đa cộng tuyến."
+    ]
+  },
+  {
+    "id": "lesson-6",
+    "title": "6. Các Chỉ Số Đánh Giá (Metrics) & Dữ Liệu Mất Cân Bằng",
+    "syllabusBadge": "BUỔI 5: METRICS ĐÁNH GIÁ & IMBALANCED DATA",
+    "summary": "Thước đo thành bại của mọi bài toán Machine Learning: Phá vỡ ảo tưởng Accuracy Paradox, làm chủ Ma trận nhầm lẫn (Confusion Matrix 2×2), cân não giữa Lỗi Loại 1 (Báo động giả) và Lỗi Loại 2 (Bỏ sót hiểm họa), giải mã bản chất toán học của Precision, Recall, Trung bình điều hòa F1-Score (và F_beta), so sánh sâu sắc ROC-AUC vs PR-Curve trên dữ liệu mất cân bằng nặng, cùng 3 cấp độ chiến thuật công nghiệp: SMOTE, Class Weighting và Threshold Tuning.",
+    "intuition": {
+      "title": "Trực giác thực tế: Vị 'bác sĩ lười biếng' và bài học xương máu về độ chính xác 99.5%",
+      "content": "Hãy tưởng tượng một thị trấn nhỏ có 1,000 người dân cùng đi xét nghiệm tầm soát một căn bệnh ung thư hiếm gặp. Trong thực tế, chỉ có đúng 5 người thực sự mang mầm bệnh nguy hiểm, còn 995 người hoàn toàn khỏe mạnh.\n\nMột 'bác sĩ lười biếng' (hoặc một mô hình AI sơ sài) nghĩ ra một mánh khóe gian lận: Ông ta không thèm xem xét bất kỳ kết quả chụp X-quang hay xét nghiệm máu nào, mà chỉ viết sẵn một kết luận duy nhất cho tất cả 1,000 người:\n'BẠN HOÀN TOÀN KHỎE MẠNH, CHÚC MỪNG BẠN!'\n\nKhi hội đồng y khoa kiểm tra lại kết quả:\n- Ông ta đã đoán đúng cho 995 người khỏe mạnh!\n- Độ chính xác toàn thể (Accuracy) đạt: 995 / 1000 = 99.5%!\nCác tờ báo giật tít: 'Bác sĩ thiên tài chẩn đoán chính xác tới 99.5%!'.\n\nNhưng sự thật đằng sau là gì?\nCả 5 người bệnh thực sự đều bị ông ta phán là 'khỏe mạnh', yên tâm ra về, không được điều trị và bỏ lỡ thời gian vàng cứu sống! Trong số 5 người bệnh cần cứu nhất, ông ta đã bỏ lọt cả 5 (tỷ lệ bắt trúng Recall = 0%). Bác sĩ này không phải thiên tài, mà là một thảm họa y tế!\n\nĐây chính là **Nghịch lý độ chính xác (Accuracy Paradox)** kinh điển trong Trí tuệ Nhân tạo: Khi tập dữ liệu bị mất cân bằng trầm trọng (lớp đa số áp đảo lớp thiểu số), chỉ số Accuracy trở thành một tấm bình phong giả tạo, ru ngủ các kỹ sư và che giấu sự sụp đổ hoàn toàn của hệ thống! Để giải quyết bài toán này, ta bắt buộc phải có một hệ thống thước đo đa chiều và các kỹ thuật cân bằng dữ liệu khoa học."
+    },
+    "sections": [
+      {
+        "heading": "6.1. Khởi Đầu Từ Con Số 0: Tại Sao Accuracy Là Một Cái Bẫy Chết Người? Nghịch Lý Độ Chính Xác (Accuracy Paradox)",
+        "content": "Trong các bài học phổ thông, học sinh thường mặc định 'tỷ lệ đoán đúng càng cao thì càng giỏi'. Nhưng trong thế giới dữ liệu thực tế, khi các lớp phân bố không đều nhau, việc tin tưởng mù quáng vào Accuracy sẽ dẫn đến những sai lầm chết người.",
+        "deepDive": "**1. Khái niệm Dữ liệu Mất Cân Bằng (Class Imbalance):**\nTrong bài toán phân loại nhị phân (Binary Classification), ta thường chia dữ liệu thành 2 nhãn:\n- **Lớp Âm tính (Negative Class / Nhãn 0):** Đại diện cho trạng thái bình thường, phổ biến.\n- **Lớp Dương tính (Positive Class / Nhãn 1):** Đại diện cho trạng thái đặc biệt, hiếm hoi, hiểm họa hoặc mục tiêu cần phát hiện.\n\nHiện tượng **Mất cân bằng lớp (Class Imbalance)** xảy ra khi số lượng mẫu của một lớp áp đảo hoàn toàn lớp còn lại:\n- *Mất cân bằng nhẹ (1:3 đến 1:10):* Dự đoán khách hàng hủy dịch vụ viễn thông (Churn Prediction).\n- *Mất cân bằng vừa (1:10 đến 1:100):* Phát hiện bình luận độc hại, vi phạm chính sách mạng xã hội.\n- *Mất cân bằng cực độ (1:100 đến 1:1,000,000):* Phát hiện giao dịch gian lận thẻ tín dụng (Fraud Detection: 99.98% giao dịch bình thường, 0.02% ăn cắp), tầm soát ung thư y tế, phát hiện lỗi vi mạch bán dẫn Intel, phát hiện tấn công mạng thâm nhập hệ thống.\n\n**2. Bản chất toán học của Nghịch lý Accuracy (Accuracy Paradox):**\nCông thức tính Độ chính xác toàn thể (Accuracy):\n$$\\text{Accuracy} = \\frac{\\text{Số lượng mẫu đoán đúng}}{\\text{Tổng số lượng mẫu}} = \\frac{N_{\\text{correct}}}{N}$$\n\nGiả sử trong quần thể, xác suất tiên nghiệm của lớp âm tính là $P(Y=0) = 1 - \\epsilon$ (với $\\epsilon \\ll 1$, ví dụ $\\epsilon = 0.001 = 0.1\\%$).\nMột mô hình tầm thường (Trivial Classifier / Majority Class Predictor) luôn đưa ra dự đoán $\\hat{Y} = 0$ cho mọi trường hợp:\n$$\\text{Accuracy} = P(\\hat{Y} = Y) = P(\\hat{Y}=0 \\mid Y=0)P(Y=0) + P(\\hat{Y}=0 \\mid Y=1)P(Y=1)$$\n$$= 1 \\times (1 - \\epsilon) + 0 \\times \\epsilon = 1 - \\epsilon = 99.9\\%$$\n\nMô hình không cần học bất kỳ đặc trưng nào (Features) từ dữ liệu, trọng số $w$ không cần tối ưu, nhưng vẫn hiển nhiên đạt điểm 99.9%!\n\n**3. Tại sao thuật toán Machine Learning dễ bị tha hóa khi tối ưu Accuracy?**\nKhi bạn huấn luyện mô hình bằng hàm mất mát tiêu chuẩn (như Cross-Entropy hoặc 0-1 Loss) mà không có trọng số điều chỉnh:\n- Mô hình nhận thấy rằng: Nếu nó cố gắng học lớp thiểu số, việc đoán sai một vài mẫu đa số sẽ khiến Loss tăng vọt!\n- Ngược lại, nếu nó 'chấp nhận buông xuôi', phán tất cả là 0, thì tổng Loss toàn cục lập tức chạm đáy cực tiểu!\n- Kết quả: Gradient Descent sẽ kéo toàn bộ tham số về điểm cực tiểu giả tạo này. Mô hình trở nên 'mù' hoàn toàn trước các dấu hiệu của lớp thiểu số!\n\n**4. Quy tắc bài học:**\nTuyệt đối không bao giờ dùng Accuracy làm chỉ số đánh giá duy nhất khi tỷ lệ mất cân bằng giữa hai lớp vượt quá 1:4!",
+        "formula": "\\text{Accuracy} = \\frac{N_{\\text{correct}}}{N_{\\text{total}}}, \\quad \\lim_{\\epsilon \\to 0} \\text{Accuracy}(\\text{Majority Classifier}) = 100\\%",
+        "mathExplainer": [
+          {
+            "sym": "N_{\\text{correct}}",
+            "name": "Số mẫu đoán đúng",
+            "mean": "Tổng số quan sát mà nhãn dự đoán trùng khớp hoàn toàn với nhãn thực tế."
+          },
+          {
+            "sym": "N_{\\text{total}}",
+            "name": "Tổng kích thước dữ liệu",
+            "mean": "Tổng số lượng tất cả các mẫu quan sát trong tập kiểm thử (Test Set)."
+          },
+          {
+            "sym": "\\epsilon (Epsilon)",
+            "name": "Tỷ lệ lớp thiểu số",
+            "mean": "Tỷ lệ phần trăm rất nhỏ của các mẫu mang tính nguy hiểm hoặc mục tiêu cần tìm (ví dụ 0.1%)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 160\" width=\"100%\" height=\"160\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"160\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"290\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Ảo Tưởng Accuracy Trong Dữ Liệu Mất Cân Bằng (1,000 Mẫu)</text>\n                        <!-- Majority class 995 samples -->\n                        <rect x=\"20\" y=\"35\" width=\"530\" height=\"35\" fill=\"#f0f0f0\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"280\" y=\"57\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">995 Người Khỏe Mạnh (Âm tính - Negative) - Dự đoán đúng: 995/995</text>\n                        <!-- Minority class 5 samples -->\n                        <rect x=\"550\" y=\"35\" width=\"25\" height=\"35\" fill=\"#111\"/>\n                        <text x=\"562\" y=\"57\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">5</text>\n\n                        <!-- Outcome labels -->\n                        <g transform=\"translate(20, 85)\">\n                          <rect x=\"0\" y=\"0\" width=\"260\" height=\"45\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1\"/>\n                          <text x=\"130\" y=\"18\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Chỉ Số Bề Nổi (Báo Chí)</text>\n                          <text x=\"130\" y=\"36\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Accuracy = 99.5% (Rất cao!)</text>\n                        </g>\n\n                        <g transform=\"translate(295, 85)\">\n                          <rect x=\"0\" y=\"0\" width=\"280\" height=\"45\" fill=\"#111\"/>\n                          <text x=\"140\" y=\"18\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Bản Chất Thực Tế (Y Tế &amp; Đời Sống)</text>\n                          <text x=\"140\" y=\"36\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Bắt trúng bệnh nhân: 0/5 = 0%!</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Mô hình đoán bừa toàn bộ là Âm tính vẫn đạt Accuracy 99.5% nhưng để lọt 100% bệnh nhân tử vong (Nghịch lý Accuracy Paradox)."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi VAIO: Đề bài cho một tập dữ liệu phát hiện giao dịch gian lận với tỷ lệ 99.9% bình thường và 0.1% gian lận. Một mô hình Baseline đoán toàn bộ giao dịch là bình thường. Nếu câu hỏi trắc nghiệm hỏi: 'Mô hình này có hoạt động tốt không?', đáp án khẳng định 'Rất tốt vì Accuracy đạt 99.9%' là SAI HOÀN TOÀN! Độ chính xác cao ở đây chỉ là ảo ảnh toán học.",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Một ngân hàng có 100,000 giao dịch mỗi ngày, trong đó có 200 giao dịch là gian lận tín dụng (Fraud). Một kỹ sư dữ liệu xây dựng một mô hình luôn gán nhãn 'Giao dịch hợp lệ' cho tất cả mọi giao dịch. Độ chính xác Accuracy của mô hình này là bao nhiêu và mô hình có giá trị thực tế không?",
+          "options": [
+            "A. Accuracy = 99.8%, mô hình cực kỳ xuất sắc và nên triển khai ngay",
+            "B. Accuracy = 99.8%, nhưng mô hình hoàn toàn vô dụng vì không ngăn chặn được bất kỳ vụ trộm tiền nào",
+            "C. Accuracy = 0.2%, mô hình rất tệ",
+            "D. Accuracy = 50.0%, tương đương đoán mò ngẫu nhiên"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính tỷ lệ mẫu hợp lệ trên tổng số mẫu: (100,000 - 200) / 100,000 = 99,800 / 100,000 = 99.8%. Nhưng có kẻ trộm nào bị bắt không?",
+          "solution": [
+            "Bước 1: Tính số giao dịch hợp lệ thực tế: 100,000 - 200 = 99,800 giao dịch.",
+            "Bước 2: Vì mô hình đoán tất cả là hợp lệ, nên nó đoán đúng toàn bộ 99,800 giao dịch này. Số mẫu đoán đúng = 99,800.",
+            "Bước 3: Tính Accuracy: 99,800 / 100,000 = 0.998 = 99.8%.",
+            "Bước 4: Đánh giá giá trị thực tiễn: Toàn bộ 200 vụ trộm tiền đều trót lọt thành công mà không bị phát hiện. Mô hình hoàn toàn vô dụng trên thực tế.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "6.2. Ma Trận Nhầm Lẫn (Confusion Matrix 2×2): Giải Mã TP, FP, TN, FN & Cuộc Đối Đầu Giữa Lỗi Loại 1 và Lỗi Loại 2",
+        "content": "Để bóc trần toàn bộ sự thật về hiệu năng của mô hình phân loại, ta không thể dùng một con số duy nhất. Ta bắt buộc phải lập bảng Ma Trận Nhầm Lẫn (Confusion Matrix) nhằm giải phẫu chi tiết 4 khả năng ghép cặp giữa Thực Tế và Dự Đoán.",
+        "deepDive": "**1. Cấu trúc bảng Ma Trận Nhầm Lẫn (Confusion Matrix 2×2):**\nBảng gồm 2 hàng và 2 cột phân chia theo hai chiều:\n- **Chiều dọc (Hàng):** Giá trị Thực Tế ngoài đời (Ground Truth / Actual Class).\n- **Chiều ngang (Cột):** Giá trị Máy Dự Đoán (Predicted Class).\n\n*(Lưu ý: Quy ước hàng/cột có thể hoán đổi tùy tài liệu, nhưng bản chất 4 đại lượng bên trong là bất biến).*\n\n| | Máy Đoán: DƯƠNG TÍNH (+1) | Máy Đoán: ÂM TÍNH (-1) |\n|---|---|---|\n| **Thực Tế: DƯƠNG TÍNH (+1)** | **TP (True Positive)** | **FN (False Negative)** |\n| **Thực Tế: ÂM TÍNH (-1)** | **FP (False Positive)** | **TN (True Negative)** |\n\n**2. Giải mã ý nghĩa từng chữ cái (Mẹo nhớ vĩnh viễn không bao giờ lú):**\nMỗi ký hiệu gồm đúng 2 chữ cái:\n- **Chữ cái đầu tiên (True / False):** Trả lời câu hỏi: *'Cái máy đoán ĐÚNG (True) hay SAI (False) so với thực tế?'*\n- **Chữ cái thứ hai (Positive / Negative):** Trả lời câu hỏi: *'Cái máy vừa NÓI RA chữ gì (Positive hay Negative)?'*\n\nCụ thể:\n1. **TP (True Positive - Thật Dương):**\n   - Máy nói: Positive (+). Thực tế: Đúng là (+). $\\implies$ **Máy đoán trúng ca bệnh!** (Thành công vang dội).\n2. **TN (True Negative - Thật Âm):**\n   - Máy nói: Negative (-). Thực tế: Đúng là (-). $\\implies$ **Máy nhận diện đúng người lành!** (Thành công).\n3. **FP (False Positive - Giả Dương - LỖI LOẠI 1 / Type I Error):**\n   - Máy nói: Positive (+). Thực tế: Sai rồi, người ta (-)!\n   - **Bản chất đời sống:** **BÁO ĐỘNG GIẢ (False Alarm)**.\n   - Ví dụ: Chuông báo cháy hú inh ỏi khi chỉ có người hút thuốc lá; Thư mời phỏng vấn xin việc bị Gmail tống nhầm vào hòm thư Rác (Spam).\n4. **FN (False Negative - Giả Âm - LỖI LOẠI 2 / Type II Error):**\n   - Máy nói: Negative (-). Thực tế: Sai rồi, người ta CÓ BỆNH (+) mà máy bảo không!\n   - **Bản chất đời sống:** **BỎ SÓT HIỂM HỌA (Missed Hazard / Bỏ lọt tội phạm)**.\n   - Ví dụ: Bệnh nhân ung thư bị máy bảo 'bình thường' đi về nhà; Kẻ khủng bố mang vũ khí vượt qua cổng quét an ninh máy bay mà không bị phát hiện.\n\n**3. Cuộc đối đầu triết học: Lỗi Loại 1 vs Lỗi Loại 2 - Cái giá nào đắt hơn?**\nTùy thuộc vào bản chất của lĩnh vực ứng dụng, cái giá phải trả của hai loại lỗi này hoàn toàn khác nhau:\n\n- **Khi Lỗi Loại 2 (FN) là thảm họa chết người (Ưu tiên giảm FN bằng mọi giá):**\n  - Chẩn đoán y khoa hiểm nghèo, an toàn hàng không, cảnh báo động đất, phát hiện lỗi phanh ô tô tự lái.\n  - *Quy tắc:* Thà báo động nhầm 10 lần (chấp nhận FP cao) để kiểm tra lại, còn hơn bỏ sót 1 ca tử vong (không thể chấp nhận FN)!\n\n- **Khi Lỗi Loại 1 (FP) là tai họa phá hủy uy tín (Ưu tiên giảm FP bằng mọi giá):**\n  - Tòa án hình sự (Nguyên tắc suy đoán vô tội): *\"Thà tha lầm 10 kẻ có tội (FN), còn hơn kết án oan 1 người vô tội (FP)\"*.\n  - Bộ lọc thư rác (Spam Filter): Thà để lọt vài email quảng cáo vào Inbox (FN) còn hơn xóa nhầm một hợp đồng triệu đô của khách hàng (FP).",
+        "formula": "\\text{Total} = \\text{TP} + \\text{TN} + \\text{FP} + \\text{FN}, \\quad \\text{Error Rate} = \\frac{\\text{FP} + \\text{FN}}{\\text{Total}}",
+        "mathExplainer": [
+          {
+            "sym": "\\text{TP}",
+            "name": "True Positive (Dương tính thật)",
+            "mean": "Thực tế Có (+), Máy đoán Có (+) => Đúng."
+          },
+          {
+            "sym": "\\text{TN}",
+            "name": "True Negative (Âm tính thật)",
+            "mean": "Thực tế Không (-), Máy đoán Không (-) => Đúng."
+          },
+          {
+            "sym": "\\text{FP (Type I Error)}",
+            "name": "False Positive (Dương tính giả)",
+            "mean": "Báo động nhầm: Thực tế Không (-), Máy đoán Có (+) => Lỗi loại 1."
+          },
+          {
+            "sym": "\\text{FN (Type II Error)}",
+            "name": "False Negative (Âm tính giả)",
+            "mean": "Bỏ sót nguy hiểm: Thực tế Có (+), Máy đoán Không (-) => Lỗi loại 2."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 220\" width=\"100%\" height=\"220\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"220\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"260\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">MA TRẬN NHẦM LẪN (CONFUSION MATRIX 2×2)</text>\n                        <!-- Headers -->\n                        <text x=\"200\" y=\"45\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Máy Đoán: DƯƠNG (+)</text>\n                        <text x=\"370\" y=\"45\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Máy Đoán: ÂM (-)</text>\n                        <text x=\"20\" y=\"95\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">Thực Tế: DƯƠNG (+)</text>\n                        <text x=\"20\" y=\"165\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">Thực Tế: ÂM (-)</text>\n\n                        <!-- Cell 1: TP -->\n                        <rect x=\"120\" y=\"60\" width=\"160\" height=\"60\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"200\" y=\"82\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">TP (True Positive)</text>\n                        <text x=\"200\" y=\"102\" font-family=\"Georgia\" font-size=\"10\" fill=\"#333\" text-anchor=\"middle\">Đúng: Bắt trúng mục tiêu</text>\n\n                        <!-- Cell 2: FN -->\n                        <rect x=\"290\" y=\"60\" width=\"160\" height=\"60\" fill=\"#111\"/>\n                        <text x=\"370\" y=\"82\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">FN (False Negative)</text>\n                        <text x=\"370\" y=\"102\" font-family=\"Georgia\" font-size=\"10\" fill=\"#ccc\" text-anchor=\"middle\">LỖI LOẠI 2: Bỏ sót hiểm họa!</text>\n\n                        <!-- Cell 3: FP -->\n                        <rect x=\"120\" y=\"130\" width=\"160\" height=\"60\" fill=\"#eee\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"200\" y=\"152\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">FP (False Positive)</text>\n                        <text x=\"200\" y=\"172\" font-family=\"Georgia\" font-size=\"10\" fill=\"#444\" text-anchor=\"middle\">LỖI LOẠI 1: Báo động giả!</text>\n\n                        <!-- Cell 4: TN -->\n                        <rect x=\"290\" y=\"130\" width=\"160\" height=\"60\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"370\" y=\"152\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">TN (True Negative)</text>\n                        <text x=\"370\" y=\"172\" font-family=\"Georgia\" font-size=\"10\" fill=\"#333\" text-anchor=\"middle\">Đúng: Nhận diện an toàn</text>\n                      </g>\n                    </svg>",
+          "caption": "Cấu trúc 4 ô của Ma Trận Nhầm Lẫn: Phân biệt rạch ròi Lỗi Loại 1 (Báo động giả) và Lỗi Loại 2 (Bỏ sót hiểm họa)."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa chữ cái thứ nhất và thứ hai: Nhiều học sinh nghĩ FP nghĩa là 'False' nên thực tế là Sai. HÃY NHỚ: Chữ cái thứ 2 là LỜI DỰ ĐOÁN CỦA MÁY (Positive = Máy đoán Dương). Chữ cái thứ 1 là PHÁN QUYẾT (False = Máy đoán Sai). Máy đoán Dương mà lại đoán Sai => Thực tế là Âm tính! Ngược lại, FN là máy đoán Âm tính mà lại đoán Sai => Thực tế là Dương tính!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong câu chuyện ngụ ngôn nổi tiếng 'Chú bé chăn cừu', chú bé nghịch ngợm hét to: 'Có sói! Có sói!' để lừa dân làng chạy lên đồi, trong khi thực tế không hề có con sói nào. Hành vi của chú bé tương ứng với loại lỗi nào trong Thống kê và Học máy?",
+          "options": [
+            "A. True Positive (Dương tính thật)",
+            "B. False Positive (Lỗi Loại 1 - Báo động giả)",
+            "C. False Negative (Lỗi Loại 2 - Bỏ sót mục tiêu)",
+            "D. True Negative (Âm tính thật)"
+          ],
+          "correctIndex": 1,
+          "hint": "Chú bé đưa ra dự đoán Dương tính (+ Có sói) nhưng thực tế là Âm tính (- Không có sói). Máy đoán Có nhưng thực tế Không => Báo động giả.",
+          "solution": [
+            "Bước 1: Xác định thực tế (Ground Truth): Không có sói (- Negative).",
+            "Bước 2: Xác định dự đoán đưa ra: Chú bé hét 'Có sói!' (+ Positive).",
+            "Bước 3: So sánh: Dự đoán là Positive nhưng bị Sai (False) => False Positive (FP).",
+            "Bước 4: Đây chính là Lỗi Loại 1 (Type I Error) - hiện tượng Báo động giả kinh điển.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "6.3. Bộ Ba Thước Đo Cốt Lõi: Precision, Recall & Điểm Cân Bằng Điều Hòa F1-Score ($F_\\beta$)",
+        "content": "Từ 4 ô cơ bản của Confusion Matrix, cộng đồng khoa học dữ liệu đã phát triển nên bộ ba thước đo quyền lực nhất: Precision (Độ chuẩn xác), Recall (Độ nhạy) và F1-Score (Trung bình điều hòa).",
+        "deepDive": "**1. Precision (Độ chuẩn xác / Độ chính xác dương):**\n- **Câu hỏi cốt lõi:** *\"Trong số tất cả những lần mô hình lớn tiếng khẳng định là DƯƠNG TÍNH, có bao nhiêu phần trăm là đúng sự thật?\"*\n- **Công thức:**\n  $$\\text{Precision} = \\frac{\\text{TP}}{\\text{TP} + \\text{FP}}$$\n- **Phân tích mẫu số:** Mẫu số $(\\text{TP} + \\text{FP})$ chính là **Toàn bộ những mẫu được mô hình dự đoán là Positive** (Tổng cột 1).\n- **Ý nghĩa:** Đo lường **Độ tin cậy của lời cảnh báo**. Nếu mô hình cảnh báo giao dịch gian lận có Precision = 95%, nhân viên ngân hàng biết rằng hễ hệ thống 'hú còi' thì 95% khả năng đó là trộm thật, yên tâm khóa thẻ mà không sợ làm phiền oan khách hàng.\n\n**2. Recall / Sensitivity / Hit Rate (Độ nhạy / Độ bao phủ / Tỷ lệ thu hồi):**\n- **Câu hỏi cốt lõi:** *\"Trong số tất cả những trường hợp THỰC SỰ LÀ DƯƠNG TÍNH tồn tại ngoài đời, mô hình đã bắt trúng được bao nhiêu phần trăm?\"*\n- **Công thức:**\n  $$\\text{Recall} = \\frac{\\text{TP}}{\\text{TP} + \\text{FN}}$$\n- **Phân tích mẫu số:** Mẫu số $(\\text{TP} + \\text{FN})$ chính là **Tổng số mẫu Dương tính thật trong tự nhiên** (Tổng hàng 1).\n- **Ý nghĩa:** Đo lường **Năng lực không bỏ sót hiểm họa**. Nếu hệ thống tầm soát ung thư có Recall = 98%, nghĩa là cứ 100 người mắc ung thư thật, máy phát hiện ra 98 người, chỉ để lọt 2 người.\n\n**3. Specificity (Độ đặc hiệu):**\n- Tỷ lệ nhận diện đúng người khỏe mạnh trong toàn bộ những người khỏe mạnh thật:\n  $$\\text{Specificity} = \\frac{\\text{TN}}{\\text{TN} + \\text{FP}}$$\n\n**4. Cuộc xung đột vĩnh cửu: Sự đánh đổi Precision-Recall (Precision-Recall Trade-off):**\nMọi mô hình phân loại đều có một ngưỡng quyết định xác suất $\\theta$ (mặc định $\\theta = 0.5$):\n- **Nếu tăng ngưỡng $\\theta$ lên rất cao (ví dụ $\\theta = 0.95$):**\n  - Mô hình trở nên 'cực kỳ cẩn trọng'. Chỉ khi nào chắc chắn 95% nó mới dám đoán Dương tính.\n  - Hậu quả: FP giảm mạnh về 0 $\\implies$ **Precision tăng vọt**, nhưng sẽ có vô số mẫu bị bỏ sót $\\implies$ FN tăng $\\implies$ **Recall giảm thê thảm**!\n- **Nếu hạ ngưỡng $\\theta$ xuống rất thấp (ví dụ $\\theta = 0.05$):**\n  - Mô hình trở nên 'cực kỳ nhạy cảm'. Thấy hơi nghi ngờ là phán Dương tính ngay.\n  - Hậu quả: FN giảm về 0 $\\implies$ **Recall tăng vọt chạm 100%**, nhưng tiếng chuông báo động giả vang lên khắp nơi $\\implies$ FP tăng vọt $\\implies$ **Precision rớt chạm đáy**!\n$\\implies$ Hai chỉ số này luôn hoạt động như hai đầu của một chiếc bập bênh: Kéo một đầu lên thì đầu kia tụt xuống!\n\n**5. F1-Score: Tại sao lại là Trung bình điều hòa (Harmonic Mean)?**\nTa cần một chỉ số tổng hợp duy nhất dung hòa cả Precision ($P$) và Recall ($R$).\nTại sao ta không lấy Trung bình cộng: $\\frac{P + R}{2}$?\n\n*Hãy xem xét một ví dụ phản chứng cực đoan:*\nGiả sử một mô hình chỉ đoán đúng duy nhất 1 mẫu và từ chối đoán tất cả các mẫu còn lại:\n$\\text{Precision} = 1.0$ (100%), nhưng $\\text{Recall} = 0.01$ (1%).\n- Nếu tính bằng Trung bình cộng (Arithmetic Mean):\n  $$\\bar{A} = \\frac{1.0 + 0.01}{2} = 0.505 \\quad (50.5\\%)$$\n  Con số $50.5\\%$ tạo cảm giác mô hình 'ở mức trung bình chấp nhận được', che đậy sự thật là nó đã bỏ sót $99\\%$ mục tiêu!\n- Nếu tính bằng Trung bình điều hòa (Harmonic Mean):\n  $$F_1 = \\frac{2}{\\frac{1}{P} + \\frac{1}{R}} = \\frac{2 \\cdot P \\cdot R}{P + R} = \\frac{2 \\times 1.0 \\times 0.01}{1.0 + 0.01} = \\frac{0.02}{1.01} \\approx 0.0198 \\quad (1.98\\%)$$\n  Trung bình điều hòa kéo tụt điểm số về sát 0 ngay lập tức!\n  **Bản chất:** Trung bình điều hòa phạt cực kỳ nặng nề nếu có bất kỳ thành phần nào bị sụp đổ. $F_1$ chỉ có thể đạt điểm cao khi CẢ HAI $P$ và $R$ đều đồng thời ở mức cao!\n\n**6. Mở rộng nâng cao: Điểm $F_\\beta$-Score:**\nKhi một bài toán coi trọng một bên hơn bên kia, ta dùng công thức tổng quát $F_\\beta$:\n$$F_\\beta = (1 + \\beta^2) \\frac{\\text{Precision} \\cdot \\text{Recall}}{\\beta^2 \\cdot \\text{Precision} + \\text{Recall}}$$\n- $\\beta = 1$: $F_1$-score (Coi trọng $P$ và $R$ ngang nhau).\n- $\\beta = 2$ ($F_2$-score): Coi trọng **Recall gấp đôi** Precision (Thích hợp cho y tế, cứu nạn).\n- $\\beta = 0.5$ ($F_{0.5}$-score): Coi trọng **Precision gấp đôi** Recall (Thích hợp cho lọc spam, gợi ý mua sắm).",
+        "formula": "\\text{Precision} = \\frac{\\text{TP}}{\\text{TP}+\\text{FP}}, \\quad \\text{Recall} = \\frac{\\text{TP}}{\\text{TP}+\\text{FN}}, \\quad F_\\beta = (1+\\beta^2)\\frac{P \\cdot R}{\\beta^2 P + R}",
+        "mathExplainer": [
+          {
+            "sym": "\\text{Precision} (P)",
+            "name": "Độ chuẩn xác",
+            "mean": "TP / (TP + FP): Tỷ lệ dự đoán đúng trong số tất cả những ca máy tuyên bố là Dương tính."
+          },
+          {
+            "sym": "\\text{Recall} (R)",
+            "name": "Độ nhạy / Thu hồi",
+            "mean": "TP / (TP + FN): Tỷ lệ bắt trúng trong số tất cả các ca thực sự Dương tính ngoài tự nhiên."
+          },
+          {
+            "sym": "F_1",
+            "name": "Điểm F1",
+            "mean": "Trung bình điều hòa của Precision và Recall: 2PR / (P + R)."
+          },
+          {
+            "sym": "\\beta (Beta)",
+            "name": "Hệ số ưu tiên Recall",
+            "mean": "Hệ số điều chỉnh mức độ quan trọng: beta > 1 ưu tiên Recall; beta < 1 ưu tiên Precision."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"280\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Chiếc Bập Bênh Đánh Đổi Giữa Precision Và Recall</text>\n\n                        <!-- Seesaw fulcrum -->\n                        <polygon points=\"280,110 260,140 300,140\" fill=\"#111\"/>\n                        <line x1=\"100\" y1=\"90\" x2=\"460\" y2=\"130\" stroke=\"#111\" stroke-width=\"4\"/>\n\n                        <!-- Left box: High Precision -->\n                        <g transform=\"translate(70, 45)\">\n                          <rect x=\"0\" y=\"0\" width=\"120\" height=\"45\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"60\" y=\"18\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Precision TĂNG</text>\n                          <text x=\"60\" y=\"34\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">Siết ngưỡng θ cao (0.9)</text>\n                        </g>\n\n                        <!-- Right box: Low Recall -->\n                        <g transform=\"translate(390, 110)\">\n                          <rect x=\"0\" y=\"0\" width=\"120\" height=\"45\" fill=\"#111\"/>\n                          <text x=\"60\" y=\"18\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Recall GIẢM</text>\n                          <text x=\"60\" y=\"34\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\" text-anchor=\"middle\">Bỏ sót nhiều mẫu hiểm</text>\n                        </g>\n\n                        <text x=\"280\" y=\"165\" font-family=\"Georgia\" font-size=\"11\" font-style=\"italic\" text-anchor=\"middle\">Điểm cân bằng lý tưởng được đo bằng F1 = 2 × (P × R) / (P + R)</text>\n                      </g>\n                    </svg>",
+          "caption": "Sự đánh đổi tất yếu (Trade-off): Tăng Precision thường phải trả giá bằng việc giảm Recall và ngược lại."
+        },
+        "commonPitfalls": "Nhầm lẫn mẫu số giữa Precision và Recall: Hãy nhớ quy tắc 'Nhìn Cột hay Nhìn Hàng'. Precision nhìn theo CỘT DỰ ĐOÁN (Mẫu số là TP + FP). Recall nhìn theo HÀNG THỰC TẾ (Mẫu số là TP + FN). Không bao giờ nhầm lẫn hai mẫu số này trong phòng thi!",
+        "practiceQuestion": {
+          "level": "Trung bình",
+          "question": "Một hệ thống phát hiện tin nhắn lừa đảo phân loại 1,000 tin nhắn. Kết quả thu được: TP = 80, FP = 20, FN = 20, TN = 880. Giá trị Precision, Recall và F1-Score của hệ thống lần lượt là:",
+          "options": [
+            "A. Precision = 80%, Recall = 80%, F1 = 0.80",
+            "B. Precision = 80%, Recall = 88.8%, F1 = 0.84",
+            "C. Precision = 88.8%, Recall = 80%, F1 = 0.84",
+            "D. Precision = 80%, Recall = 20%, F1 = 0.32"
+          ],
+          "correctIndex": 0,
+          "hint": "Tính Precision = TP / (TP + FP) = 80 / (80 + 20). Tính Recall = TP / (TP + FN) = 80 / (80 + 20).",
+          "solution": [
+            "Bước 1: Tính Precision = TP / (TP + FP) = 80 / (80 + 20) = 80 / 100 = 0.80 = 80%.",
+            "Bước 2: Tính Recall = TP / (TP + FN) = 80 / (80 + 20) = 80 / 100 = 0.80 = 80%.",
+            "Bước 3: Vì Precision = Recall = 0.8, nên F1-score hiển nhiên bằng đúng 0.80 (2 * 0.8 * 0.8 / (0.8 + 0.8) = 0.80).",
+            "Đáp án chính xác: A."
+          ]
+        }
+      },
+      {
+        "heading": "6.4. Đường Cong ROC-AUC vs PR-Curve: Đánh Giá Mô Hình Độc Lập Với Ngưỡng Quyết Định (Threshold-Independent)",
+        "content": "Các mô hình phân loại xác suất không trực tiếp gán nhãn 0 hay 1 mà xuất ra xác suất p ∈ [0, 1]. Đường cong ROC và đường cong PR sinh ra để đánh giá năng lực phân loại của mô hình trên toàn bộ phổ ngưỡng quyết định có thể có.",
+        "deepDive": "**1. Sự hạn chế của việc chọn ngưỡng cố định:**\nKhi ta tính Confusion Matrix tại ngưỡng $\\theta = 0.5$, ta chỉ đang chụp một 'bức ảnh tĩnh' của mô hình tại duy nhất một điểm cắt. Nếu một kỹ sư khác chọn ngưỡng $\\theta = 0.3$, các chỉ số TP, FP, TN, FN sẽ thay đổi hoàn toàn!\nLàm thế nào để đánh giá xem thuật toán nào thực sự thông minh hơn mà không phụ thuộc vào việc ai chọn ngưỡng khéo hơn? Ta cần đánh giá **Khả năng xếp hạng (Ranking ability / Discrimination power)** của mô hình!\n\n**2. Đường cong ROC (Receiver Operating Characteristic):**\n- *Lịch sử:* Phát minh trong Thế chiến II bởi các kỹ sư radar của quân đội Anh nhằm phân biệt tín hiệu máy bay ném bom Đức với nhiễu sóng của các đàn chim biển.\n- *Hệ trục tọa độ:*\n  - **Trục tung (Trục Y):** $\\text{TPR (True Positive Rate)} = \\text{Recall} = \\frac{\\text{TP}}{\\text{TP} + \\text{FN}}$.\n  - **Trục hoành (Trục X):** $\\text{FPR (False Positive Rate)} = \\frac{\\text{FP}}{\\text{FP} + \\text{TN}} = 1 - \\text{Specificity}$.\n- *Cách hình thành đường cong:* Ta dịch chuyển ngưỡng $\\theta$ liên tục từ $1.0 \\to 0.0$:\n  - Tại $\\theta = 1.0$: Mô hình đoán tất cả là Âm tính $\\implies \\text{TPR}=0, \\text{FPR}=0$ (Điểm gốc $(0,0)$).\n  - Khi $\\theta$ giảm dần: Mô hình đoán nhiều mẫu thành Dương tính hơn $\\implies$ Cả TPR và FPR cùng tăng dần.\n  - Tại $\\theta = 0.0$: Mô hình đoán tất cả là Dương tính $\\implies \\text{TPR}=1, \\text{FPR}=1$ (Điểm góc trên phải $(1,1)$).\n- *Điểm lý tưởng (Perfect Classifier):* Tọa độ $(0, 1)$ — Tức $\\text{FPR} = 0$ (Không báo động nhầm nào) và $\\text{TPR} = 1$ (Bắt trúng 100% mục tiêu). Đường cong càng uốn cong áp sát góc trên bên trái $(0, 1)$ thì mô hình càng hoàn hảo!\n- *Đường chéo ngẫu nhiên (Random Guess):* Nối từ $(0,0)$ đến $(1,1)$ tương ứng với mô hình tung đồng xu ngẫu nhiên ($\\text{AUC} = 0.5$).\n\n**3. Ý nghĩa xác suất sâu sắc của chỉ số ROC-AUC:**\nAUC (Area Under the Curve) là diện tích nằm dưới đường cong ROC, nhận giá trị trong đoạn $[0.5, 1.0]$:\n- $\\text{AUC} = 0.5$: Đoán mò ngẫu nhiên.\n- $\\text{AUC} = 1.0$: Phân tách tuyệt đối hoàn hảo.\n- **Định lý xác suất cốt lõi:**\n  $$\\text{AUC} = P\\big(\\hat{p}(X_{\\text{positive}}) > \\hat{p}(X_{\\text{negative}})\\big)$$\n  *Nghĩa là:* Nếu bạn bốc ngẫu nhiên một mẫu Dương tính thật và một mẫu Âm tính thật, AUC chính là xác suất mà mô hình gán điểm tin cậy cho mẫu Dương tính CAO HƠN mẫu Âm tính!\n\n**4. Đường cong PR (Precision-Recall Curve) & Điểm cốt tử trong đề thi Olympic:**\n- Trục tung là Precision, Trục hoành là Recall.\n- **Tại sao ROC-AUC có thể 'lừa dối' bạn khi dữ liệu mất cân bằng nặng?**\n  Hãy nhìn vào mẫu số của FPR:\n  $$\\text{FPR} = \\frac{\\text{FP}}{\\text{FP} + \\text{TN}}$$\n  Trong bài toán phát hiện gian lận thẻ tín dụng, số giao dịch hợp lệ $\\text{TN}$ là hàng triệu mẫu!\n  Nếu mô hình báo động nhầm $\\text{FP} = 1,000$ lần:\n  $$\\text{FPR} = \\frac{1,000}{1,000 + 1,000,000} \\approx 0.001 \\quad (0.1\\%)$$\n  FPR vẫn cực kỳ bé ($\\approx 0$), khiến đường ROC vẫn nằm sát trục tung và cho ra **ROC-AUC cao ngất ngưởng đạt 0.98 hoặc 0.99**!\n  Nhưng trên thực tế, nếu số ca gian lận thật chỉ có 100 ca ($\\text{TP} \\approx 90$), thì:\n  $$\\text{Precision} = \\frac{90}{90 + 1,000} \\approx 8.2\\%!$$\n  Người dùng phải chịu đựng 1,000 cuộc gọi làm phiền chỉ để bắt được 90 vụ trộm!\n- **Quy tắc vàng phân định:**\n  - Khi hai lớp cân bằng $\\implies$ Dùng **ROC-AUC**.\n  - Khi lớp Dương tính cực kỳ hiếm hoi và việc báo động giả gây hậu quả nghiêm trọng $\\implies$ **BẮT BUỘC DÙNG ĐƯỜNG CONG PR (PR-AUC / Average Precision)** vì PR không chứa $\\text{TN}$ khổng lồ trong mẫu số!",
+        "formula": "\\text{TPR} = \\frac{\\text{TP}}{\\text{TP}+\\text{FN}}, \\quad \\text{FPR} = \\frac{\\text{FP}}{\\text{FP}+\\text{TN}}, \\quad \\text{ROC-AUC} = \\int_0^1 \\text{TPR}(\\text{FPR}) \\, d\\text{FPR}",
+        "mathExplainer": [
+          {
+            "sym": "\\text{TPR} (Recall)",
+            "name": "True Positive Rate",
+            "mean": "Tỷ lệ dương tính thật (Trục tung của đường cong ROC)."
+          },
+          {
+            "sym": "\\text{FPR}",
+            "name": "False Positive Rate",
+            "mean": "FP / (FP + TN): Tỷ lệ báo động giả trên toàn bộ mẫu âm tính (Trục hoành đường cong ROC)."
+          },
+          {
+            "sym": "\\text{ROC-AUC}",
+            "name": "Area Under ROC Curve",
+            "mean": "Diện tích dưới đường cong ROC (0.5 = đoán mò, 1.0 = hoàn hảo tuyệt đối)."
+          },
+          {
+            "sym": "\\text{PR-AUC}",
+            "name": "Area Under PR Curve",
+            "mean": "Diện tích dưới đường Precision-Recall, bắt buộc dùng khi dữ liệu mất cân bằng nặng."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <!-- ROC Chart -->\n                        <g transform=\"translate(20, 10)\">\n                          <text x=\"90\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Đường Cong ROC (Cân Bằng)</text>\n                          <line x1=\"20\" y1=\"130\" x2=\"160\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <line x1=\"20\" y1=\"10\" x2=\"20\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <!-- diagonal -->\n                          <line x1=\"20\" y1=\"130\" x2=\"160\" y2=\"10\" stroke=\"#888\" stroke-dasharray=\"3,3\"/>\n                          <!-- curve -->\n                          <path d=\"M 20 130 Q 25 10 160 10\" fill=\"none\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                          <text x=\"90\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">FPR (0 → 1)</text>\n                          <text x=\"10\" y=\"75\" font-family=\"Georgia\" font-size=\"9\" transform=\"rotate(-90 10 75)\" text-anchor=\"middle\">TPR (0 → 1)</text>\n                          <text x=\"65\" y=\"40\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">AUC = 0.96</text>\n                        </g>\n\n                        <!-- Divider -->\n                        <line x1=\"260\" y1=\"10\" x2=\"260\" y2=\"150\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n\n                        <!-- PR Chart -->\n                        <g transform=\"translate(320, 10)\">\n                          <text x=\"90\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Đường Cong PR (Mất Cân Bằng)</text>\n                          <line x1=\"20\" y1=\"130\" x2=\"160\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <line x1=\"20\" y1=\"10\" x2=\"20\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <!-- baseline horizontal line for PR -->\n                          <line x1=\"20\" y1=\"120\" x2=\"160\" y2=\"120\" stroke=\"#888\" stroke-dasharray=\"3,3\"/>\n                          <!-- PR curve -->\n                          <path d=\"M 20 20 Q 90 25 160 120\" fill=\"none\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                          <text x=\"90\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Recall (0 → 1)</text>\n                          <text x=\"10\" y=\"75\" font-family=\"Georgia\" font-size=\"9\" transform=\"rotate(-90 10 75)\" text-anchor=\"middle\">Precision (0 → 1)</text>\n                          <text x=\"50\" y=\"70\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">PR-AUC = 0.72</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "So sánh ROC Curve (phản ánh toàn cục) và Precision-Recall Curve (phơi bày sự thật khi dữ liệu mất cân bằng nghiêm trọng)."
+        },
+        "commonPitfalls": "Đường chéo ngẫu nhiên của đường cong PR không phải lúc nào cũng là 0.5: Trong đường cong ROC, đường cơ sở ngẫu nhiên luôn cố định là đường chéo có AUC = 0.5. Nhưng trong đường cong PR, đường cơ sở ngẫu nhiên là một đường thẳng nằm ngang bằng đúng tỷ lệ mẫu dương tính P / (P + N) (ví dụ nếu dữ liệu chỉ có 1% mẫu hiếm thì đường cơ sở của PR là 0.01!).",
+        "practiceQuestion": {
+          "level": "Nâng cao",
+          "question": "Trong một bài toán phát hiện giao dịch rửa tiền với 999,900 giao dịch sạch và 100 giao dịch rửa tiền, mô hình A đạt ROC-AUC = 0.98 nhưng khi kiểm tra thực tế thì Precision chỉ đạt 5%. Nguyên nhân cốt lõi của hiện tượng này là gì?",
+          "options": [
+            "A. Do tính toán sai công thức ROC-AUC",
+            "B. Do số lượng TN quá khổng lồ làm cho FPR bị đè xuống cực nhỏ, thổi phồng điểm ROC-AUC",
+            "C. Do Precision luôn tỷ lệ nghịch với ROC-AUC",
+            "D. Do tập kiểm thử quá nhỏ không đủ đại diện"
+          ],
+          "correctIndex": 1,
+          "hint": "Nhìn vào công thức FPR = FP / (FP + TN). Khi TN = 999,900, mẫu số cực lớn khiến FPR luôn gần bằng 0 dù FP có lên tới hàng trăm.",
+          "solution": [
+            "Bước 1: Phân tích công thức FPR: FPR = FP / (FP + TN).",
+            "Bước 2: Vì TN = 999,900 rất lớn, ngay cả khi FP = 1,900 (báo động giả rất nhiều), FPR vẫn chỉ là 1,900 / 1,001,800 ≈ 0.0019 (0.19%).",
+            "Bước 3: Vì FPR rất nhỏ nên đồ thị ROC vẫn ép sát trục tung, tạo ra diện tích ROC-AUC cao chót vót (0.98).",
+            "Bước 4: Nhưng với Precision = TP / (TP + FP) = 90 / (90 + 1900) ≈ 4.5% (quá thấp).",
+            "Kết luận: TN quá lớn đã che giấu sự yếu kém của mô hình trên đường cong ROC. Bài toán này bắt buộc phải dùng PR-AUC.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "6.5. Các Chiến Thuật Xử Lý Dữ Liệu Mất Cân Bằng: SMOTE, Resampling, Class Weights & Threshold Tuning",
+        "content": "Để chế ngự dữ liệu mất cân bằng trong thực tế công nghiệp, kỹ sư Machine Learning sử dụng một hệ thống chiến thuật 3 cấp độ: Cấp độ dữ liệu (Resampling/SMOTE), Cấp độ thuật toán (Cost-Sensitive/Class Weights) và Cấp độ hậu xử lý (Threshold Tuning).",
+        "deepDive": "**1. Cấp độ 1: Can thiệp dữ liệu (Data-level Resampling):**\nMục tiêu là đưa tỷ lệ giữa hai lớp về mức cân bằng nhân tạo trước khi cho mô hình học:\n\n- **Random Undersampling (Giảm mẫu ngẫu nhiên lớp đa số):**\n  - *Cách làm:* Bỏ bớt ngẫu nhiên các mẫu của lớp đa số cho đến khi số lượng hai lớp tương đương.\n  - *Ưu điểm:* Giảm dung lượng tập dữ liệu, mô hình học cực nhanh.\n  - *Nhược điểm chí mạng:* **Mất mát thông tin (Information Loss)**! Bạn có thể vô tình xóa bỏ những ranh giới phân loại quan trọng của lớp đa số.\n\n- **Random Oversampling (Nhân bản ngẫu nhiên lớp thiểu số):**\n  - *Cách làm:* Sao chép (copy-paste) lặp lại các mẫu hiếm có sẵn.\n  - *Ưu điểm:* Giữ lại toàn bộ thông tin.\n  - *Nhược điểm chí mạng:* **Gây ra Quá khớp (Overfitting)**! Mô hình sẽ học thuộc lòng chính xác từng điểm dữ liệu bị nhân bản thay vì học quy luật tổng quát.\n\n- **Kỹ thuật đột phá SMOTE (Synthetic Minority Over-sampling Technique):**\n  - Đề xuất bởi Chawla et al. (2002). Thay vì sao chép thô thiển điểm cũ, SMOTE **tạo ra các điểm dữ liệu nhân tạo mới** bằng cách nội suy hình học!\n  - *Thuật toán 4 bước của SMOTE:*\n    1. Với mỗi điểm dữ liệu lớp thiểu số $x_i$, tìm $k$ điểm láng giềng gần nhất (k-Nearest Neighbors) cũng thuộc lớp thiểu số.\n    2. Chọn ngẫu nhiên một láng giềng $x_{(k)}$.\n    3. Vẽ một đoạn thẳng nối giữa $x_i$ và $x_{(k)}$.\n    4. Sinh ra một mẫu nhân tạo mới $x_{\\text{new}}$ nằm ngẫu nhiên trên đoạn thẳng đó:\n       $$x_{\\text{new}} = x_i + \\lambda \\cdot (x_{(k)} - x_i), \\quad \\text{với } \\lambda \\sim U(0, 1)$$\n  - *Nguyên tắc vàng:* **CHỈ ĐƯỢC CHẠY SMOTE TRÊN TẬP HUẤN LUYỆN (TRAIN SET)!** Tuyệt đối không bao giờ chạy SMOTE trước khi chia tập Train/Test (sẽ gây ra rò rỉ dữ liệu - Data Leakage nghiêm trọng).\n\n**2. Cấp độ 2: Can thiệp thuật toán (Algorithm-level: Cost-Sensitive Learning & Class Weights):**\nKhông cần sửa đổi dữ liệu gốc, ta thay đổi **Hàm mất mát (Loss Function)** để phạt nặng hơn khi đoán sai lớp hiếm:\n\n- **Hàm Binary Cross-Entropy có trọng số (Weighted BCE):**\n  $$\\mathcal{L} = - \\left[ w_1 \\cdot y \\log(\\hat{p}) + w_0 \\cdot (1-y) \\log(1-\\hat{p}) \\right]$$\n- **Công thức tính trọng số tự động chuẩn Scikit-learn (Balanced Class Weights):**\n  $$w_c = \\frac{N}{K \\cdot N_c}$$\n  - $N$: Tổng số mẫu dữ liệu.\n  - $K$: Số lượng lớp ($K = 2$).\n  - $N_c$: Số mẫu của lớp $c$.\n  *Ví dụ:* Tập gồm 900 mẫu âm tính ($N_0 = 900$) và 100 mẫu dương tính ($N_1 = 100$), tổng $N = 1000$:\n  $$w_0 = \\frac{1000}{2 \\times 900} \\approx 0.556, \\quad w_1 = \\frac{1000}{2 \\times 100} = 5.0$$\n  Lỗi đoán sai một mẫu dương tính bị phạt nặng gấp 9 lần lỗi đoán sai mẫu âm tính! Mô hình bị ép phải chú ý đặc biệt đến lớp thiểu số.\n\n- **Focal Loss (Lin et al., 2017):**\n  $$\\text{FL}(p_t) = -\\alpha_t (1 - p_t)^\\gamma \\log(p_t)$$\n  Thêm hệ số điều biến $(1 - p_t)^\\gamma$ nhằm triệt tiêu gradient của các mẫu 'quá dễ' (Easy examples) và dồn toàn bộ sức mạnh tối ưu vào các mẫu 'khó' (Hard examples).\n\n**3. Cấp độ 3: Hậu xử lý dịch chuyển ngưỡng (Threshold Tuning / Moving):**\nNếu mô hình đã được huấn luyện xong và ta không muốn train lại:\nThay vì dùng ngưỡng mặc định $\\theta = 0.5$, ta hạ ngưỡng xuống $\\theta = 0.1$ hoặc $\\theta = 0.2$ để tối đa hóa Recall cho các bài toán y tế hoặc cứu nạn.",
+        "formula": "x_{\\text{new}} = x_i + \\lambda (x_{(k)} - x_i), \\quad w_c = \\frac{N}{K \\cdot N_c}, \\quad \\text{FL}(p_t) = -\\alpha_t (1 - p_t)^\\gamma \\log(p_t)",
+        "mathExplainer": [
+          {
+            "sym": "x_{\\text{new}}",
+            "name": "Mẫu nhân tạo SMOTE",
+            "mean": "Điểm dữ liệu mới được sinh ra bằng phép nội suy tuyến tính giữa 2 mẫu thiểu số láng giềng."
+          },
+          {
+            "sym": "\\lambda (Lambda)",
+            "name": "Hệ số ngẫu nhiên",
+            "mean": "Số thực ngẫu nhiên trong khoảng [0, 1] quyết định vị trí điểm mới trên đoạn thẳng nối."
+          },
+          {
+            "sym": "w_c",
+            "name": "Trọng số cân bằng lớp",
+            "mean": "Hệ số phạt trong hàm mất mát tỷ lệ nghịch với số lượng mẫu của lớp c."
+          },
+          {
+            "sym": "\\gamma (Gamma)",
+            "name": "Hệ số tập trung Focal Loss",
+            "mean": "Hệ số làm giảm đóng góp của các mẫu dễ phân loại (thường chọn gamma = 2.0)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"280\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Trực Quan Thuật Toán SMOTE: Nội Suy Điểm Nhân Tạo Giữa Các Láng Giềng</text>\n\n                        <!-- Minority point 1 -->\n                        <circle cx=\"100\" cy=\"90\" r=\"8\" fill=\"#111\"/>\n                        <text x=\"100\" y=\"70\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">x_i (Gốc)</text>\n\n                        <!-- Line segment -->\n                        <line x1=\"100\" y1=\"90\" x2=\"280\" y2=\"60\" stroke=\"#111\" stroke-width=\"2\" stroke-dasharray=\"4,4\"/>\n\n                        <!-- Synthetic point -->\n                        <circle cx=\"190\" cy=\"75\" r=\"7\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"190\" y=\"55\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">x_new (SMOTE)</text>\n\n                        <!-- Minority point 2 (neighbor) -->\n                        <circle cx=\"280\" cy=\"60\" r=\"8\" fill=\"#111\"/>\n                        <text x=\"280\" y=\"40\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">x_(k) (Láng giềng)</text>\n\n                        <!-- Majority points around -->\n                        <circle cx=\"220\" cy=\"130\" r=\"6\" fill=\"#ccc\" stroke=\"#111\"/>\n                        <circle cx=\"340\" cy=\"110\" r=\"6\" fill=\"#ccc\" stroke=\"#111\"/>\n                        <circle cx=\"80\" cy=\"140\" r=\"6\" fill=\"#ccc\" stroke=\"#111\"/>\n                        <circle cx=\"300\" cy=\"140\" r=\"6\" fill=\"#ccc\" stroke=\"#111\"/>\n                        <text x=\"270\" y=\"155\" font-family=\"Georgia\" font-size=\"9\" fill=\"#666\">Các mẫu lớp đa số</text>\n\n                        <!-- Formula label -->\n                        <text x=\"440\" y=\"85\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">x_new = x_i + λ(x_(k) - x_i)</text>\n                        <text x=\"440\" y=\"105\" font-family=\"Georgia\" font-size=\"10\" fill=\"#444\">λ ~ U(0, 1) chọn ngẫu nhiên</text>\n                      </g>\n                    </svg>",
+          "caption": "Cơ chế sinh mẫu nhân tạo SMOTE: Nội suy hình học giữa 2 điểm thiểu số láng giềng để mở rộng vùng quyết định mà không bị Overfitting."
+        },
+        "commonPitfalls": "Lỗi Rò Rỉ Dữ Liệu (Data Leakage) khi dùng SMOTE: Đây là lỗi phổ biến nhất của sinh viên và kỹ sư mới ra trường. Áp dụng SMOTE lên toàn bộ tập dữ liệu TRƯỚC KHI chia Train/Test! Hậu quả: Tập Test sẽ chứa các mẫu nhân tạo được sinh ra từ tập Train, dẫn tới điểm kiểm thử cao ảo tưởng nhưng mô hình thất bại thảm hại khi triển khai thực tế!",
+        "practiceQuestion": {
+          "level": "Trung bình",
+          "question": "Cho một tập dữ liệu nhị phân gồm tổng cộng N = 2,000 mẫu, trong đó có 1,800 mẫu thuộc lớp 0 (Bình thường) và 200 mẫu thuộc lớp 1 (Gian lận). Khi sử dụng công thức cân bằng trọng số chuẩn của Scikit-learn (w_c = N / (K * N_c)), trọng số phạt w_1 dành cho lớp gian lận bằng bao nhiêu?",
+          "options": [
+            "A. w_1 = 1.0",
+            "B. w_1 = 5.0",
+            "C. w_1 = 0.556",
+            "D. w_1 = 10.0"
+          ],
+          "correctIndex": 1,
+          "hint": "Thay số: N = 2000, K = 2 (nhị phân), N_1 = 200. Tính w_1 = 2000 / (2 * 200).",
+          "solution": [
+            "Bước 1: Xác định các tham số:",
+            "  Tổng số mẫu N = 2,000.",
+            "  Số lớp K = 2.",
+            "  Số mẫu lớp 1 là N_1 = 200.",
+            "Bước 2: Áp dụng công thức trọng số Scikit-learn:",
+            "  w_1 = N / (K * N_1) = 2000 / (2 * 200) = 2000 / 400 = 5.0.",
+            "Bước 3: Tương tự, w_0 = 2000 / (2 * 1800) = 2000 / 3600 ≈ 0.556.",
+            "Ý nghĩa: Đoán sai một mẫu lớp 1 sẽ bị phạt nặng gấp 5.0 / 0.556 = 9 lần so với đoán sai lớp 0.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "6.6. Bài Toán Tính Tay Chuẩn Đề Thi VAIO: Phân Tích Toàn Diện Mô Hình Chẩn Đoán Y Tế & Gian Lận Thẻ",
+        "content": "Để sẵn sàng 100% cho kỳ thi Olympic AI, ta cùng giải quyết một bài toán tính tay toàn diện mô phỏng Câu 1 đề thi IAIO 2024 / VAIO 2025: Lập ma trận nhầm lẫn, tính toán Accuracy, Precision, Recall, F1, F2 và giải mã sự thất bại của mô hình ngây thơ.",
+        "deepDive": "**1. Đề bài chuẩn Olympic AI:**\nMột bệnh viện đa khoa ứng dụng hệ thống chẩn đoán AI để phát hiện sớm bệnh ung thư phổi cho $10,000$ bệnh nhân tham gia tầm soát định kỳ.\nTheo thống kê dịch tễ, tỷ lệ mắc bệnh ung thư phổi trong nhóm đối tượng này là $2\\%$ (nghĩa là có đúng $200$ ca thực sự mang mầm bệnh và $9,800$ người hoàn toàn khỏe mạnh).\n\nHội đồng chuyên môn độc lập đánh giá mô hình AI trên $10,000$ bệnh nhân này và ghi nhận kết quả:\n- Trong số $200$ người thực sự mắc bệnh, mô hình AI chẩn đoán chính xác được $180$ người.\n- Trong số $9,800$ người hoàn toàn khỏe mạnh, mô hình AI đã chẩn đoán nhầm $200$ người là 'Có bệnh' (báo động giả).\n- Các trường hợp còn lại được mô hình kết luận tương ứng.\n\n**YÊU CẦU THÍ SINH:**\n1. Lập bảng Ma Trận Nhầm Lẫn (Confusion Matrix 2×2) hoàn chỉnh với đầy đủ các giá trị $\\text{TP}, \\text{TN}, \\text{FP}, \\text{FN}$.\n2. Tính Độ chính xác toàn thể ($\\text{Accuracy}$).\n3. Tính Độ chuẩn xác ($\\text{Precision}$) và Độ nhạy ($\\text{Recall}$). Giải thích ý nghĩa của 2 con số này cho Giám đốc bệnh viện.\n4. Tính Điểm cân bằng điều hòa $F_1\\text{-Score}$.\n5. Ban giám đốc yêu cầu: *\"Chi phí bỏ sót 1 ca bệnh (FN) nguy hiểm gấp 2 lần sự phiền toái khi báo động nhầm (FP)\"*. Hãy tính chỉ số $F_2\\text{-Score}$ ($\\beta = 2$) để làm căn cứ nghiệm thu.\n6. So sánh mô hình AI này với một 'Mô hình ngây thơ (Naive Baseline)' luôn phán tất cả mọi người đều khỏe mạnh. Mô hình nào có Accuracy cao hơn? Mô hình nào thực sự có giá trị cứu người?\n\n---\n\n**2. Lời giải chi tiết từng bước (Step-by-Step Derivation):**\n\n**Bước 1: Xác định 4 ô của Confusion Matrix:**\n- Tổng số ca có bệnh thực tế: $P = \\text{TP} + \\text{FN} = 200$.\n  - Mô hình chẩn đoán đúng: $\\text{TP} = 180$.\n  - Mô hình bỏ sót (âm tính giả): $\\text{FN} = 200 - 180 = 20$.\n- Tổng số người khỏe mạnh thực tế: $N_{\\text{neg}} = \\text{TN} + \\text{FP} = 9,800$.\n  - Mô hình báo động nhầm (dương tính giả): $\\text{FP} = 200$.\n  - Mô hình chẩn đoán đúng là khỏe mạnh: $\\text{TN} = 9,800 - 200 = 9,600$.\n- Tổng số mẫu: $\\text{Total} = 180 + 20 + 200 + 9600 = 10,000$ mẫu.\n\nBảng Ma Trận Nhầm Lẫn hoàn chỉnh:\n$$\\begin{bmatrix} \\text{TP} = 180 & \\text{FN} = 20 \\\\ \\text{FP} = 200 & \\text{TN} = 9600 \\end{bmatrix}$$\n\n**Bước 2: Tính Accuracy:**\n$$\\text{Accuracy} = \\frac{\\text{TP} + \\text{TN}}{\\text{Total}} = \\frac{180 + 9600}{10,000} = \\frac{9,780}{10,000} = 0.9780 = 97.80\\%$$\n\n**Bước 3: Tính Precision và Recall:**\n- Độ chuẩn xác (Precision):\n  $$\\text{Precision} = \\frac{\\text{TP}}{\\text{TP} + \\text{FP}} = \\frac{180}{180 + 200} = \\frac{180}{380} \\approx 0.4737 = 47.37\\%$$\n  *Giải thích ý nghĩa:* Trong số 380 người bị máy kết luận có bệnh, chỉ có $47.37\\%$ là bệnh thật, hơn một nửa ($52.63\\%$) là báo động giả!\n- Độ nhạy (Recall):\n  $$\\text{Recall} = \\frac{\\text{TP}}{\\text{TP} + \\text{FN}} = \\frac{180}{180 + 20} = \\frac{180}{200} = 0.9000 = 90.00\\%$$\n  *Giải thích ý nghĩa:* Mô hình đã bắt trúng $90\\%$ tổng số bệnh nhân ung thư, chỉ để lọt $10\\%$ ($20$ người).\n\n**Bước 4: Tính Điểm Cân Bằng $F_1$-Score:**\n$$F_1 = \\frac{2 \\cdot P \\cdot R}{P + R} = \\frac{2 \\times 0.4737 \\times 0.9000}{0.4737 + 0.9000} = \\frac{0.85266}{1.3737} \\approx 0.6207 \\quad (62.07\\%)$$\n\n**Bước 5: Tính $F_2$-Score ($\\beta = 2$):**\n$$F_2 = (1 + 2^2) \\frac{P \\cdot R}{2^2 \\cdot P + R} = 5 \\times \\frac{0.4737 \\times 0.9000}{4 \\times 0.4737 + 0.9000}$$\n$$= 5 \\times \\frac{0.42633}{1.8948 + 0.9000} = \\frac{2.13165}{2.7948} \\approx 0.7627 \\quad (76.27\\%)$$\n*Nhận xét:* Vì bài toán y tế ưu tiên Recall (đạt 90%), điểm $F_2$ đạt tới $76.27\\%$, cao hơn hẳn điểm $F_1$ ($62.07\\%$).\n\n**Bước 6: So sánh với Mô hình Ngây Thơ (Naive Baseline):**\nXét mô hình ngây thơ luôn phán mọi người là 'Khỏe mạnh' ($\\hat{y} = 0$):\n- $\\text{TP} = 0, \\text{FN} = 200, \\text{FP} = 0, \\text{TN} = 9800$.\n- $\\text{Accuracy}_{\\text{Naive}} = \\frac{0 + 9800}{10,000} = 98.00\\%$!\n- $\\text{Recall}_{\\text{Naive}} = \\frac{0}{200} = 0.00\\%$! $\\text{F1}_{\\text{Naive}} = 0.00\\%$!\n\n**BẢNG SO SÁNH QUYẾT ĐỊNH:**\n| Chỉ Số | Mô Hình Ngây Thơ (Lười) | Mô Hình AI Đang Xét | Ý Nghĩa Thực Tế |\n|---|---|---|---|\n| **Accuracy** | **98.00% (Cao hơn!)** | 97.80% | Accuracy bị bóp méo bởi 9,800 người lành! |\n| **Recall** | **0.00%** | **90.00%** | AI cứu sống 180 người, mô hình lười giết cả 200 người! |\n| **Precision** | Không xác định (0/0) | 47.37% | AI giúp khoanh vùng chính xác 380 người cần chụp CT. |\n| **F1-Score** | 0.000 | 0.621 | AI vượt trội hoàn toàn về năng lực học máy. |\n\n**KẾT LUẬN VÀNG:**\nNếu ban giám khảo chỉ căn cứ vào Accuracy, mô hình lười biếng sẽ chiến thắng (98% > 97.8%). Nhưng trên thực tế cứu người, mô hình AI là chiếc phao cứu sinh với Recall 90%! Đây là bài học sâu sắc nhất trong kỳ thi VAIO 2025.",
+        "formula": "\\text{TP}=180, \\, \\text{FN}=20, \\, \\text{FP}=200, \\, \\text{TN}=9600 \\implies \\text{Acc}=97.8\\%, \\, P=47.4\\%, \\, R=90.0\\%, \\, F_1=0.621, \\, F_2=0.763",
+        "mathExplainer": [
+          {
+            "sym": "\\text{TP}=180",
+            "name": "Bắt đúng ca bệnh",
+            "mean": "180 bệnh nhân ung thư được phát hiện kịp thời và cứu sống."
+          },
+          {
+            "sym": "\\text{FN}=20",
+            "name": "Bỏ sót ca bệnh",
+            "mean": "20 bệnh nhân ung thư bị chẩn đoán nhầm là khỏe mạnh (Lỗi Loại 2 nguy hiểm)."
+          },
+          {
+            "sym": "\\text{FP}=200",
+            "name": "Báo động nhầm",
+            "mean": "200 người khỏe mạnh bị báo nhầm là có bệnh, cần đi làm sinh thiết lại (Lỗi Loại 1)."
+          },
+          {
+            "sym": "F_2 = 0.763",
+            "name": "Điểm F2-score",
+            "mean": "Thước đo dung hòa ưu tiên Recall gấp đôi Precision phù hợp tiêu chuẩn y khoa."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"280\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">SO SÁNH MÔ HÌNH AI VS MÔ HÌNH NGÂY THƠ TRONG Y TẾ (10,000 BỆNH NHÂN)</text>\n\n                        <!-- Box 1: Naive Model -->\n                        <g transform=\"translate(20, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"240\" height=\"110\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"120\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Mô Hình Ngây Thơ (Luôn đoán Khỏe)</text>\n                          <text x=\"20\" y=\"48\" font-family=\"Georgia\" font-size=\"11\">• Accuracy: 98.0% (Rất cao!)</text>\n                          <text x=\"20\" y=\"70\" font-family=\"Georgia\" font-size=\"11\">• Recall: 0.0% (Bỏ sót 100%)</text>\n                          <text x=\"20\" y=\"95\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#111\">Bỏ sót cả 200 ca tử vong!</text>\n                        </g>\n\n                        <!-- Arrow vs -->\n                        <text x=\"280\" y=\"95\" font-family=\"Georgia\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">VS</text>\n\n                        <!-- Box 2: AI Model -->\n                        <g transform=\"translate(300, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"240\" height=\"110\" fill=\"#111\"/>\n                          <text x=\"120\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Mô Hình AI (Chẩn Đoán Thực Tế)</text>\n                          <text x=\"20\" y=\"48\" font-family=\"Georgia\" font-size=\"11\" fill=\"#eee\">• Accuracy: 97.8% (Thấp hơn một chút)</text>\n                          <text x=\"20\" y=\"70\" font-family=\"Georgia\" font-size=\"11\" fill=\"#eee\">• Recall: 90.0% (Rất xuất sắc!)</text>\n                          <text x=\"20\" y=\"95\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" fill=\"#fff\">Cứu sống 180 bệnh nhân!</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Mô hình ngây thơ có Accuracy cao hơn (98% vs 97.8%) nhưng bỏ mặc bệnh nhân tử vong; Mô hình AI thực sự cứu sống 180 người."
+        },
+        "commonPitfalls": "Sai lầm tính mẫu số Precision là 200: Rất nhiều thí sinh nhầm lẫn lấy Precision = 180 / 200 = 90%. Đây là lỗi SAI NGHIÊM TRỌNG! 200 là tổng số người bệnh thật (đây là mẫu số của Recall). Để tính Precision, mẫu số phải là TỔNG SỐ NGƯỜI MÁY BẢO CÓ BỆNH: TP + FP = 180 + 200 = 380!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 1 Đề Thi IAIO 2024 / VAIO 2025)",
+          "question": "Cho bảng Confusion Matrix: TP = 90, FN = 10, FP = 30, TN = 870. Giá trị F1-Score của mô hình xấp xỉ bằng:",
+          "options": [
+            "A. 0.818",
+            "B. 0.750",
+            "C. 0.900",
+            "D. 0.960"
+          ],
+          "correctIndex": 0,
+          "hint": "Tính Precision = 90 / (90 + 30) = 90 / 120 = 0.75. Tính Recall = 90 / (90 + 10) = 90 / 100 = 0.90. F1 = 2 * P * R / (P + R).",
+          "solution": [
+            "Bước 1: Tính Precision = TP / (TP + FP) = 90 / (90 + 30) = 90 / 120 = 0.75 (75.0%).",
+            "Bước 2: Tính Recall = TP / (TP + FN) = 90 / (90 + 10) = 90 / 100 = 0.90 (90.0%).",
+            "Bước 3: Tính F1-score:",
+            "  F1 = 2 * (0.75 * 0.90) / (0.75 + 0.90) = 2 * 0.675 / 1.65 = 1.35 / 1.65 = 9 / 11 ≈ 0.8181 (81.8%).",
+            "Đáp án chính xác: A."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-confusion-matrix",
+    "examConnection": {
+      "questionTitle": "Điểm Trọng Tâm Về Metrics & Imbalanced Data Trong Đề Thi VAIO 2025",
+      "items": [
+        {
+          "code": "Accuracy Paradox & Câu 1 IAIO",
+          "problem": "Tại sao trong bài toán chẩn đoán bệnh hiếm hoặc gian lận thẻ tín dụng, chỉ số Accuracy cao không chứng minh được mô hình hoạt động tốt?",
+          "solution": [
+            "1. Hiện tượng: Lớp đa số chiếm tỷ lệ áp đảo (ví dụ 99%), mô hình chỉ cần dự đoán toàn bộ là lớp âm tính thì Accuracy đã đạt 99% một cách tầm thường.",
+            "2. Bản chất: Mô hình không bắt được bất kỳ ca bệnh hiếm nào (Recall = 0%), khiến toàn bộ người bệnh bị bỏ sót và tử vong.",
+            "3. Khắc phục: Bắt buộc chuyển sang dùng Precision, Recall, F1-Score, Balanced Accuracy hoặc PR-AUC."
+          ]
+        },
+        {
+          "code": "ROC-AUC vs PR-AUC & Câu 85 VAIO",
+          "problem": "Khi nào đường cong ROC-AUC gây ra ảo giác sai lệch và khi nào bắt buộc phải dùng PR-AUC?",
+          "solution": [
+            "1. Khi dữ liệu cực kỳ mất cân bằng (Severe Class Imbalance), số lượng TN khổng lồ trong mẫu số của FPR = FP / (FP + TN) khiến FPR luôn ở mức cực nhỏ gần 0.",
+            "2. Hệ quả: Đường cong ROC vẫn áp sát trục tung và ROC-AUC vẫn đạt 0.98 - 0.99 dù số lượng báo động giả FP nhiều gấp hàng chục lần TP.",
+            "3. Bắt buộc: Sử dụng đường cong PR (Precision-Recall) vì cả hai trục của PR đều chỉ tập trung vào lớp thiểu số và loại bỏ hoàn toàn đại lượng TN khỏi mẫu số."
+          ]
+        },
+        {
+          "code": "Lỗi Data Leakage với SMOTE & Câu 89 VAIO",
+          "problem": "Sai lầm nguy hiểm nhất khi áp dụng thuật toán cân bằng dữ liệu SMOTE trong quy trình Machine Learning là gì?",
+          "solution": [
+            "1. Áp dụng SMOTE trên toàn bộ tập dữ liệu TRƯỚC KHI chia Train/Validation/Test.",
+            "2. Hậu quả: Dữ liệu nhân tạo được sinh ra từ các cặp điểm láng giềng sẽ bị rò rỉ vào tập Test, khiến điểm số kiểm thử cao ảo tưởng nhưng mô hình thất bại khi triển khai thực tế.",
+            "3. Quy tắc bắt buộc: Luôn chia Train/Test trước; chỉ áp dụng SMOTE trên tập Train; giữ nguyên vẹn tập Test với phân phối thực tế tự nhiên."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Nghịch lý Accuracy (Accuracy Paradox): Khi dữ liệu mất cân bằng, mô hình tầm thường đoán toàn bộ lớp đa số vẫn đạt Accuracy cao giả tạo.",
+      "Confusion Matrix gồm 4 ô: TP (Đúng dương), TN (Đúng âm), FP (Lỗi Loại 1 - Báo động giả), FN (Lỗi Loại 2 - Bỏ sót hiểm họa).",
+      "Precision đo độ tin cậy của lời cảnh báo (nhìn theo Cột dự đoán); Recall đo khả năng không bỏ sót mục tiêu (nhìn theo Hàng thực tế).",
+      "F1-Score là Trung bình điều hòa của Precision và Recall, phạt cực nặng khi có một thành phần bị sụp đổ.",
+      "Khi dữ liệu mất cân bằng nặng, ROC-AUC bị thổi phồng bởi TN lớn => BẮT BUỘC dùng đường cong Precision-Recall (PR-AUC).",
+      "3 Cấp độ xử lý mất cân bằng: Resampling (SMOTE nội suy hình học), Cost-Sensitive (Class Weights w_c = N / (K * N_c)), và Dịch chuyển ngưỡng (Threshold Tuning)."
+    ]
+  },
+  {
+    "id": "lesson-7",
+    "title": "7. Cây Quyết Định (Decision Tree) & Kỹ Thuật Ensemble",
+    "syllabusBadge": "BUỔI 4 & 6: CÂY QUYẾT ĐỊNH & KỸ THUẬT ENSEMBLE",
+    "summary": "Từ trò chơi 20 câu hỏi đến lý thuyết thông tin của Claude Shannon: Hiểu sâu sắc Độ hỗn loạn Entropy, Chỉ số vẩn đục Gini Impurity, Độ lợi thông tin Information Gain trong thuật toán ID3/C4.5/CART, các cơ chế kiểm soát Quá khớp (Pre-pruning và Cost-Complexity Post-pruning), và sức mạnh tối thượng của học kết hợp Ensemble: So sánh toàn diện Bagging (Random Forest, lấy mẫu Out-Of-Bag 36.8%) và Boosting (AdaBoost, Gradient Boosting, XGBoost giảm Bias).",
+    "intuition": {
+      "title": "Trực giác thực tế: Trò chơi '20 câu hỏi' và Hội đồng 100 vị bác sĩ độc lập",
+      "content": "Hãy tưởng tượng bạn đang chơi trò chơi kinh điển '20 câu hỏi' với bạn của mình. Bạn nghĩ trong đầu một loài động vật bí mật, và bạn của bạn chỉ được phép đặt những câu hỏi Đúng/Sai (Yes/No).\n\nMột người chơi thiếu kinh nghiệm sẽ đặt những câu hỏi hú họa: 'Nó có phải con hươu cao cổ không?' - Nếu câu trả lời là 'Không', anh ta vẫn còn hàng triệu loài vật khác phải đoán mò!\nNhưng một người chơi thông minh sẽ đặt những câu hỏi phân loại có tính chiến lược:\n1. 'Nó sống trên cạn hay dưới nước?' -> Ngay lập tức loại bỏ 50% số loài vật trên Trái Đất!\n2. 'Nó có phải loài đẻ trứng không?' -> Tiếp tục cắt đôi số loài còn lại!\nMỗi câu hỏi thông minh giúp chia đôi không gian tìm kiếm. Chỉ sau đúng 20 câu hỏi nhị phân, anh ta có thể thu hẹp $2^{20} = 1,048,576$ loài vật về đúng 1 loài duy nhất! Đây chính là cách hoạt động của một **Cây Quyết Định (Decision Tree)**!\n\nNhưng một cái cây đơn lẻ có thể bị 'học vẹt' (Overfitting) và đưa ra những phán đoán phiến diện.\nLàm sao để đưa ra quyết định chuẩn xác tuyệt đối?\nHãy thành lập một **Hội đồng gồm 100 chuyên gia độc lập** (mỗi người được học từ các tài liệu khác nhau và có góc nhìn riêng). Sau đó, hãy cho cả 100 người cùng bỏ phiếu biểu quyết đa số! Những sai sót cá nhân ngẫu nhiên sẽ triệt tiêu lẫn nhau, và phán quyết của toàn hội đồng sẽ chuẩn xác đến kinh ngạc!\nĐây chính là triết lý vĩ đại của kỹ thuật **Ensemble (Học kết hợp)** và thuật toán **Random Forest (Rừng ngẫu nhiên)**!"
+    },
+    "sections": [
+      {
+        "heading": "7.1. Khởi Đầu Từ Con Số 0: Cây Quyết Định Là Gì? Trò Chơi 20 Câu Hỏi & Phân Vùng Trực Giao Không Gian",
+        "content": "Cây quyết định là mô hình học máy gần gũi nhất với tư duy logic của con người. Thay vì sử dụng các phương trình toán học phức tạp, nó mô hình hóa bài toán dưới dạng một sơ đồ cây các câu hỏi điều kiện If-Else phân cấp.",
+        "deepDive": "**1. Giải phẫu cấu trúc của một Cây Quyết Định (Decision Tree):**\nKhác với cây cối ngoài tự nhiên, Cây quyết định trong khoa học máy tính mọc ngược: Gốc ở trên đỉnh và Lá ở dưới đáy!\n- **Nút Gốc (Root Node):** Nút khởi đầu cao nhất, chứa toàn bộ tập dữ liệu huấn luyện $S$ ban đầu. Nơi đặt câu hỏi quan trọng nhất.\n- **Nút Quyết Định / Nút Phân Nhánh (Internal / Decision Nodes):** Các nút trung gian kiểm tra một điều kiện trên một đặc trưng cụ thể (ví dụ: $\\text{Tuổi} \\ge 30?$, $\\text{Thu nhập} > 20\\text{ triệu}?$).\n- **Cành (Branches / Edges):** Các nhánh rẽ tương ứng với câu trả lời (Đúng rẽ trái, Sai rẽ phải).\n- **Nút Lá (Leaf Nodes / Terminal Nodes):** Điểm dừng chân cuối cùng, không phân chia thêm nữa.\n  - Trong bài toán **Phân loại (Classification):** Nút lá chứa nhãn lớp chiếm đa số trong nút đó.\n  - Trong bài toán **Hồi quy (Regression):** Nút lá chứa giá trị trung bình $\\bar{y}$ của các mẫu rơi vào nút đó.\n\n**2. Bản chất hình học: Phân vùng trực giao không gian (Axis-Aligned Splits):**\nTrong không gian các đặc trưng ($x_1, x_2$), mỗi câu hỏi If-Else tương ứng với việc kẻ một lát cắt thẳng đứng hoặc nằm ngang song song tuyệt đối với các trục tọa độ:\n- Lát cắt 1: $x_1 \\\\le 3.5$ (chia không gian 2D làm 2 nửa trái - phải).\n- Lát cắt 2: Tại nửa bên phải, kiểm tra tiếp $x_2 \\\\le 5.0$ (kẻ đường nằm ngang chia tiếp thành các ô chữ nhật con).\n- **Kết quả hình học:** Cây quyết định chia toàn bộ không gian đặc trưng thành tập hợp các siêu khối hộp chữ nhật (Hyper-rectangles) rời nhau.\n- **So sánh với SVM và Hồi quy Tuyến tính:**\n  - Tuyến tính / SVM: Kẻ một siêu phẳng chéo xiên $w_1 x_1 + w_2 x_2 + b = 0$.\n  - Cây quyết định: Kẻ các đường giật cục zíc-zắc dạng bậc thang bám theo các trục tọa độ!\n\n**3. Ưu điểm nổi bật:**\n- **Tính giải thích cao (White-box model):** Con người có thể nhìn vào cây và hiểu chính xác 100% tại sao máy lại đưa ra quyết định đó (rất quan trọng trong Y tế và Ngân hàng cấp tín dụng).\n- **Không yêu cầu chuẩn hóa dữ liệu:** Không cần Scaling hay Chuẩn hóa Z-score vì phép so sánh $x \\\\le \\\\theta$ là bất biến với các phép biến đổi đơn điệu!\n- Xử lý mượt mà cả dữ liệu dạng số (Numerical) và dữ liệu dạng phân loại (Categorical).",
+        "formula": "\\hat{y}(x) = \\sum_{m=1}^{|T|} c_m \\cdot \\mathbb{I}(x \\in R_m), \\quad c_m = \\text{mode}(y \\in R_m) \\text{ hoặc } \\text{mean}(y \\in R_m)",
+        "mathExplainer": [
+          {
+            "sym": "R_m",
+            "name": "Vùng không gian thứ m",
+            "mean": "Một khối hộp chữ nhật con trong không gian đặc trưng tương ứng với một nút lá của cây."
+          },
+          {
+            "sym": "c_m",
+            "name": "Giá trị dự đoán tại lá m",
+            "mean": "Nhãn đa số (phân loại) hoặc giá trị trung bình mẫu (hồi quy) của vùng R_m."
+          },
+          {
+            "sym": "\\mathbb{I}(\\cdot)",
+            "name": "Hàm chỉ thị (Indicator Function)",
+            "mean": "Bằng 1 nếu mẫu x rơi vào vùng R_m, bằng 0 nếu ngược lại."
+          },
+          {
+            "sym": "|T|",
+            "name": "Số lượng nút lá",
+            "mean": "Tổng số lượng vùng phân hoạch không gian được tạo ra bởi cây."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 210\" width=\"100%\" height=\"210\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"210\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(30, 20)\">\n                        <!-- Decision Tree Graph (Left) -->\n                        <g transform=\"translate(20, 10)\">\n                          <text x=\"120\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Cấu Trúc Cây Phân Cấp</text>\n                          <!-- Root -->\n                          <rect x=\"70\" y=\"20\" width=\"100\" height=\"28\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"120\" y=\"38\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Tuổi &lt; 30?</text>\n                          <!-- Branch left -->\n                          <line x1=\"90\" y1=\"48\" x2=\"40\" y2=\"80\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"50\" y=\"60\" font-family=\"Georgia\" font-size=\"9\">Đúng</text>\n                          <!-- Leaf 1 -->\n                          <rect x=\"10\" y=\"80\" width=\"65\" height=\"26\" fill=\"#111\"/>\n                          <text x=\"42\" y=\"97\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Lớp A</text>\n\n                          <!-- Branch right -->\n                          <line x1=\"150\" y1=\"48\" x2=\"190\" y2=\"80\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"180\" y=\"60\" font-family=\"Georgia\" font-size=\"9\">Sai</text>\n                          <!-- Node 2 -->\n                          <rect x=\"150\" y=\"80\" width=\"90\" height=\"28\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"195\" y=\"98\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Lương &gt; 20M?</text>\n\n                          <!-- Leaf 2 & 3 -->\n                          <line x1=\"175\" y1=\"108\" x2=\"140\" y2=\"135\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <rect x=\"110\" y=\"135\" width=\"60\" height=\"26\" fill=\"#111\"/>\n                          <text x=\"140\" y=\"152\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Lớp B</text>\n\n                          <line x1=\"215\" y1=\"108\" x2=\"245\" y2=\"135\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <rect x=\"220\" y=\"135\" width=\"60\" height=\"26\" fill=\"#eee\" stroke=\"#111\"/>\n                          <text x=\"250\" y=\"152\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Lớp A</text>\n                        </g>\n\n                        <!-- Partition Space (Right) -->\n                        <g transform=\"translate(340, 10)\">\n                          <text x=\"120\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Phân Vùng Trực Giao Trong Không Gian 2D</text>\n                          <rect x=\"20\" y=\"20\" width=\"200\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <!-- Split 1: x1 < 30 -->\n                          <line x1=\"80\" y1=\"20\" x2=\"80\" y2=\"160\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <text x=\"50\" y=\"90\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Lớp A</text>\n                          <text x=\"80\" y=\"175\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Tuổi = 30</text>\n\n                          <!-- Split 2: x2 > 20 -->\n                          <line x1=\"80\" y1=\"80\" x2=\"220\" y2=\"80\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <text x=\"150\" y=\"55\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Lớp B</text>\n                          <text x=\"150\" y=\"125\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Lớp A</text>\n                          <text x=\"235\" y=\"85\" font-family=\"Georgia\" font-size=\"9\">Lương=20M</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Sự tương đương toán học: Mỗi câu hỏi If-Else trong cây nhị phân tương ứng với một lát cắt phẳng trực giao chia đôi không gian dữ liệu."
+        },
+        "commonPitfalls": "Nhầm lẫn rằng cây quyết định có thể vẽ đường biên nghiêng chéo: Cây quyết định tiêu chuẩn chỉ chia các điều kiện đơn biến (Univariate Splits: $x_i \\le \\theta$), do đó đường ranh giới của nó luôn vuông góc với các trục tọa độ. Để xấp xỉ một đường chéo $x_1 + x_2 = 1$, cây phải tạo ra rất nhiều lát cắt zíc-zắc hình bậc thang!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong không gian 2 chiều với 2 đặc trưng (x₁, x₂), một cây quyết định có độ sâu bằng 2 (thực hiện đúng 2 phép chia đơn biến liên tiếp) có thể chia không gian dữ liệu thành tối đa bao nhiêu vùng chữ nhật riêng biệt?",
+          "options": [
+            "A. Tối đa 2 vùng",
+            "B. Tối đa 3 vùng",
+            "C. Tối đa 4 vùng",
+            "D. Tối đa 8 vùng"
+          ],
+          "correctIndex": 2,
+          "hint": "Nút gốc chia thành 2 nhánh. Mỗi nhánh con ở tầng 1 lại có thể chia tiếp thành 2 nhánh ở tầng 2. Số lá tối đa của cây nhị phân đầy đủ ở độ sâu d là 2^d.",
+          "solution": [
+            "Bước 1: Nút gốc (độ sâu 0) chia không gian làm 2 nửa.",
+            "Bước 2: Mỗi nút con ở độ sâu 1 tiếp tục chia nửa của nó thành 2 phần nhỏ hơn.",
+            "Bước 3: Tổng số vùng lá tối đa tạo thành là 2^2 = 4 vùng chữ nhật.",
+            "Đáp án chính xác: C (Tối đa 4 vùng)."
+          ]
+        }
+      },
+      {
+        "heading": "7.2. Thước Đo Độ Thuần Khiết: Độ Hỗn Loạn Entropy (Shannon) & Chỉ Số Vẩn Đục Gini Impurity",
+        "content": "Để biết câu hỏi nào là 'tốt nhất' để đặt ở mỗi nút, thuật toán cần một thước đo định lượng mức độ thuần khiết (Purity) của dữ liệu. Hai thước đo kinh điển nhất là Entropy và Gini Impurity.",
+        "deepDive": "**1. Entropy (Độ Hỗn Loạn Thông Tin - Claude Shannon, 1948):**\n- **Trực giác vật lý & đời sống:**\n  - Hãy tưởng tượng một chiếc hộp chứa 100 viên bi:\n    - Nếu 100 viên đều là màu Đỏ: Bạn thò tay vào bốc, bạn chắc chắn 100% bốc được bi Đỏ. Không có gì bất ngờ $\\implies$ **Độ hỗn loạn bằng 0!**\n    - Nếu 50 viên Đỏ và 50 viên Xanh: Tỷ lệ 50-50 như tung đồng xu, hoàn toàn không thể đoán trước $\\implies$ **Độ hỗn loạn cực đại!**\n- **Công thức toán học của Entropy:**\n  $$H(S) = - \\sum_{i=1}^C p_i \\log_2(p_i)$$\n  - $C$: Số lượng lớp (với bài toán nhị phân thì $C = 2$).\n  - $p_i$: Tỷ lệ mẫu thuộc lớp $i$ trong tập dữ liệu $S$ ($0 \\le p_i \\le 1$).\n  - Đơn vị tính: Khi dùng cơ số $\\log_2$, Entropy được đo bằng đơn vị **bit** thông tin.\n  - **Quy ước toán học sống còn:** Nếu $p_i = 0$, ta quy ước:\n    $$0 \\times \\log_2(0) = 0$$\n    *(Cơ sở giải tích: $\\lim_{p \\to 0^+} p \\log_2 p = 0$ theo quy tắc L'Hôpital).*\n\n- **Khảo sát hàm Entropy nhị phân $H(p) = -p \\log_2 p - (1-p) \\log_2(1-p)$:**\n  - Khi $p = 0$ hoặc $p = 1$ (Thuần khiết tuyệt đối): $H(S) = 0.0$ bit.\n  - Khi $p = 0.5$ (Hỗn loạn cực đại):\n    $$H(S) = - [ 0.5 \\log_2(0.5) + 0.5 \\log_2(0.5) ] = - [ 0.5(-1) + 0.5(-1) ] = -(-1.0) = 1.0\\text{ bit}$$\n  - Đồ thị Entropy là một đường cong hình vòm úp ngược hoàn hảo đối xứng qua điểm $p = 0.5$.\n\n**2. Gini Impurity (Độ Vẩn Đục Gini - Breiman et al., 1984):**\n- **Trực giác xác suất:**\n  - Giả sử bạn bốc ngẫu nhiên một phần tử trong hộp, và sau đó gán nhãn cho nó một cách ngẫu nhiên theo đúng phân phối xác suất của tập dữ liệu. Xác suất bạn gán SAI nhãn là bao nhiêu? Đó chính là Gini Impurity!\n- **Công thức toán học:**\n  $$\\text{Gini}(S) = 1 - \\sum_{i=1}^C p_i^2$$\n- **Với bài toán nhị phân gồm hai lớp có xác suất $p$ và $1-p$:**\n  $$\\text{Gini}(S) = 1 - [p^2 + (1-p)^2] = 1 - [p^2 + 1 - 2p + p^2] = 2p(1-p)$$\n  - Khi $p = 0$ hoặc $p = 1$ (Thuần khiết): $\\text{Gini}(S) = 0.0$.\n  - Khi $p = 0.5$ (Hỗn loạn cực đại): $\\text{Gini}(S) = 2 \\times 0.5 \\times 0.5 = 0.5$.\n\n**3. So sánh đối chiếu toàn diện giữa Entropy và Gini (Điểm cốt tử phòng thi):**\n- **Hình dáng đồ thị:** Cả hai đều đạt cực tiểu bằng 0 tại biên ($p=0, p=1$) và đạt cực đại tại tâm ($p=0.5$).\n- **Giá trị cực đại:** Entropy cực đại là **1.0 bit**, Gini cực đại là **0.5**.\n- **Hiệu năng tính toán (Computational Speed):**\n  - Gini chỉ yêu cầu phép nhân và phép cộng: $1 - \\sum p_i^2 \\implies$ **Tính cực nhanh!**\n  - Entropy bắt buộc phải tính logarit tự nhiên/cơ số 2: $\\sum p_i \\log_2 p_i \\implies$ **Tốn kém chi phí CPU!**\n  - Vì lý do này, thuật toán CART và thư viện Scikit-Learn chọn **Gini Impurity làm tiêu chuẩn mặc định**.",
+        "formula": "H(S) = - \\sum_{i=1}^C p_i \\log_2(p_i), \\quad \\text{Gini}(S) = 1 - \\sum_{i=1}^C p_i^2 = 2p(1-p)",
+        "mathExplainer": [
+          {
+            "sym": "H(S)",
+            "name": "Độ hỗn loạn Entropy",
+            "mean": "Thước đo mức độ không chắc chắn thông tin của tập S (cực đại bằng 1.0 khi phân bố 50-50)."
+          },
+          {
+            "sym": "\\text{Gini}(S)",
+            "name": "Độ vẩn đục Gini",
+            "mean": "Xác suất phân loại sai một mẫu nếu gán nhãn ngẫu nhiên theo phân phối (cực đại bằng 0.5)."
+          },
+          {
+            "sym": "p_i",
+            "name": "Tỷ lệ xác suất lớp i",
+            "mean": "Số lượng mẫu thuộc lớp i chia cho tổng số mẫu của nút: N_i / N."
+          },
+          {
+            "sym": "\\log_2",
+            "name": "Hàm Logarit cơ số 2",
+            "mean": "Đơn vị đo lường thông tin dạng nhị phân (bit). log₂(1)=0, log₂(0.5)=-1, log₂(0.25)=-2."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"260\" y=\"12\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">SO SÁNH ĐỒ THỊ ENTROPY VS GINI IMPURITY</text>\n                        <!-- Axis -->\n                        <line x1=\"30\" y1=\"130\" x2=\"430\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"30\" y1=\"20\" x2=\"30\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"230\" y=\"148\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">Xác suất p của Lớp Dương tính (0 → 1)</text>\n\n                        <!-- Curves -->\n                        <!-- Entropy (peaks at 1.0 -> y=30) -->\n                        <path d=\"M 30 130 Q 230 10 430 130\" fill=\"none\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <circle cx=\"230\" cy=\"30\" r=\"4\" fill=\"#111\"/>\n                        <text x=\"240\" y=\"32\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">Entropy cực đại = 1.0</text>\n\n                        <!-- Gini (peaks at 0.5 -> y=80) -->\n                        <path d=\"M 30 130 Q 230 65 430 130\" fill=\"none\" stroke=\"#666\" stroke-width=\"2\" stroke-dasharray=\"4,4\"/>\n                        <circle cx=\"230\" cy=\"80\" r=\"4\" fill=\"#666\"/>\n                        <text x=\"240\" y=\"82\" font-family=\"Georgia\" font-size=\"10\" fill=\"#444\">Gini cực đại = 0.5</text>\n\n                        <!-- Legend on right -->\n                        <g transform=\"translate(460, 40)\">\n                          <line x1=\"0\" y1=\"10\" x2=\"30\" y2=\"10\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                          <text x=\"35\" y=\"14\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">Entropy H(p)</text>\n                          <line x1=\"0\" y1=\"35\" x2=\"30\" y2=\"35\" stroke=\"#666\" stroke-width=\"2\" stroke-dasharray=\"4,4\"/>\n                          <text x=\"35\" y=\"39\" font-family=\"Georgia\" font-size=\"10\" fill=\"#444\">Gini 2p(1-p)</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Đồ thị Entropy (đạt đỉnh 1.0) và Gini Impurity (đạt đỉnh 0.5): Cả hai đều đạt cực tiểu 0 khi thuần khiết và cực đại tại p = 0.5."
+        },
+        "commonPitfalls": "Quên dấu trừ đằng trước công thức Entropy: Vì các xác suất p_i đều nhỏ hơn hoặc bằng 1, nên log₂(p_i) luôn là số ÂM hoặc bằng 0. Nếu không có dấu trừ phía trước tổng, Entropy sẽ bị tính ra số âm, vi phạm bản chất độ hỗn loạn!",
+        "practiceQuestion": {
+          "level": "Trung bình",
+          "question": "Một nút trong cây quyết định chứa 10 mẫu dữ liệu, trong đó có 8 mẫu thuộc Lớp 1 và 2 mẫu thuộc Lớp 2. Chỉ số Gini Impurity của nút này bằng bao nhiêu?",
+          "options": [
+            "A. 0.16",
+            "B. 0.32",
+            "C. 0.50",
+            "D. 0.68"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính p₁ = 8/10 = 0.8, p₂ = 2/10 = 0.2. Áp dụng công thức Gini = 1 - (p₁² + p₂²) hoặc Gini = 2 * p₁ * p₂.",
+          "solution": [
+            "Bước 1: Tính tỷ lệ xác suất từng lớp:",
+            "  p₁ = 8 / 10 = 0.8",
+            "  p₂ = 2 / 10 = 0.2",
+            "Bước 2: Thay vào công thức Gini nhị phân:",
+            "  Gini = 1 - (p₁² + p₂²) = 1 - (0.8² + 0.2²) = 1 - (0.64 + 0.04) = 1 - 0.68 = 0.32.",
+            "Cách 2 nhanh hơn: Gini = 2 × p₁ × p₂ = 2 × 0.8 × 0.2 = 0.32.",
+            "Đáp án chính xác: B (0.32)."
+          ]
+        }
+      },
+      {
+        "heading": "7.3. Thuật Toán ID3, C4.5 & CART: Độ Lợi Thông Tin (Information Gain) & Cạm Bẫy Của Thuộc Tính ID",
+        "content": "Làm thế nào để xây dựng cây quyết định tự động từ dữ liệu? Khám phá thuật toán kinh điển ID3 của Ross Quinlan, công thức Độ Lợi Thông Tin Information Gain, và cách C4.5 giải quyết cạm bẫy thuộc tính ID.",
+        "deepDive": "**1. Độ Lợi Thông Tin (Information Gain - Thuật toán ID3):**\nMục tiêu của việc phân nhánh là làm cho các nút con có độ hỗn loạn thấp hơn nút cha.\nĐộ sụt giảm của độ hỗn loạn sau khi chia dữ liệu theo thuộc tính $A$ được gọi là **Information Gain (IG)**:\n$$IG(S, A) = H(S) - H(S \\mid A)$$\nTrong đó:\n- $H(S)$: Entropy ban đầu của nút cha trước khi chia.\n- $H(S \\mid A)$: Entropy có điều kiện (Trung bình có trọng số của Entropy các nhánh con):\n  $$H(S \\mid A) = \\sum_{v \\in \\text{Values}(A)} \\frac{|S_v|}{|S|} H(S_v)$$\n  - $v$: Một giá trị khả dĩ của thuộc tính $A$.\n  - $S_v$: Tập các mẫu có thuộc tính $A = v$.\n  - $\\frac{|S_v|}{|S|}$: Trọng số tỷ lệ số phần tử rơi vào nhánh con $v$.\n\n**Quy tắc tham lam (Greedy Choice) của ID3:**\nTại mỗi nút, thuật toán tính $IG(S, A)$ cho TOÀN BỘ các thuộc tính còn lại, và **CHỌN THUỘC TÍNH CÓ INFORMATION GAIN LỚN NHẤT** để làm câu hỏi phân nhánh!\n\n**2. Cạm bẫy chí mạng của Information Gain: Thuộc tính Số CMND / ID:**\nHãy tưởng tượng tập dữ liệu có một thuộc tính là `Số Căn Cước Công Dân (CCCD)` hoặc `Mã Khách Hàng`:\n- Mỗi người có đúng một mã duy nhất!\n- Nếu cây quyết định chọn chia theo `Mã Khách Hàng`: Cây sẽ rẽ thành $N$ nhánh con, mỗi nhánh con chứa đúng 1 người duy nhất!\n- Mỗi nhánh con chứa đúng 1 người nên thuần khiết $100\\% \\implies H(S_v) = 0$!\n- Dẫn đến: $H(S \\mid \\text{Mã CCCD}) = 0 \\implies IG(S, \\text{Mã CCCD}) = H(S) - 0 = H(S)$ (Cực đại tuyệt đối)!\n- Thuật toán ID3 ngây thơ sẽ reo lên: *'Đây là thuộc tính hoàn hảo nhất!'* và chọn ngay nó để làm gốc!\n- **Hậu quả:** Cây bị Quá khớp (Overfitting) thảm hại! Nó hoàn toàn không có khả năng tổng quát hóa cho bất kỳ khách hàng mới nào!\n\n**3. Đột phá của Thuật toán C4.5: Gain Ratio (Tỷ Số Độ Lợi):**\nRoss Quinlan đã sửa lỗi này trong thuật toán nâng cấp C4.5 bằng cách chia $IG$ cho một đại lượng phạt gọi là **Split Information (Thông tin phân tách)**:\n$$\\text{Gain Ratio}(S, A) = \\frac{IG(S, A)}{\\text{Split Information}(S, A)}$$\nvới:\n$$\\text{Split Information}(S, A) = - \\sum_{v \\in \\text{Values}(A)} \\frac{|S_v|}{|S|} \\log_2\\left(\\frac{|S_v|}{|S|}\\right)$$\n- Thuộc tính nào chia ra càng nhiều nhánh con li ti thì $\\text{Split Information}$ càng khổng lồ $\\implies$ $\\text{Gain Ratio}$ bị dìm xuống sát 0!\n- C4.5 loại bỏ hoàn toàn thiên vị đối với các thuộc tính có quá nhiều giá trị riêng biệt!\n\n**4. Bảng phân loại 3 thuật toán Cây Quyết Định kinh điển:**\n| Thuật toán | Tác giả | Tiêu chuẩn phân chia | Kiểu phân nhánh | Loại bài toán |\n|---|---|---|---|---|\n| **ID3** | Ross Quinlan (1986) | Information Gain | Đa nhánh (Multi-way) | Phân loại (Thuộc tính rời rạc) |\n| **C4.5** | Ross Quinlan (1993) | Gain Ratio | Đa nhánh & Nhị phân | Phân loại (Hỗ trợ liên tục) |\n| **CART** | Leo Breiman (1984) | Gini Impurity / MSE | **Chỉ nhị phân (Binary split)** | **Cả Phân loại & Hồi quy** |",
+        "formula": "IG(S, A) = H(S) - \\sum_{v} \\frac{|S_v|}{|S|} H(S_v), \\quad \\text{GainRatio} = \\frac{IG(S, A)}{\\text{SplitInfo}(S, A)}",
+        "mathExplainer": [
+          {
+            "sym": "IG(S, A)",
+            "name": "Độ lợi thông tin (Information Gain)",
+            "mean": "Lượng hỗn loạn giảm đi sau khi chia tập S theo thuộc tính A."
+          },
+          {
+            "sym": "H(S \\mid A)",
+            "name": "Entropy có điều kiện",
+            "mean": "Tổng Entropy các nhánh con có tính trọng số theo kích thước từng nhánh."
+          },
+          {
+            "sym": "\\text{SplitInfo}",
+            "name": "Thông tin phân tách",
+            "mean": "Thước đo đo lường mức độ phân mảnh của phép chia, dùng để phạt các thuộc tính có quá nhiều nhánh con."
+          },
+          {
+            "sym": "\\text{GainRatio}",
+            "name": "Tỷ số độ lợi",
+            "mean": "Chỉ số chuẩn hóa của C4.5 giúp chống lại cạm bẫy thiên vị thuộc tính ID."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"280\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">CƠ CHẾ TÍNH INFORMATION GAIN TẠI NÚT CHA</text>\n\n                        <!-- Parent Node -->\n                        <rect x=\"200\" y=\"30\" width=\"160\" height=\"40\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"280\" y=\"48\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Nút Cha: S (N = 14)</text>\n                        <text x=\"280\" y=\"62\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">9 Yes, 5 No ⇒ H(S) = 0.940</text>\n\n                        <!-- Split arrows -->\n                        <line x1=\"240\" y1=\"70\" x2=\"130\" y2=\"105\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"160\" y=\"85\" font-family=\"Georgia\" font-size=\"9\">Nhánh 1: |S₁| = 8</text>\n\n                        <line x1=\"320\" y1=\"70\" x2=\"430\" y2=\"105\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"400\" y=\"85\" font-family=\"Georgia\" font-size=\"9\">Nhánh 2: |S₂| = 6</text>\n\n                        <!-- Child Node 1 -->\n                        <rect x=\"50\" y=\"105\" width=\"160\" height=\"40\" fill=\"#eee\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"130\" y=\"123\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">S₁ (6 Yes, 2 No)</text>\n                        <text x=\"130\" y=\"137\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">H(S₁) = 0.811 bit</text>\n\n                        <!-- Child Node 2 -->\n                        <rect x=\"350\" y=\"105\" width=\"160\" height=\"40\" fill=\"#eee\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"430\" y=\"123\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">S₂ (3 Yes, 3 No)</text>\n                        <text x=\"430\" y=\"137\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">H(S₂) = 1.000 bit</text>\n\n                        <!-- Bottom formula -->\n                        <text x=\"280\" y=\"170\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">IG = H(S) - [(8/14) × 0.811 + (6/14) × 1.000] = 0.940 - 0.892 = 0.048 bit</text>\n                      </g>\n                    </svg>",
+          "caption": "Luồng tính toán Information Gain: Trừ Entropy nút cha cho trung bình có trọng số của Entropy các nút con."
+        },
+        "commonPitfalls": "Quên nhân tỷ lệ mẫu |S_v| / |S|: Rất nhiều học sinh cộng trung bình trực tiếp H(S₁) + H(S₂) rồi chia 2. Đây là sai lầm nghiêm trọng! Phải lấy trung bình có trọng số theo số lượng phần tử của mỗi nhánh con.",
+        "practiceQuestion": {
+          "level": "Nâng cao",
+          "question": "Tại sao thuật toán ID3 có xu hướng thiên vị nghiêm trọng việc lựa chọn các thuộc tính có số lượng giá trị phân biệt rất lớn (như Số điện thoại hoặc Mã ID khách hàng)?",
+          "options": [
+            "A. Vì các thuộc tính đó có Entropy nút cha rất nhỏ",
+            "B. Vì khi chia theo thuộc tính đó, mỗi nhánh con chỉ chứa rất ít mẫu, làm Entropy từng nhánh con rơi về 0 và Information Gain đạt cực đại giả tạo",
+            "C. Vì thuật toán ID3 không thể xử lý dữ liệu dạng số liên tục",
+            "D. Vì các thuộc tính đó làm giảm tốc độ tính toán của máy tính"
+          ],
+          "correctIndex": 1,
+          "hint": "Nếu mỗi nhánh con chỉ có 1 người thì nhánh đó có thuần khiết tuyệt đối không? Khi H(S_v) = 0 thì IG = H(S) - 0 = H(S).",
+          "solution": [
+            "Bước 1: Phân tích thuộc tính có nhiều giá trị như Mã ID: số lượng nhánh con sinh ra bằng đúng số mẫu dữ liệu N.",
+            "Bước 2: Mỗi nhánh con chỉ chứa đúng 1 mẫu duy nhất, do đó tỷ lệ p = 1.0 và Entropy của mọi nhánh con đều bằng 0.",
+            "Bước 3: Khi đó Entropy có điều kiện H(S|ID) = 0, dẫn tới IG(S, ID) = H(S) đạt giá trị lớn nhất có thể.",
+            "Bước 4: ID3 sẽ chọn thuộc tính này dù nó hoàn toàn vô dụng trên thực tế (Quá khớp tuyệt đối).",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "7.4. Kiểm Soát Quá Khớp (Overfitting): Kỹ Thuật Tỉa Cành (Pre-pruning & Cost-Complexity Post-pruning)",
+        "content": "Cây quyết định có bản năng tự nhiên mọc sâu vô tận cho đến khi nhớ từng điểm dữ liệu nhiễu. Khám phá hai chiến lược thuần hóa cây: Tiền tỉa cành (Pre-pruning) và Hậu tỉa cành (Cost-Complexity Pruning).",
+        "deepDive": "**1. Bản chất sự sụp đổ của Cây Quyết Định (Overfitting):**\nCây quyết định là thuật toán **Phi tham số (Non-parametric)**, nghĩa là nó không bị gò bó bởi bất kỳ giả định hình học nào như đường thẳng hay siêu phẳng.\n- Nếu bạn không can thiệp, cây sẽ liên tục phân nhánh cho đến khi mỗi chiếc lá chỉ chứa đúng **1 điểm dữ liệu duy nhất**!\n- Lúc này:\n  - Sai số trên tập huấn luyện (Train Error) = **0%**!\n  - Nhưng sai số trên tập kiểm tra (Test Error) vọt lên rất cao vì cây đã ghi nhớ cả các điểm nhiễu (Noise) và Outliers!\n\n**2. Chiến lược 1: Tiền tỉa cành (Pre-pruning / Early Stopping):**\nChặn đứng sự phát triển của cây ngay trong quá trình xây dựng bằng các 'hàng rào an toàn':\n- `max_depth`: Giới hạn độ sâu tối đa của cây (ví dụ: `max_depth=4` chỉ cho phép cây mọc tối đa 4 tầng).\n- `min_samples_split`: Số lượng mẫu tối thiểu bắt buộc phải có ở một nút để được phép chia tiếp (ví dụ: nếu nút có ít hơn 20 mẫu thì dừng lại, không chia nữa).\n- `min_samples_leaf`: Số lượng mẫu tối thiểu bắt buộc phải có ở một nút lá (ví dụ: mỗi lá phải có ít nhất 5 mẫu).\n- `min_impurity_decrease`: Mức độ giảm Gini/Entropy tối thiểu để chấp nhận một phép chia.\n- *Nhược điểm của Tiền tỉa cành:* Dễ mắc lỗi **Tầm nhìn ngắn (Myopic Stopping)**. Có những phép chia ở tầng hiện tại chỉ giảm rất ít Entropy, nhưng nó lại mở đường cho một phép chia cực kỳ xuất sắc ở tầng ngay sau đó! Nếu dừng quá sớm, ta sẽ bỏ lỡ cơ hội này.\n\n**3. Chiến lược 2: Hậu tỉa cành (Post-pruning / Cost-Complexity Pruning - CCP):**\nCho phép cây phát triển thoải mái đến mức cực đại ($T_0$), sau đó dùng dao tỉa gọt bớt các cành lá thừa thãi từ dưới đáy lên trên!\n- **Hàm mục tiêu phạt độ phức tạp (Cost-Complexity Criterion):**\n  $$\\mathcal{R}_\\alpha(T) = \\mathcal{R}(T) + \\alpha |T|$$\n  - $\\mathcal{R}(T)$: Tổng sai số phân loại của toàn bộ cây $T$ trên tập dữ liệu.\n  - $|T|$: Số lượng nút lá của cây $T$ (Đại diện cho kích thước và độ cồng kềnh của mô hình).\n  - $\\alpha \\ge 0$: Siêu tham số điều chỉnh độ phạt tỉa cành (Complexity Parameter).\n- **Cơ chế hoạt động của $\\alpha$:**\n  - Khi $\\alpha = 0$: Không phạt gì cả $\\implies$ Cây giữ nguyên kích thước khổng lồ ban đầu $T_0$.\n  - Khi $\\alpha$ tăng dần: Giá phạt cho mỗi chiếc lá tăng lên. Thuật toán sẽ so sánh: Việc giữ lại một nhánh con có giúp giảm sai số $\\mathcal{R}(T)$ đủ nhiều để bù lại chi phí phạt $\\alpha |T|$ hay không?\n  - Nếu nhánh con đó chỉ giúp sửa sai cho một vài điểm nhiễu vu vơ, thuật toán sẽ **cắt phăng nhánh đó đi** và gộp lại thành một nút lá duy nhất!\n  - Khi $\\alpha \\to \\infty$: Toàn bộ các nhánh bị cắt sạch, chỉ còn lại đúng 1 nút gốc duy nhất!",
+        "formula": "\\mathcal{R}_\\alpha(T) = \\mathcal{R}(T) + \\alpha |T|, \\quad \\alpha_{\\text{eff}} = \\frac{\\mathcal{R}(t) - \\mathcal{R}(T_t)}{|T_t| - 1}",
+        "mathExplainer": [
+          {
+            "sym": "\\mathcal{R}(T)",
+            "name": "Sai số của cây T",
+            "mean": "Tỷ lệ hoặc số lượng mẫu bị phân loại sai bởi cây trên tập dữ liệu."
+          },
+          {
+            "sym": "|T|",
+            "name": "Số lượng nút lá",
+            "mean": "Độ phức tạp kích cỡ của cây (càng nhiều lá cây càng dễ overfit)."
+          },
+          {
+            "sym": "\\alpha (Alpha)",
+            "name": "Hệ số phạt độ phức tạp",
+            "mean": "Siêu tham số điều khiển mức độ tỉa: alpha càng lớn cây càng bị gọt ngắn."
+          },
+          {
+            "sym": "\\alpha_{\\text{eff}}",
+            "name": "Ngưỡng alpha hiệu dụng",
+            "mean": "Mức alpha tối thiểu mà tại đó việc tỉa bỏ nhánh T_t đem lại lợi ích tốt hơn giữ lại."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <!-- Overfitted Tree (Left) -->\n                        <g transform=\"translate(30, 10)\">\n                          <text x=\"100\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Cây Mọc Tự Do (Overfit: 7 Lá)</text>\n                          <circle cx=\"100\" cy=\"25\" r=\"5\" fill=\"#111\"/>\n                          <line x1=\"95\" y1=\"28\" x2=\"60\" y2=\"55\" stroke=\"#111\"/><line x1=\"105\" y1=\"28\" x2=\"140\" y2=\"55\" stroke=\"#111\"/>\n                          <circle cx=\"60\" cy=\"58\" r=\"4\" fill=\"#111\"/><circle cx=\"140\" cy=\"58\" r=\"4\" fill=\"#111\"/>\n                          <line x1=\"55\" y1=\"62\" x2=\"30\" y2=\"90\" stroke=\"#111\"/><line x1=\"65\" y1=\"62\" x2=\"80\" y2=\"90\" stroke=\"#111\"/>\n                          <circle cx=\"30\" cy=\"92\" r=\"3\" fill=\"#111\"/><circle cx=\"80\" cy=\"92\" r=\"3\" fill=\"#111\"/>\n                          <!-- Noise branches -->\n                          <line x1=\"28\" y1=\"95\" x2=\"15\" y2=\"125\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                          <line x1=\"32\" y1=\"95\" x2=\"45\" y2=\"125\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                          <circle cx=\"15\" cy=\"127\" r=\"3\" fill=\"#888\"/><circle cx=\"45\" cy=\"127\" r=\"3\" fill=\"#888\"/>\n                          <text x=\"30\" y=\"145\" font-family=\"Georgia\" font-size=\"8\" fill=\"#888\">Cành thừa do nhiễu</text>\n                        </g>\n\n                        <!-- Scissors Arrow -->\n                        <g transform=\"translate(245, 65)\">\n                          <line x1=\"0\" y1=\"15\" x2=\"60\" y2=\"15\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <polygon points=\"60,15 50,10 50,20\" fill=\"#111\"/>\n                          <text x=\"30\" y=\"5\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Hậu tỉa cành</text>\n                          <text x=\"30\" y=\"32\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">Phạt R_α(T)</text>\n                        </g>\n\n                        <!-- Pruned Tree (Right) -->\n                        <g transform=\"translate(360, 10)\">\n                          <text x=\"100\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Cây Sau Khi Tỉa (Tổng Quát: 3 Lá)</text>\n                          <circle cx=\"100\" cy=\"25\" r=\"6\" fill=\"#111\"/>\n                          <line x1=\"95\" y1=\"30\" x2=\"60\" y2=\"65\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <line x1=\"105\" y1=\"30\" x2=\"140\" y2=\"65\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <rect x=\"40\" y=\"65\" width=\"40\" height=\"25\" fill=\"#111\"/>\n                          <text x=\"60\" y=\"81\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">Lá 1</text>\n                          <!-- Right split -->\n                          <circle cx=\"140\" cy=\"65\" r=\"5\" fill=\"#111\"/>\n                          <line x1=\"135\" y1=\"70\" x2=\"115\" y2=\"105\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <line x1=\"145\" y1=\"70\" x2=\"165\" y2=\"105\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <rect x=\"95\" y=\"105\" width=\"40\" height=\"25\" fill=\"#eee\" stroke=\"#111\"/>\n                          <text x=\"115\" y=\"121\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Lá 2</text>\n                          <rect x=\"145\" y=\"105\" width=\"40\" height=\"25\" fill=\"#111\"/>\n                          <text x=\"165\" y=\"121\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">Lá 3</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Kỹ thuật Cost-Complexity Pruning cắt bỏ các cành lá sâu li ti ghi nhớ nhiễu để đưa mô hình về trạng thái tổng quát hóa cao."
+        },
+        "commonPitfalls": "Nhầm lẫn chiều tác động của siêu tham số alpha: Khi alpha = 0, mô hình phức tạp nhất (dễ Overfitting). Khi alpha TĂNG LÊN, mô hình bị tỉa ngắn lại (giảm Overfitting). Nếu alpha quá lớn, cây bị tỉa trụi lủi chỉ còn 1 lá, dẫn tới hiện tượng Underfitting!",
+        "practiceQuestion": {
+          "level": "Trung bình",
+          "question": "Khi áp dụng kỹ thuật Cost-Complexity Pruning với hàm mục tiêu R_α(T) = R(T) + α|T|, nếu ta liên tục tăng giá trị siêu tham số α từ 0 lên vô cùng, điều gì sẽ xảy ra với số lượng nút lá |T| của cây quyết định?",
+          "options": [
+            "A. Số lượng nút lá |T| sẽ tăng dần để giảm sai số R(T)",
+            "B. Số lượng nút lá |T| sẽ giảm dần đơn điệu và cuối cùng chỉ còn lại 1 nút gốc duy nhất",
+            "C. Số lượng nút lá |T| không thay đổi vì cấu trúc cây đã được cố định trước đó",
+            "D. Cây sẽ bị xóa hoàn toàn và không còn nút nào"
+          ],
+          "correctIndex": 1,
+          "hint": "alpha là tiền phạt cho mỗi chiếc lá. Tiền phạt càng đắt đỏ thì thuật toán càng thẳng tay cắt bỏ các lá rườm rà.",
+          "solution": [
+            "Bước 1: Phân tích hàm mục tiêu: R_α(T) = R(T) + α|T|.",
+            "Bước 2: Khi α tăng lên, chi phí phạt cho mỗi nút lá tăng vọt, buộc thuật toán phải cắt bớt các nhánh con để cực tiểu hóa hàm mục tiêu.",
+            "Bước 3: Do đó số lượng lá |T| là một hàm giảm đơn điệu theo α, cho đến khi chỉ còn đúng 1 nút lá gốc.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "7.5. Kỹ Thuật Ensemble: Sức Mạnh Hội Đồng, Bagging (Random Forest, OOB 36.8%) vs Boosting (XGBoost)",
+        "content": "Một cây đơn lẻ luôn có phương sai cao và dễ lung lay trước nhiễu. Kỹ thuật Học Kết Hợp (Ensemble Learning) kết nối hàng trăm cây lại với nhau, tạo ra những mô hình thống trị mọi cuộc thi Machine Learning trên thế giới.",
+        "deepDive": "**1. Triết lý Ensemble và Định lý Ban Giám Khảo Condorcet (1785):**\nGiả sử có một hội đồng gồm 100 vị bác sĩ độc lập. Mỗi vị bác sĩ có xác suất chẩn đoán đúng là $p = 70\\%$ ($0.7$).\n- Nếu bạn chỉ hỏi 1 bác sĩ: Xác suất đúng là $70\\%$.\n- Nhưng nếu bạn cho **cả 100 bác sĩ bỏ phiếu biểu quyết đa số**:\n  Theo luật số lớn, xác suất để hơn một nửa hội đồng (từ 51 bác sĩ trở lên) cùng đoán đúng vọt lên tới:\n  $$P(\\text{Hội đồng đúng}) = \\sum_{k=51}^{100} \\binom{100}{k} (0.7)^k (0.3)^{100-k} \\approx 99.997\\%!$$\n- Một tập hợp gồm các mô hình yếu (Weak Learners) độc lập khi kết hợp lại sẽ tạo ra một mô hình mạnh mẽ phi thường (Strong Learner)!\n\n**2. Hai trường phái Ensemble vĩ đại: BAGGING vs BOOSTING (Trọng tâm Câu 12 Đề thi VAIO):**\n\n| Tiêu Chí Phân Biệt | BAGGING (Bootstrap Aggregating) | BOOSTING (Tăng Cường Tuần Tự) |\n|---|---|---|\n| **Thuật toán đại diện** | **Random Forest (Rừng ngẫu nhiên)** | **AdaBoost, Gradient Boosting, XGBoost, LightGBM** |\n| **Cách huấn luyện** | **Song song, độc lập hoàn toàn** (Parallel) | **Nối tiếp, tuần tự từng cây** (Sequential) |\n| **Mục tiêu toán học** | **GIẢM PHƯƠNG SAI (Variance Reduction)** | **GIẢM ĐỘ LỆCH (Bias Reduction)** |\n| **Loại cây cơ sở** | Cây mọc sâu hết mức (Low Bias, High Variance) | Cây nông, gốc cụt 1-3 tầng (High Bias, Low Variance) |\n| **Cơ chế tổng hợp** | Bỏ phiếu đa số (Phân loại) hoặc Lấy trung bình cộng (Hồi quy) | Tổng có trọng số của các cây: $\\hat{y} = \\sum \\eta f_b(x)$ |\n| **Xử lý mẫu sai** | Các cây xem mọi mẫu dữ liệu bình đẳng như nhau | Cây sau **tập trung toàn lực vào các mẫu cây trước đoán sai** |\n| **Độ nhạy với Nhiễu** | Rất kiên cường với nhiễu và Outliers | Dễ bị ảnh hưởng bởi nhiễu (vì cố ép học các mẫu khó) |\n\n**3. Bí mật bên trong Random Forest: Hai tầng ngẫu nhiên hóa:**\nRandom Forest nâng cấp từ Bagging nhờ hai kỹ thuật ngẫu nhiên đột phá:\n- **Tầng 1: Lấy mẫu Bootstrap có hoàn lại (Sample Bootstrapping):**\n  - Từ tập dữ liệu $N$ mẫu, mỗi cây rút thăm ngẫu nhiên $N$ mẫu CÓ HOÀN LẠI (một mẫu có thể được rút nhiều lần).\n  - **Định lý kỳ diệu Out-Of-Bag (OOB) trong đề thi Olympic:**\n    - Xác suất một mẫu dữ liệu cụ thể KHÔNG ĐƯỢC CHỌN trong 1 lần bốc là $1 - \\frac{1}{N}$.\n    - Xác suất mẫu đó hoàn toàn vắng mặt sau cả $N$ lần bốc độc lập là:\n      $$P(\\text{Vắng mặt}) = \\left(1 - \\frac{1}{N}\\right)^N$$\n    - Khi kích thước dữ liệu lớn ($N \\to \\infty$):\n      $$\\lim_{N \\to \\infty} \\left(1 - \\frac{1}{N}\\right)^N = \\frac{1}{e} \\approx 0.3679 \\approx 36.8\\%$$\n    - **Ý nghĩa thực tiễn:** Trong mỗi cây, luôn có khoảng **$36.8\\%$ dữ liệu gốc không hề được dùng để huấn luyện**! Tập này gọi là **Out-Of-Bag (OOB)**, được tận dụng làm tập kiểm thử Validation miễn phí mà không cần phải tốn công chia tập Validation riêng!\n\n- **Tầng 2: Ngẫu nhiên hóa không gian đặc trưng (Feature Subsampling):**\n  - Tại MỖI LẦN PHÂN NHÁNH, cây không được phép nhìn tất cả $d$ đặc trưng!\n  - Cây chỉ được bốc ngẫu nhiên một tập con gồm $m$ đặc trưng:\n    $$m = \\sqrt{d} \\text{ (với bài toán Phân loại)}, \\quad m = \\frac{d}{3} \\text{ (với bài toán Hồi quy)}$$\n  - *Tại sao phải làm vậy?* Nếu có 1 đặc trưng cực kỳ mạnh (ví dụ: Thu nhập), tất cả 100 cây đều sẽ chọn nó làm gốc, khiến 100 cây giống hệt nhau và tương quan chặt chẽ với nhau! Việc ép chọn ngẫu nhiên buộc các cây phải khám phá các đặc trưng khác nhau, làm **Mất tương quan (Decorrelate) giữa các cây**, giúp phương sai toàn cục giảm tối đa!\n\n**4. Cơ chế hoạt động của Boosting (XGBoost / Gradient Boosting):**\n- Cây thứ 1 huấn luyện xong, dự đoán còn sai lệch một lượng dư sai số (Residual):\n  $$r_i^{(1)} = y_i - \\hat{y}_i^{(1)}$$\n- Cây thứ 2 sinh ra **không phải để dự đoán $y$**, mà để **dự đoán chính xác phần sai số dư $r_i^{(1)}$**!\n- Cập nhật dự đoán tổng hợp với tốc độ học $\\eta$ (Shrinkage factor, ví dụ $\\eta = 0.05$):\n  $$\\hat{y}^{(2)} = \\hat{y}^{(1)} + \\eta f_2(x)$$\n- Từng bước một, các cây nối tiếp nhau bào mòn sai số về gần bằng 0!",
+        "formula": "\\hat{y}_{\\text{RF}} = \\text{mode}(T_1, \\dots, T_B), \\quad \\lim_{N \\to \\infty}\\left(1-\\frac{1}{N}\\right)^N = \\frac{1}{e} \\approx 36.8\\%, \\quad \\hat{y}_{\\text{Boost}} = \\sum_{b=1}^B \\eta f_b(x)",
+        "mathExplainer": [
+          {
+            "sym": "B",
+            "name": "Số lượng cây trong rừng",
+            "mean": "Thường chọn từ 100 đến 500 cây (tăng B không làm overfit Random Forest, chỉ tốn thời gian)."
+          },
+          {
+            "sym": "m = \\sqrt{d}",
+            "name": "Số đặc trưng ngẫu nhiên",
+            "mean": "Quy tắc vàng của Leo Breiman: mỗi bước phân nhánh chỉ xét căn bậc hai tổng số đặc trưng."
+          },
+          {
+            "sym": "1/e \\approx 36.8\\%",
+            "name": "Tỷ lệ mẫu Out-Of-Bag (OOB)",
+            "mean": "Tỷ lệ phần trăm các mẫu dữ liệu không được rút trúng trong quá trình lấy mẫu Bootstrap."
+          },
+          {
+            "sym": "\\eta (Eta)",
+            "name": "Hệ số co rút (Learning Rate)",
+            "mean": "Tốc độ học trong Boosting (thường 0.01 đến 0.1) giúp ngăn chặn cây học quá nhanh dẫn tới overfit."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 210\" width=\"100%\" height=\"210\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"210\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(30, 20)\">\n                        <!-- Bagging Diagram (Left) -->\n                        <g transform=\"translate(10, 10)\">\n                          <text x=\"130\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">BAGGING (Random Forest: Song Song)</text>\n                          <!-- Data -->\n                          <rect x=\"70\" y=\"15\" width=\"120\" height=\"25\" fill=\"#eee\" stroke=\"#111\"/>\n                          <text x=\"130\" y=\"32\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Tập dữ liệu gốc D</text>\n                          <!-- Parallel branches -->\n                          <line x1=\"85\" y1=\"40\" x2=\"35\" y2=\"65\" stroke=\"#111\"/>\n                          <line x1=\"130\" y1=\"40\" x2=\"130\" y2=\"65\" stroke=\"#111\"/>\n                          <line x1=\"175\" y1=\"40\" x2=\"225\" y2=\"65\" stroke=\"#111\"/>\n                          <!-- Trees -->\n                          <rect x=\"10\" y=\"65\" width=\"50\" height=\"35\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"35\" y=\"86\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Cây 1</text>\n                          <rect x=\"105\" y=\"65\" width=\"50\" height=\"35\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"130\" y=\"86\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Cây 2</text>\n                          <rect x=\"200\" y=\"65\" width=\"50\" height=\"35\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"225\" y=\"86\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Cây B</text>\n                          <!-- Voting box -->\n                          <line x1=\"35\" y1=\"100\" x2=\"130\" y2=\"130\" stroke=\"#111\"/>\n                          <line x1=\"130\" y1=\"100\" x2=\"130\" y2=\"130\" stroke=\"#111\"/>\n                          <line x1=\"225\" y1=\"100\" x2=\"130\" y2=\"130\" stroke=\"#111\"/>\n                          <rect x=\"65\" y=\"130\" width=\"130\" height=\"30\" fill=\"#111\"/>\n                          <text x=\"130\" y=\"149\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Biểu Quyết Đa Số</text>\n                          <text x=\"130\" y=\"178\" font-family=\"Georgia\" font-size=\"9\" font-style=\"italic\" text-anchor=\"middle\">Mục tiêu: GIẢM PHƯƠNG SAI</text>\n                        </g>\n\n                        <!-- Divider -->\n                        <line x1=\"290\" y1=\"15\" x2=\"290\" y2=\"185\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n\n                        <!-- Boosting Diagram (Right) -->\n                        <g transform=\"translate(310, 10)\">\n                          <text x=\"140\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">BOOSTING (XGBoost: Tuần Tự)</text>\n                          <!-- Sequential flow -->\n                          <rect x=\"10\" y=\"45\" width=\"55\" height=\"40\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"37\" y=\"68\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Cây 1</text>\n\n                          <line x1=\"65\" y1=\"65\" x2=\"105\" y2=\"65\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <polygon points=\"105,65 97,61 97,69\" fill=\"#111\"/>\n                          <text x=\"85\" y=\"58\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Sai số r₁</text>\n\n                          <rect x=\"105\" y=\"45\" width=\"55\" height=\"40\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"132\" y=\"68\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Cây 2</text>\n\n                          <line x1=\"160\" y1=\"65\" x2=\"200\" y2=\"65\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <polygon points=\"200,65 192,61 192,69\" fill=\"#111\"/>\n                          <text x=\"180\" y=\"58\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Sai số r₂</text>\n\n                          <rect x=\"200\" y=\"45\" width=\"55\" height=\"40\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"227\" y=\"68\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Cây 3</text>\n\n                          <!-- Summation -->\n                          <rect x=\"55\" y=\"130\" width=\"160\" height=\"30\" fill=\"#111\"/>\n                          <text x=\"135\" y=\"149\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Tổng Có Trọng Số Σ η·f_b(x)</text>\n                          <text x=\"135\" y=\"178\" font-family=\"Georgia\" font-size=\"9\" font-style=\"italic\" text-anchor=\"middle\">Mục tiêu: GIẢM ĐỘ LỆCH (BIAS)</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "So sánh kiến trúc song song Bagging (Random Forest - Giảm Variance) vs kiến trúc nối tiếp Boosting (XGBoost - Giảm Bias)."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa cơ chế giảm lỗi của Bagging và Boosting: Đề thi VAIO thường xuyên gài bẫy: 'Random Forest giúp giảm thành phần nào trong sai số?'. Câu trả lời ĐÚNG là GIẢM PHƯƠNG SAI (Variance). Boosting mới là kỹ thuật tập trung GIẢM ĐỘ LỆCH (Bias)!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 12 Đề Thi VAIO 2025)",
+          "question": "Trong thuật toán Rừng Ngẫu Nhiên (Random Forest), khi kích thước tập dữ liệu huấn luyện N rất lớn, tỷ lệ xấp xỉ của các mẫu dữ liệu không được rút trúng vào tập Bootstrap của mỗi cây (Tập Out-Of-Bag - OOB) là bao nhiêu?",
+          "options": [
+            "A. Khoảng 50.0%",
+            "B. Khoảng 36.8% (Tương đương 1/e)",
+            "C. Khoảng 63.2% (Tương đương 1 - 1/e)",
+            "D. Đúng bằng 0% vì tất cả mẫu đều được dùng"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính giới hạn của (1 - 1/N)^N khi N tiến tới vô cùng. lim(1 - 1/N)^N = 1/e ≈ 0.368.",
+          "solution": [
+            "Bước 1: Xác suất một mẫu không được rút trong một lượt bốc là (1 - 1/N).",
+            "Bước 2: Sau N lượt bốc có hoàn lại độc lập, xác suất mẫu đó hoàn toàn vắng mặt là (1 - 1/N)^N.",
+            "Bước 3: Lấy giới hạn khi N -> vô cùng: lim (1 - 1/N)^N = e^(-1) = 1/e ≈ 0.367879 ≈ 36.8%.",
+            "Bước 4: Đây chính là tỷ lệ mẫu Out-Of-Bag (OOB). Mẫu được dùng trong cây chiếm 1 - 36.8% = 63.2%.",
+            "Đáp án chính xác: B (Khoảng 36.8%)."
+          ]
+        }
+      },
+      {
+        "heading": "7.6. Bài Toán Tính Tay Chuẩn Đề Thi VAIO: Tính Entropy, Information Gain & Dự Đoán Biểu Quyết Random Forest",
+        "content": "Thực hành giải bài toán kinh điển mô phỏng chuẩn xác Câu 34 và Câu 12 Đề thi Olympic AI: Tính toán chi tiết từng bit Entropy, độ lợi thông tin Information Gain, và phân biệt Hard Voting vs Soft Voting trong Random Forest.",
+        "deepDive": "**1. Đề bài chuẩn Olympic AI:**\nXét bài toán phân loại kinh điển gồm $N = 14$ ngày quan sát để dự đoán quyết định có nên `Chơi Quần Vợt (Play Tennis)` hay không.\nTập dữ liệu ban đầu $S$ có:\n- **9 ngày Chơi (Yes)**\n- **5 ngày Nghỉ (No)**\n\nTa muốn đánh giá xem có nên chọn thuộc tính `Gió (Wind)` để phân nhánh tại nút gốc hay không. Thuộc tính `Gió` nhận 2 giá trị:\n- `Gió Yếu (Weak)`: Gồm **8 ngày**, trong đó có **6 ngày Chơi (Yes)** và **2 ngày Nghỉ (No)**.\n- `Gió Mạnh (Strong)`: Gồm **6 ngày**, trong đó có **3 ngày Chơi (Yes)** và **3 ngày Nghỉ (No)**.\n\n*(Bảng số liệu hỗ trợ tính toán: $\\log_2(9/14) \\approx -0.6374$, $\\log_2(5/14) \\approx -1.4854$, $\\log_2(6/8) \\approx -0.4150$, $\\log_2(2/8) \\approx -2.0000$, $\\log_2(0.5) = -1.0000$)*.\n\n**YÊU CẦU THÍ SINH:**\n1. Tính độ hỗn loạn Entropy ban đầu của tập dữ liệu: $H(S)$.\n2. Tính Entropy của nhánh `Gió Yếu`: $H(S_{\\text{Weak}})$ và nhánh `Gió Mạnh`: $H(S_{\\text{Strong}})$.\n3. Tính Entropy có điều kiện $H(S \\mid \\text{Wind})$ và Độ Lợi Thông Tin $\\text{IG}(S, \\text{Wind})$.\n4. Tính chỉ số vẩn đục ban đầu $\\text{Gini}(S)$.\n5. Giả sử ta huấn luyện một mô hình Random Forest gồm $B = 5$ cây độc lập. Với một ngày mới có các điều kiện thời tiết $x$, 5 cây đưa ra các xác suất dự đoán $P(\\text{Yes} \\mid x)$ lần lượt là: $[0.8, 0.7, 0.4, 0.9, 0.3]$.\n   - Theo cơ chế **Biểu quyết cứng (Hard Voting)** với ngưỡng 0.5: Kết quả phân loại là gì?\n   - Theo cơ chế **Biểu quyết mềm (Soft Voting)**: Xác suất trung bình là bao nhiêu và kết quả phân loại là gì?\n\n---\n\n**2. Lời giải chi tiết từng bước (Step-by-Step Derivation):**\n\n**Bước 1: Tính Entropy ban đầu $H(S)$:**\nTập $S$ có 9 Yes, 5 No trên tổng số 14 mẫu:\n$$p_{\\text{Yes}} = \\frac{9}{14} \\approx 0.6429, \\quad p_{\\text{No}} = \\frac{5}{14} \\approx 0.3571$$\n$$H(S) = - \\left[ \\frac{9}{14} \\log_2\\left(\\frac{9}{14}\\right) + \\frac{5}{14} \\log_2\\left(\\frac{5}{14}\\right) \\right]$$\n$$= - [ 0.6429 \\times (-0.6374) + 0.3571 \\times (-1.4854) ]$$\n$$= - [ -0.4098 - 0.5305 ] = - (-0.9403) = 0.9403\\text{ bit}$$\n\n**Bước 2: Tính Entropy các nhánh con:**\n- **Nhánh Gió Yếu ($S_{\\text{Weak}}$ gồm 6 Yes, 2 No, tổng 8 mẫu):**\n  $$p_1 = \\frac{6}{8} = 0.75, \\quad p_2 = \\frac{2}{8} = 0.25$$\n  $$H(S_{\\text{Weak}}) = - [ 0.75 \\log_2(0.75) + 0.25 \\log_2(0.25) ]$$\n  $$= - [ 0.75 \\times (-0.4150) + 0.25 \\times (-2.0000) ]$$\n  $$= - [ -0.3113 - 0.5000 ] = 0.8113\\text{ bit}$$\n\n- **Nhánh Gió Mạnh ($S_{\\text{Strong}}$ gồm 3 Yes, 3 No, tổng 6 mẫu):**\n  Vì tỷ lệ chia đôi cân bằng 50-50 ($p_1 = 0.5, p_2 = 0.5$):\n  $$H(S_{\\text{Strong}}) = - [ 0.5 \\log_2(0.5) + 0.5 \\log_2(0.5) ] = - [ 0.5(-1) + 0.5(-1) ] = 1.0000\\text{ bit}$$\n\n**Bước 3: Tính Entropy có điều kiện và Information Gain:**\n- Entropy có điều kiện $H(S \\mid \\text{Wind})$:\n  $$H(S \\mid \\text{Wind}) = \\frac{|S_{\\text{Weak}}|}{|S|} H(S_{\\text{Weak}}) + \\frac{|S_{\\text{Strong}}|}{|S|} H(S_{\\text{Strong}})$$\n  $$= \\frac{8}{14} \\times 0.8113 + \\frac{6}{14} \\times 1.0000$$\n  $$= 0.5714 \\times 0.8113 + 0.4286 \\times 1.0000 = 0.4636 + 0.4286 = 0.8922\\text{ bit}$$\n- Độ Lợi Thông Tin $\\text{IG}(S, \\text{Wind})$:\n  $$\\text{IG}(S, \\text{Wind}) = H(S) - H(S \\mid \\text{Wind}) = 0.9403 - 0.8922 = 0.0481\\text{ bit}$$\n  *Nhận xét:* Việc phân nhánh theo thuộc tính Gió giúp làm giảm độ hỗn loạn đi $0.0481$ bit thông tin.\n\n**Bước 4: Tính Gini ban đầu $\\text{Gini}(S)$:**\n$$\\text{Gini}(S) = 1 - \\left[ \\left(\\frac{9}{14}\\right)^2 + \\left(\\frac{5}{14}\\right)^2 \\right] = 1 - \\left[ \\frac{81}{196} + \\frac{25}{196} \\right] = 1 - \\frac{106}{196} = \\frac{90}{196} \\approx 0.4592$$\n\n**Bước 5: Dự đoán Random Forest (Hard Voting vs Soft Voting):**\nTập xác suất của 5 cây: $[0.8, 0.7, 0.4, 0.9, 0.3]$.\n- **Biểu quyết cứng (Hard Voting):**\n  Quy đổi từng xác suất thành nhãn nhị phân với ngưỡng $\\theta = 0.5$:\n  - Cây 1: $0.8 \\ge 0.5 \\implies$ **YES**\n  - Cây 2: $0.7 \\ge 0.5 \\implies$ **YES**\n  - Cây 3: $0.4 < 0.5 \\implies$ **NO**\n  - Cây 4: $0.9 \\ge 0.5 \\implies$ **YES**\n  - Cây 5: $0.3 < 0.5 \\implies$ **NO**\n  - Kiểm phiếu: Có **3 phiếu YES** và **2 phiếu NO**.\n  - **Kết luận:** Mô hình biểu quyết chọn **YES** (Thắng áp đảo 3-2).\n\n- **Biểu quyết mềm (Soft Voting):**\n  Tính xác suất trung bình cộng của cả 5 cây:\n  $$\\bar{P}(\\text{Yes} \\mid x) = \\frac{0.8 + 0.7 + 0.4 + 0.9 + 0.3}{5} = \\frac{3.1}{5} = 0.62 = 62.0\\%$$\n  Vì $\\bar{P} = 62.0\\% \\ge 50\\%$, mô hình kết luận nhãn **YES** với độ tin cậy $62\\%$.\n  *(Lưu ý: Soft Voting thường cho kết quả ổn định và chính xác hơn Hard Voting vì nó cân nhắc cả mức độ tự tin của từng cây!)*",
+        "formula": "H(S) = 0.9403, \\, H(S|\\text{Wind}) = 0.8922 \\implies \\text{IG} = 0.0481\\text{ bit}, \\, \\text{Gini} = 0.4592, \\, \\bar{P}_{\\text{Soft}} = 62\\%",
+        "mathExplainer": [
+          {
+            "sym": "H(S) = 0.9403",
+            "name": "Entropy gốc",
+            "mean": "Độ hỗn loạn ban đầu của 14 mẫu thời tiết."
+          },
+          {
+            "sym": "H(S|\\text{Wind}) = 0.8922",
+            "name": "Entropy có điều kiện",
+            "mean": "Độ hỗn loạn trung bình còn lại sau khi biết thông tin về Gió."
+          },
+          {
+            "sym": "\\text{IG} = 0.0481",
+            "name": "Độ lợi thông tin",
+            "mean": "Lượng thông tin hữu ích thu được từ thuộc tính Gió (0.0481 bit)."
+          },
+          {
+            "sym": "\\bar{P} = 62\\%",
+            "name": "Xác suất Soft Voting",
+            "mean": "Độ tin cậy tổng hợp của hội đồng 5 cây quyết định trong Random Forest."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"290\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">TỔNG HỢP KẾT QUẢ TÍNH TOÁN THỰC CHIẾN CÂU 34 &amp; CÂU 12</text>\n\n                        <!-- Box 1: Information Gain -->\n                        <g transform=\"translate(10, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"260\" height=\"120\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"130\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Tính Toán Cây Đơn (ID3)</text>\n                          <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\">• H(S ban đầu) = 0.9403 bit</text>\n                          <text x=\"15\" y=\"68\" font-family=\"Georgia\" font-size=\"10\">• H(S_Weak) = 0.8113, H(S_Strong) = 1.000</text>\n                          <text x=\"15\" y=\"88\" font-family=\"Georgia\" font-size=\"10\">• H(S|Wind) = (8/14)(0.811) + (6/14)(1.0) = 0.892</text>\n                          <text x=\"15\" y=\"110\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">⇒ IG(S, Wind) = 0.0481 bit</text>\n                        </g>\n\n                        <!-- Box 2: Random Forest Voting -->\n                        <g transform=\"translate(300, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"270\" height=\"120\" fill=\"#111\"/>\n                          <text x=\"135\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">2. Hội Đồng Rừng Ngẫu Nhiên</text>\n                          <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\">• Xác suất 5 cây: [0.8, 0.7, 0.4, 0.9, 0.3]</text>\n                          <text x=\"15\" y=\"70\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\">• Hard Voting: 3 YES vs 2 NO ⇒ YES</text>\n                          <text x=\"15\" y=\"92\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\">• Soft Voting: Trung bình p = 62.0% ⇒ YES</text>\n                          <text x=\"15\" y=\"112\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\">Hội đồng triệt tiêu sai số ngẫu nhiên!</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Bảng tổng kết toàn diện: Phép tính toán Entropy / Information Gain của thuật toán ID3 và cơ chế biểu quyết Hard/Soft Voting của Random Forest."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa logarit tự nhiên ln và logarit cơ số 2 trong đề thi: Nếu đề bài yêu cầu tính Entropy theo đơn vị bit (Shannon Entropy), bạn BẮT BUỘC phải dùng logarit cơ số 2 (log₂). Nếu dùng logarit tự nhiên ln, đơn vị tính sẽ là nat (thường dùng trong vật lý thống kê).",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 34 Đề Thi VAIO 2025)",
+          "question": "Cho một tập dữ liệu nhị phân S gồm 16 mẫu với 12 mẫu Dương tính và 4 mẫu Âm tính. Nếu một thuộc tính A chia tập S thành hai tập con S₁ (gồm 8 mẫu Dương tính, 0 mẫu Âm tính) và S₂ (gồm 4 mẫu Dương tính, 4 mẫu Âm tính). Biết H(S) ≈ 0.811 bit. Độ Lợi Thông Tin IG(S, A) bằng bao nhiêu?",
+          "options": [
+            "A. 0.311 bit",
+            "B. 0.500 bit",
+            "C. 0.811 bit",
+            "D. 0.000 bit"
+          ],
+          "correctIndex": 0,
+          "hint": "Tính H(S₁) = 0 (thuần khiết). Tính H(S₂) = 1.0 (50-50). Tính H(S|A) = (8/16) * 0 + (8/16) * 1.0 = 0.5. IG = H(S) - H(S|A).",
+          "solution": [
+            "Bước 1: Tính Entropy từng nhánh con:",
+            "  Nhánh S₁: 8 mẫu (+) và 0 mẫu (-) ⇒ Thuần khiết tuyệt đối ⇒ H(S₁) = 0.0 bit.",
+            "  Nhánh S₂: 4 mẫu (+) và 4 mẫu (-) ⇒ Chia đôi 50-50 ⇒ H(S₂) = 1.0 bit.",
+            "Bước 2: Tính trọng số và Entropy có điều kiện:",
+            "  |S₁| = 8, |S₂| = 8, tổng |S| = 16.",
+            "  H(S|A) = (8/16) × H(S₁) + (8/16) × H(S₂) = 0.5 × 0 + 0.5 × 1.0 = 0.500 bit.",
+            "Bước 3: Tính Độ Lợi Thông Tin:",
+            "  IG(S, A) = H(S) - H(S|A) = 0.811 - 0.500 = 0.311 bit.",
+            "Đáp án chính xác: A (0.311 bit)."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-entropy-calculator",
+    "examConnection": {
+      "questionTitle": "Điểm Trọng Tâm Về Decision Tree & Ensemble Trong Đề Thi VAIO 2025",
+      "items": [
+        {
+          "code": "Câu 12 VAIO: Bagging vs Random Forest",
+          "problem": "Thuật toán nào sau đây là thuật toán phổ biến và hiệu quả nhất dựa trên ý tưởng Bagging (Bootstrap Aggregating)?",
+          "solution": [
+            "1. Random Forest (Rừng ngẫu nhiên) là hiện thân hoàn hảo nhất của Bagging.",
+            "2. Bản chất: Kết hợp lấy mẫu Bootstrap (rút thăm có hoàn lại) và ngẫu nhiên hóa đặc trưng (m = sqrt(d)) để làm mất tương quan giữa các cây, giúp GIẢM PHƯƠNG SAI (Variance) tối đa."
+          ]
+        },
+        {
+          "code": "Câu 34 VAIO: Tính Toán Entropy & Information Gain",
+          "problem": "Cách tính nhanh Entropy nhị phân và Information Gain trong phòng thi không dùng máy tính bỏ túi.",
+          "solution": [
+            "1. Ghi nhớ các mốc chuẩn: p = 0 hoặc 1 => H = 0; p = 0.5 => H = 1.0; p = 0.25 hoặc 0.75 => H ≈ 0.811 bit.",
+            "2. Luôn nhân trọng số số mẫu của từng nhánh: H(S|A) = (|S₁|/|S|) * H(S₁) + (|S₂|/|S|) * H(S₂).",
+            "3. Lấy Entropy nút cha trừ Entropy có điều kiện để ra IG."
+          ]
+        },
+        {
+          "code": "Câu 68 VAIO: Bias-Variance Trong Bagging vs Boosting",
+          "problem": "Tại sao Bagging dùng cây sâu trong khi Boosting lại dùng cây nông?",
+          "solution": [
+            "1. Bagging mục tiêu là GIẢM PHƯƠNG SAI (Variance): Cây sâu có Bias thấp nhưng Variance cao. Gom trung bình nhiều cây sâu độc lập sẽ triệt tiêu Variance mà vẫn giữ được Bias thấp.",
+            "2. Boosting mục tiêu là GIẢM ĐỘ LỆCH (Bias): Cây nông có Variance thấp nhưng Bias cao. Nối tiếp các cây nông sửa sai liên tiếp sẽ bào mòn Bias xuống thấp."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Cây quyết định phân hoạch không gian bằng các siêu phẳng trực giao song song với các trục tọa độ.",
+      "Entropy đo độ hỗn loạn (cực đại 1.0 bit tại p = 0.5); Gini đo độ vẩn đục (cực đại 0.5 tại p = 0.5 và tính nhanh hơn).",
+      "Thuật toán ID3 chọn thuộc tính có Information Gain lớn nhất; C4.5 dùng Gain Ratio để trị cạm bẫy thuộc tính ID.",
+      "Pre-pruning (max_depth, min_samples_split) và Post-pruning (R_α(T) = R(T) + α|T|) giúp ngăn chặn Overfitting.",
+      "Bagging (Random Forest) huấn luyện song song các cây sâu để GIẢM PHƯƠNG SAI; tỷ lệ mẫu OOB là (1-1/N)^N ≈ 36.8%.",
+      "Boosting (XGBoost, AdaBoost) huấn luyện tuần tự các cây nông để dự đoán phần sai số dư nhằm GIẢM ĐỘ LỆCH."
+    ]
+  },
+  {
+    "id": "lesson-8",
+    "title": "8. Máy Vector Hỗ Trợ (SVM), Kernel Trick & Thuật Toán k-NN",
+    "syllabusBadge": "BUỔI 4: MÁY VECTOR HỖ TRỢ (SVM) & THUẬT TOÁN k-NN",
+    "summary": "Nghệ thuật phân chia ranh giới hình học tối ưu: Từ trực giác dải phân cách an toàn giữa hai ngôi làng đến Siêu phẳng lề cực đại (Maximum Margin Hyperplane = 2/||w||), giải mã vai trò độc tôn của các Support Vectors qua hệ điều kiện KKT, Soft-Margin SVM với biến lỏng xi và tham số phạt C, vũ khí tối thượng Kernel Trick (RBF chiếu lên không gian vô hạn chiều), và đối chiếu chuyên sâu với thuật toán 'học lười biếng' k-NN cùng lời nguyền số chiều (Curse of Dimensionality).",
+    "intuition": {
+      "title": "Trực giác thực tế: Con đường biên giới công bằng giữa hai ngôi làng và nguyên lý 'chọn bạn mà chơi'",
+      "content": "Hãy tưởng tượng hai ngôi làng A và B nằm ở hai bên bờ một thung lũng. Họ muốn xây dựng một con đường ranh giới và một dải đất trống phi quân sự (Hành lang đệm) ở giữa để cư dân hai làng không bao giờ cãi cọ va chạm.\n\nCó vô số con đường có thể vẽ ra để ngăn cách hai làng.\nNhưng nếu bạn kẻ một con đường sát sạt tường nhà của làng A, chỉ cần một đứa trẻ làng A bước chân ra khỏi cửa là đã giẫm sang ranh giới tranh chấp! Con đường đó quá mong manh và nguy hiểm (mô hình kém ổn định trước nhiễu).\n\nCon đường biên giới công bằng, an toàn và bền vững nhất phải là: **Chạy chính giữa và cách xa nhất có thể các ngôi nhà gần nhất của cả hai làng**! Bề rộng của hành lang đệm (Lề - Margin) phải được mở rộng tối đa!\n- Những ngôi nhà nằm sát mép hành lang đệm nhất được gọi là các **Support Vectors (Các điểm tựa)**. Vị trí của con đường chỉ phụ thuộc duy nhất vào những ngôi nhà tiền tuyến này; mọi ngôi nhà khác nằm sâu trong đất liền không hề ảnh hưởng đến vị trí con đường! Đây chính là triết lý của **Support Vector Machine (SVM)**!\n\nVà khi có một vị khách lạ bước vào vùng đất đó, làm sao biết anh ta thuộc về phe nào?\nHãy nhìn vào **3 người hàng xóm gần nhất** xung quanh nhà anh ta: Nếu 2 trong 3 người là cư dân làng A, anh ta chắc chắn thuộc về làng A! Đây chính là triết lý 'chọn bạn mà chơi' của thuật toán **k-Láng Giềng Gần Nhất (k-NN)**!"
+    },
+    "sections": [
+      {
+        "heading": "8.1. Khởi Đầu Từ Con Số 0: Bản Chất Hình Học Của SVM & Siêu Phẳng Lề Cực Đại (Maximum Margin)",
+        "content": "Trong không gian dữ liệu, có vô số siêu phẳng có thể phân tách hai lớp. SVM ra đời để tìm ra duy nhất MỘT siêu phẳng tối ưu tuyệt đối: Siêu phẳng có khoảng cách tới các điểm dữ liệu gần nhất là LỚN NHẤT.",
+        "deepDive": "**1. Siêu phẳng (Hyperplane) là gì?**\n- Trong không gian 2 chiều (2D): Siêu phẳng là một **Đường thẳng**: $w_1 x_1 + w_2 x_2 + b = 0$.\n- Trong không gian 3 chiều (3D): Siêu phẳng là một **Mặt phẳng**: $w_1 x_1 + w_2 x_2 + w_3 x_3 + b = 0$.\n- Trong không gian $d$ chiều tổng quát: Siêu phẳng là tập hợp các điểm $x$ thỏa mãn phương trình:\n  $$w^T x + b = 0$$\n  - $w = (w_1, w_2, \\dots, w_d)^T$: **Vector pháp tuyến (Normal Vector)**, vuông góc với siêu phẳng và quyết định hướng nghiêng của siêu phẳng.\n  - $b$: **Hệ số chệch (Bias)**, quyết định khoảng cách dịch chuyển của siêu phẳng so với gốc tọa độ.\n\n**2. Quy ước nhãn đặc thù trong SVM: $y \\in \\{-1, +1\\}$:**\nKhác với Hồi quy Logistic quy ước nhãn là $\\{0, 1\\}$, SVM quy ước nhãn là **$\\pm 1$**:\n- Nếu mẫu $x_i$ thuộc lớp Dương: $y_i = +1 \\implies w^T x_i + b \\ge +1$.\n- Nếu mẫu $x_i$ thuộc lớp Âm: $y_i = -1 \\implies w^T x_i + b \\le -1$.\n- **Điều kỳ diệu của phép nhân:** Ta có thể gộp hai điều kiện trên thành duy nhất một bất đẳng thức toán học tao nhã:\n  $$y_i (w^T x_i + b) \\ge 1, \\quad \\forall i = 1, \\dots, N$$\n  *(Bởi vì nếu $y_i = -1$ và $(w^T x_i + b) \\le -1$ thì tích của hai số âm luôn là một số dương $\\ge +1$!).*\n\n**3. Chứng minh toán học: Bề rộng hành lang lề (Margin Width) = $2 / \\|w\\|$:**\nHai bờ rào biên giới tiếp xúc với các điểm gần nhất lần lượt có phương trình:\n- Bờ rào dương: $w^T x_+ + b = +1$\n- Bờ rào âm: $w^T x_- + b = -1$\n\nTrừ hai phương trình cho nhau:\n$$w^T (x_+ - x_-) = 2$$\nVector $(x_+ - x_-)$ là đoạn thẳng nối từ một điểm trên bờ rào âm sang bờ rào dương.\nĐể tìm khoảng cách vuông góc hình học giữa hai bờ rào (Margin), ta chiếu vector này lên vector pháp tuyến đơn vị $\\frac{w}{\\|w\\|}$:\n$$\\text{Margin Width} = \\frac{w^T (x_+ - x_-)}{\\|w\\|} = \\frac{2}{\\|w\\|}$$\n\n**4. Bài toán tối ưu lề cực đại (Hard-Margin SVM):**\nMục tiêu là **tối đa hóa bề rộng lề** $\\frac{2}{\\|w\\|}$.\nTối đa hóa $\\frac{2}{\\|w\\|}$ tương đương với việc **cực tiểu hóa $\\|w\\|$, hay cực tiểu hóa $\\frac{1}{2}\\|w\\|^2$** (để đạo hàm đẹp):\n$$\\min_{w, b} \\frac{1}{2}\\|w\\|^2 \\quad \\text{thỏa mãn điều kiện} \\quad y_i (w^T x_i + b) \\ge 1, \\, \\forall i$$\nĐây là một bài toán **Quy hoạch toàn phương lồi (Convex Quadratic Programming)**, đảm bảo luôn tìm được duy nhất một nghiệm cực tiểu toàn cục mà không sợ bị mắc kẹt ở cực tiểu địa phương!",
+        "formula": "\\min_{w, b} \\frac{1}{2}\\|w\\|^2 \\quad \\text{s.t.} \\quad y_i (w^T x_i + b) \\ge 1, \\quad \\text{Margin} = \\frac{2}{\\|w\\|}",
+        "mathExplainer": [
+          {
+            "sym": "w",
+            "name": "Vector pháp tuyến",
+            "mean": "Vector vuông góc với siêu phẳng, xác định hướng của đường ranh giới."
+          },
+          {
+            "sym": "b",
+            "name": "Hệ số chệch (Bias)",
+            "mean": "Xác định khoảng cách tịnh tiến của siêu phẳng so với gốc tọa độ."
+          },
+          {
+            "sym": "y_i \\in \\{-1, +1\\}",
+            "name": "Nhãn lớp trong SVM",
+            "mean": "Quy ước nhị phân chuẩn của SVM (+1 cho lớp dương, -1 cho lớp âm)."
+          },
+          {
+            "sym": "\\|w\\|",
+            "name": "Độ dài chuẩn L2 của w",
+            "mean": "Căn bậc hai của tổng bình phương các thành phần: sqrt(w₁² + w₂² + ... + w_d²)."
+          },
+          {
+            "sym": "\\text{Margin} = 2/\\|w\\|",
+            "name": "Bề rộng hành lang lề",
+            "mean": "Khoảng cách vuông góc giữa 2 bờ rào biên giới tiếp xúc với các điểm gần nhất."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 210\" width=\"100%\" height=\"210\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"210\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"260\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">SIÊU PHẲNG LỀ CỰC ĐẠI TRONG KHÔNG GIAN 2D</text>\n\n                        <!-- Margin Zone shaded -->\n                        <polygon points=\"120,170 320,10 380,10 180,170\" fill=\"#eee\"/>\n\n                        <!-- Positive boundary line: w^T x + b = +1 -->\n                        <line x1=\"120\" y1=\"170\" x2=\"320\" y2=\"10\" stroke=\"#888\" stroke-width=\"1.5\" stroke-dasharray=\"4,4\"/>\n                        <text x=\"325\" y=\"15\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">wᵀx + b = +1</text>\n\n                        <!-- Decision Hyperplane: w^T x + b = 0 -->\n                        <line x1=\"150\" y1=\"170\" x2=\"350\" y2=\"10\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"355\" y=\"28\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">wᵀx + b = 0</text>\n\n                        <!-- Negative boundary line: w^T x + b = -1 -->\n                        <line x1=\"180\" y1=\"170\" x2=\"380\" y2=\"10\" stroke=\"#888\" stroke-width=\"1.5\" stroke-dasharray=\"4,4\"/>\n                        <text x=\"385\" y=\"42\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">wᵀx + b = -1</text>\n\n                        <!-- Normal vector w arrow -->\n                        <line x1=\"250\" y1=\"90\" x2=\"290\" y2=\"40\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <polygon points=\"290,40 280,45 285,52\" fill=\"#111\"/>\n                        <text x=\"295\" y=\"55\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">w (Pháp tuyến)</text>\n\n                        <!-- Support Vectors -->\n                        <!-- Positive points -->\n                        <circle cx=\"80\" cy=\"140\" r=\"5\" fill=\"#111\"/><circle cx=\"120\" cy=\"90\" r=\"5\" fill=\"#111\"/><circle cx=\"160\" cy=\"50\" r=\"5\" fill=\"#111\"/>\n                        <!-- SV positive on the boundary -->\n                        <circle cx=\"220\" cy=\"90\" r=\"8\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"220\" cy=\"90\" r=\"4\" fill=\"#111\"/>\n                        <text x=\"145\" y=\"105\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Support Vector (+1)</text>\n\n                        <!-- Negative points -->\n                        <circle cx=\"340\" cy=\"150\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"380\" cy=\"110\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <!-- SV negative on the boundary -->\n                        <circle cx=\"280\" cy=\"90\" r=\"8\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"280\" cy=\"90\" r=\"4\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"295\" y=\"105\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Support Vector (-1)</text>\n\n                        <!-- Margin arrow -->\n                        <line x1=\"185\" y1=\"120\" x2=\"245\" y2=\"120\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"215\" y=\"135\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Margin = 2/||w||</text>\n                      </g>\n                    </svg>",
+          "caption": "Mô hình SVM lề cực đại: Siêu phẳng chính giữa cách đều hai bờ rào lề, khoảng cách giữa 2 bờ rào đạt giá trị lớn nhất 2/||w||."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa công thức khoảng cách từ 1 điểm đến siêu phẳng và bề rộng lề: Khoảng cách từ 1 Support Vector đến siêu phẳng chính giữa là 1/||w|| (nửa bề rộng lề). Bề rộng toàn bộ hành lang lề giữa hai bờ rào đối diện là 2/||w||!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong không gian 2D, một mô hình SVM tìm được vector trọng số w = (3, 4)ᵀ. Bề rộng toàn phần của hành lang lề (Margin Width) của siêu phẳng phân loại này bằng bao nhiêu?",
+          "options": [
+            "A. 0.40",
+            "B. 0.20",
+            "C. 0.50",
+            "D. 2.00"
+          ],
+          "correctIndex": 0,
+          "hint": "Tính độ dài chuẩn ||w|| = sqrt(3² + 4²) = sqrt(9 + 16) = sqrt(25) = 5. Bề rộng lề Margin = 2 / ||w|| = 2 / 5.",
+          "solution": [
+            "Bước 1: Tính độ dài vector pháp tuyến ||w||:",
+            "  ||w|| = sqrt(w₁² + w₂²) = sqrt(3² + 4²) = sqrt(9 + 16) = sqrt(25) = 5.",
+            "Bước 2: Áp dụng công thức bề rộng lề SVM:",
+            "  Margin = 2 / ||w|| = 2 / 5 = 0.40.",
+            "Đáp án chính xác: A (0.40)."
+          ]
+        }
+      },
+      {
+        "heading": "8.2. Giải Mã Các Support Vectors: Tính Thưa (Sparsity) & Bài Toán Đối Ngẫu Lagrange (Dual Form)",
+        "content": "Tại sao thuật toán lại có tên là 'Máy Vector Hỗ Trợ'? Khám phá vai trò độc tôn của các điểm Support Vectors, hệ điều kiện KKT và cách bài toán đối ngẫu đưa tích vô hướng vào trung tâm của mô hình.",
+        "deepDive": "**1. Support Vectors (Các Vector Hỗ Trợ) là gì?**\n- Trong toán học, mỗi điểm dữ liệu $x_i$ trong không gian $d$ chiều chính là một vector tọa độ.\n- **Support Vectors** là những điểm dữ liệu nằm **CHÍNH XÁC TRÊN HAI BỜ RÀO LỀ**:\n  $$y_i (w^T x_i + b) = 1$$\n- Chúng là những điểm 'tiền tuyến' gần siêu phẳng nhất, đóng vai trò như những chiếc cột trụ chống đỡ toàn bộ bờ rào lề.\n\n**2. Tính chất độc tôn chấn động: Nghiệm thưa (Sparsity) của SVM:**\nHãy tưởng tượng bạn có 1,000,000 điểm dữ liệu trong tập huấn luyện:\n- Thuật toán SVM tìm ra nghiệm và chỉ có đúng 4 điểm dữ liệu là Support Vectors!\n- **Điều gì xảy ra nếu bạn XÓA BỎ 999,996 ĐIỂM DỮ LIỆU CÒN LẠI?**\n  $\\implies$ Siêu phẳng SVM **GIỮ NGUYÊN 100% VỊ TRÍ CŨ**, không hề suy suyển 1 milimet nào!\n- **Điều gì xảy ra nếu bạn THÊM VÀO 1,000,000 ĐIỂM MỚI nằm sâu trong vùng an toàn?**\n  $\\implies$ Siêu phẳng SVM **HOÀN TOÀN KHÔNG BỊ ẢNH HƯỞNG**!\n- *Ý nghĩa:* Khác với Hồi quy Logistic hay Naive Bayes (nơi mọi điểm dữ liệu đều tham gia kéo đường biên), vị trí của siêu phẳng SVM **CHỈ ĐƯỢC QUYẾT ĐỊNH DUY NHẤT BỞI CÁC SUPPORT VECTORS**!\n\n**3. Bài toán Đối Ngẫu Lagrange (Lagrange Dual Problem):**\nĐể giải bài toán tối ưu có ràng buộc, ta lập hàm Lagrange với các nhân tử $\\alpha_i \\ge 0$:\n$$\\mathcal{L}(w, b, \\alpha) = \\frac{1}{2}\\|w\\|^2 - \\sum_{i=1}^N \\alpha_i \\left[ y_i (w^T x_i + b) - 1 \\right]$$\n\nLấy đạo hàm riêng theo các biến gốc $w$ và $b$ rồi cho bằng 0:\n$$\\frac{\\partial \\mathcal{L}}{\\partial w} = 0 \\implies w = \\sum_{i=1}^N \\alpha_i y_i x_i$$\n$$\\frac{\\partial \\mathcal{L}}{\\partial b} = 0 \\implies \\sum_{i=1}^N \\alpha_i y_i = 0$$\n\n**Hệ điều kiện bù trừ KKT (Karush-Kuhn-Tucker Complementary Slackness):**\n$$\\alpha_i \\left[ y_i (w^T x_i + b) - 1 \\right] = 0$$\n- Nếu điểm $x_i$ nằm sâu trong vùng an toàn ($y_i(w^Tx_i+b) > 1$) $\\implies$ Bắt buộc **$\\alpha_i = 0$**! (Điểm này hoàn toàn không đóng góp gì vào vector trọng số $w$).\n- Chỉ những điểm nằm đúng trên bờ rào lề ($y_i(w^Tx_i+b) = 1$) mới có **$\\alpha_i > 0$**! Đây chính là các **Support Vectors**!\n\n**4. Dạng đối ngẫu toàn phần (Dual Formulation):**\nThay $w = \\sum \\alpha_i y_i x_i$ ngược lại vào hàm Lagrange, ta thu được bài toán đối ngẫu chỉ còn ẩn số $\\alpha$:\n$$\\max_\\alpha \\sum_{i=1}^N \\alpha_i - \\frac{1}{2} \\sum_{i=1}^N \\sum_{j=1}^N \\alpha_i \\alpha_j y_i y_j (\\mathbf{x}_i^T \\mathbf{x}_j) \\quad \\text{s.t.} \\quad \\alpha_i \\ge 0, \\, \\sum_{i=1}^N \\alpha_i y_i = 0$$\n**Điểm mấu chốt vĩ đại:** Toàn bộ dữ liệu huấn luyện chỉ xuất hiện dưới dạng duy nhất là **TÍCH VÔ HƯỚNG $\\mathbf{x}_i^T \\mathbf{x}_j$**! Đây chính là cánh cửa thần kỳ mở ra vũ khí Kernel Trick!",
+        "formula": "w = \\sum_{i \\in \\text{SV}} \\alpha_i y_i x_i, \\quad \\alpha_i [y_i (w^T x_i + b) - 1] = 0, \\quad \\max_\\alpha \\sum \\alpha_i - \\frac{1}{2}\\sum \\alpha_i \\alpha_j y_i y_j (x_i^T x_j)",
+        "mathExplainer": [
+          {
+            "sym": "\\alpha_i (Alpha)",
+            "name": "Nhân tử Lagrange",
+            "mean": "Trọng số đóng góp của điểm i. alpha_i = 0 với điểm bình thường, alpha_i > 0 với Support Vectors."
+          },
+          {
+            "sym": "\\text{KKT Conditions}",
+            "name": "Hệ điều kiện Karush-Kuhn-Tucker",
+            "mean": "Điều kiện cần và đủ cho nghiệm tối ưu của bài toán quy hoạch phi tuyến có ràng buộc."
+          },
+          {
+            "sym": "x_i^T x_j",
+            "name": "Tích vô hướng giữa 2 điểm",
+            "mean": "Thước đo độ tương đồng hình học giữa 2 mẫu dữ liệu trong không gian gốc."
+          },
+          {
+            "sym": "\\text{Sparsity}",
+            "name": "Tính thưa của nghiệm",
+            "mean": "Đại đa số các mẫu đều có alpha_i = 0, mô hình chỉ lưu lại một tập nhỏ các Support Vectors."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"280\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">TÍNH THƯA CỦA NGHIỆM SVM: α = 0 VS α &gt; 0</text>\n\n                        <!-- Non-SV points (alpha = 0) -->\n                        <g transform=\"translate(30, 40)\">\n                          <rect x=\"0\" y=\"0\" width=\"230\" height=\"100\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"115\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Điểm Trong Đất Liền (α_i = 0)</text>\n                          <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\">• Nằm sâu trong vùng an toàn</text>\n                          <text x=\"15\" y=\"68\" font-family=\"Georgia\" font-size=\"10\">• y_i(wᵀx_i + b) &gt; 1</text>\n                          <text x=\"15\" y=\"90\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#555\">Xóa bỏ không ảnh hưởng gì!</text>\n                        </g>\n\n                        <!-- Arrow -->\n                        <line x1=\"275\" y1=\"90\" x2=\"305\" y2=\"90\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <polygon points=\"305,90 297,86 297,94\" fill=\"#111\"/>\n\n                        <!-- SV points (alpha > 0) -->\n                        <g transform=\"translate(320, 40)\">\n                          <rect x=\"0\" y=\"0\" width=\"240\" height=\"100\" fill=\"#111\"/>\n                          <text x=\"120\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Support Vectors (α_i &gt; 0)</text>\n                          <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\">• Nằm CHÍNH XÁC trên bờ rào lề</text>\n                          <text x=\"15\" y=\"68\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\">• y_i(wᵀx_i + b) = 1</text>\n                          <text x=\"15\" y=\"90\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\">Quyết định 100% vị trí siêu phẳng!</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Chỉ các điểm Support Vectors với nhân tử Lagrange α > 0 mới quyết định vị trí siêu phẳng; các điểm khác trong đất liền có α = 0 hoàn toàn không ảnh hưởng."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi: Đề bài cho một tập dữ liệu đã huấn luyện SVM xong. Thêm 1,000 điểm dữ liệu mới nằm rất xa siêu phẳng. Hỏi siêu phẳng có thay đổi không? Đáp án là KHÔNG HỀ THAY ĐỔI vì các điểm mới đều có α = 0!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 52 Đề Thi VAIO 2025)",
+          "question": "Trong thuật toán SVM phân loại nhị phân, điều gì sẽ xảy ra với siêu phẳng phân loại tối ưu nếu ta xóa bỏ một điểm dữ liệu huấn luyện x_k có nhân tử Lagrange α_k = 0?",
+          "options": [
+            "A. Siêu phẳng sẽ xoay đi một góc nhỏ",
+            "B. Bề rộng lề Margin sẽ bị thu hẹp lại",
+            "C. Siêu phẳng phân loại hoàn toàn không thay đổi vị trí và hướng",
+            "D. Bài toán tối ưu sẽ trở nên vô nghiệm"
+          ],
+          "correctIndex": 2,
+          "hint": "Theo công thức w = sum(α_i * y_i * x_i), nếu α_k = 0 thì điểm x_k có đóng góp gì vào vector trọng số w không?",
+          "solution": [
+            "Bước 1: Vector trọng số w được biểu diễn qua nghiệm đối ngẫu: w = sum_{i=1}^N α_i y_i x_i.",
+            "Bước 2: Với điểm x_k có α_k = 0, số hạng tương ứng trong tổng bằng 0 * y_k * x_k = 0.",
+            "Bước 3: Do đó, việc xóa bỏ điểm x_k không làm thay đổi giá trị của w và b. Siêu phẳng giữ nguyên 100% vị trí cũ.",
+            "Đáp án chính xác: C."
+          ]
+        }
+      },
+      {
+        "heading": "8.3. Dữ Liệu Có Nhiễu: Soft-Margin SVM, Biến Lỏng $\\xi_i$ & Siêu Tham Số Đánh Đổi $C$",
+        "content": "Trong thực tế, dữ liệu hiếm khi phân tách hoàn hảo mà luôn có các điểm nhiễu lọt nhầm sang bên kia chiến tuyến. Khám phá cách Soft-Margin SVM sử dụng biến lỏng ξ để dung thứ cho sai sót và vai trò đánh đổi sống còn của tham số C.",
+        "deepDive": "**1. Bế tắc của Hard-Margin SVM trên dữ liệu thực tế:**\n- Nếu dữ liệu không phân tách tuyến tính hoàn hảo (Linearly Inseparable), hoặc chỉ cần có **đúng 1 điểm nhiễu Outlier** nằm lẫn sang vùng của lớp kia:\n  - Hệ bất đẳng thức $y_i(w^Tx_i+b) \\ge 1$ sẽ trở nên **VÔ NGHIỆM**!\n  - Hoặc nếu cố tìm nghiệm, siêu phẳng sẽ bị ép uốn éo theo điểm dị biệt đó, khiến lề Margin bị co lại cực kỳ hẹp $\\implies$ **Quá khớp (Overfitting)** thảm hại!\n\n**2. Đột phá Soft-Margin SVM (Cortes & Vapnik, 1995):**\nCho phép một số điểm dữ liệu được quyền 'phạm quy' (nhảy vào trong hành lang lề hoặc thậm chí sang nhầm bên kia siêu phẳng).\nKhoảng cách vi phạm của mỗi điểm được đo bằng **Biến lỏng (Slack Variable) $\\xi_i \\ge 0$** (đọc là Xi):\n$$y_i (w^T x_i + b) \\ge 1 - \\xi_i, \\quad \\xi_i \\ge 0$$\n- **Trường hợp 1: $\\xi_i = 0$:** Điểm nằm an toàn ngoài bờ rào lề hoặc đúng trên bờ rào lề (Phân loại đúng hoàn hảo).\n- **Trường hợp 2: $0 < \\xi_i \\le 1$:** Điểm lọt vào bên trong hành lang lề (Margin), nhưng vẫn nằm đúng phía của siêu phẳng (Vẫn phân loại đúng, nhưng xâm lấn vùng đệm an toàn).\n- **Trường hợp 3: $\\xi_i > 1$:** Điểm vượt qua siêu phẳng sang nhầm bên kia chiến tuyến $\\implies$ **BỊ PHÂN LOẠI SAI (Misclassified)**!\n\n**3. Hàm mục tiêu Soft-Margin và Siêu tham số $C$:**\n$$\\min_{w, b, \\xi} \\frac{1}{2}\\|w\\|^2 + C \\sum_{i=1}^N \\xi_i$$\n- $\\frac{1}{2}\\|w\\|^2$: Mục tiêu **Mở rộng bề rộng lề** Margin.\n- $\\sum \\xi_i$: Tổng mức độ vi phạm sai số.\n- $C > 0$: **Siêu tham số đánh đổi (Trade-off Parameter)** giữa độ rộng lề và số lượng lỗi chấp nhận.\n\n**4. Bản chất của siêu tham số $C$ (Trọng tâm Câu 64 Đề thi VAIO):**\n- **Khi $C$ rất lớn ($C \\to \\infty$ - Khắt khe, không khoan nhượng):**\n  - Thuật toán phạt cực nặng mọi sai sót. Nó ép $\\xi_i \\to 0$ bằng mọi giá!\n  - Kết quả: Mô hình cố né tránh mọi lỗi nhỏ, chấp nhận thu hẹp lề Margin $\\implies$ **Dễ bị Quá khớp (Overfitting)**!\n- **Khi $C$ nhỏ ($C \\to 0$ - Bao dung, rộng lượng):**\n  - Thuật toán coi trọng việc giữ lề Margin rộng thênh thang hơn là việc bắt bẻ từng điểm lỗi. Chấp nhận hy sinh vài điểm vi phạm để đổi lấy ranh giới ổn định.\n  - Kết quả: Lề Margin rộng, mô hình kiên cường trước nhiễu $\\implies$ **Chống Overfitting tốt, tăng tổng quát hóa**, nhưng nếu $C$ quá nhỏ sẽ dẫn tới **Thiếu khớp (Underfitting)**!\n\n**5. Góc nhìn Hinge Loss (Hàm mất mát bản lề):**\nBản chất Soft-Margin SVM chính là việc tối ưu hàm mất mát Hinge Loss có Regularization L2:\n$$\\mathcal{L}_{\\text{Hinge}}(z) = \\max(0, 1 - z), \\quad \\text{với } z = y_i(w^Tx_i+b)$$\nNếu điểm nằm an toàn ($z \\ge 1$), mất mát bằng đúng 0; nếu điểm vi phạm ($z < 1$), mất mát tăng tuyến tính $1 - z$!",
+        "formula": "\\min_{w, b, \\xi} \\frac{1}{2}\\|w\\|^2 + C \\sum_{i=1}^N \\xi_i \\quad \\text{s.t.} \\quad y_i(w^Tx_i+b) \\ge 1 - \\xi_i, \\, \\xi_i \\ge 0",
+        "mathExplainer": [
+          {
+            "sym": "\\xi_i (Xi)",
+            "name": "Biến lỏng (Slack Variable)",
+            "mean": "Khoảng cách vi phạm bờ rào lề của mẫu i (xi=0 là an toàn; 0<xi<=1 là lọt vào lề; xi>1 là đoán sai)."
+          },
+          {
+            "sym": "C",
+            "name": "Siêu tham số phạt C",
+            "mean": "C lớn phạt lỗi nặng (lề hẹp, dễ Overfit); C nhỏ chấp nhận lỗi (lề rộng, chống Overfit)."
+          },
+          {
+            "sym": "\\mathcal{L}_{\\text{Hinge}}",
+            "name": "Hàm mất mát bản lề",
+            "mean": "max(0, 1 - y(w^T x + b)): bằng 0 khi phân loại đúng ngoài lề, tăng tuyến tính khi vi phạm."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"260\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Ý NGHĨA HÌNH HỌC CỦA BIẾN LỎNG ξ TRONG SOFT-MARGIN SVM</text>\n\n                        <!-- Lines -->\n                        <line x1=\"80\" y1=\"140\" x2=\"440\" y2=\"140\" stroke=\"#888\" stroke-dasharray=\"3,3\"/>\n                        <text x=\"450\" y=\"143\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">Bờ rào (+1)</text>\n\n                        <line x1=\"80\" y1=\"90\" x2=\"440\" y2=\"90\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"450\" y=\"93\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">Siêu phẳng (0)</text>\n\n                        <line x1=\"80\" y1=\"40\" x2=\"440\" y2=\"40\" stroke=\"#888\" stroke-dasharray=\"3,3\"/>\n                        <text x=\"450\" y=\"43\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">Bờ rào (-1)</text>\n\n                        <!-- Points with Slack values -->\n                        <!-- Point 1: Safe -->\n                        <circle cx=\"120\" cy=\"160\" r=\"5\" fill=\"#111\"/>\n                        <text x=\"120\" y=\"175\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">ξ = 0 (An toàn)</text>\n\n                        <!-- Point 2: On margin -->\n                        <circle cx=\"200\" cy=\"140\" r=\"5\" fill=\"#111\"/>\n                        <text x=\"200\" y=\"155\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">ξ = 0 (Trên lề)</text>\n\n                        <!-- Point 3: Inside margin -->\n                        <circle cx=\"280\" cy=\"115\" r=\"5\" fill=\"#111\"/>\n                        <line x1=\"280\" y1=\"140\" x2=\"280\" y2=\"115\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"280\" y=\"110\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">0 &lt; ξ &lt; 1 (Trong lề)</text>\n\n                        <!-- Point 4: Misclassified -->\n                        <circle cx=\"380\" cy=\"60\" r=\"5\" fill=\"#111\"/>\n                        <line x1=\"380\" y1=\"140\" x2=\"380\" y2=\"60\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"380\" y=\"55\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">ξ &gt; 1 (Sai nhãn!)</text>\n                      </g>\n                    </svg>",
+          "caption": "Phân loại các mức độ vi phạm của biến lỏng ξ: ξ = 0 là an toàn; 0 < ξ <= 1 xâm lấn lề nhưng đoán đúng; ξ > 1 là đoán sai nhãn."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa C lớn và C nhỏ: Hãy nhớ rằng trong SVM, tham số C đứng trước tổng lỗi (C * sum(xi)). Do đó, C LỚN = PHẠT LỖI NẶNG = Cố sửa lỗi = Dễ Overfitting. C NHỎ = Khoan dung với lỗi = Lề rộng = Chống Overfitting!",
+        "practiceQuestion": {
+          "level": "Trung bình",
+          "question": "Trong mô hình Soft-Margin SVM, một điểm dữ liệu x_i thuộc lớp Dương (+1) có giá trị hàm quyết định wᵀx_i + b = -0.5. Giá trị biến lỏng ξ_i tương ứng của điểm này bằng bao nhiêu và điểm này có bị phân loại sai không?",
+          "options": [
+            "A. ξ_i = 0.5, phân loại đúng",
+            "B. ξ_i = 1.5, bị phân loại sai",
+            "C. ξ_i = 1.0, nằm đúng trên siêu phẳng",
+            "D. ξ_i = 0.0, nằm an toàn ngoài lề"
+          ],
+          "correctIndex": 1,
+          "hint": "Điểm thuộc lớp +1 nhưng wᵀx + b = -0.5 < 0 nên đã bị máy đoán nhầm sang lớp Âm! Thay vào công thức: y_i(wᵀx_i + b) = 1 - ξ_i.",
+          "solution": [
+            "Bước 1: Tính tích y_i(wᵀx_i + b): (+1) × (-0.5) = -0.5.",
+            "Bước 2: Thay vào phương trình bờ rào lề: y_i(wᵀx_i + b) = 1 - ξ_i.",
+            "  -0.5 = 1 - ξ_i  =>  ξ_i = 1 - (-0.5) = 1 + 0.5 = 1.5.",
+            "Bước 3: Vì ξ_i = 1.5 > 1 và wᵀx_i + b < 0, điểm này nằm hẳn sang phía âm của siêu phẳng và bị phân loại sai.",
+            "Đáp án chính xác: B (ξ_i = 1.5, bị phân loại sai)."
+          ]
+        }
+      },
+      {
+        "heading": "8.4. Vũ Khí Tối Thượng: Kernel Trick (Thủ Thuật Hạt Nhân) & RBF Kernel Chiếu Lên Không Gian Vô Hạn Chiều",
+        "content": "Làm thế nào để chia cắt hai vòng tròn đồng tâm khi không thể kẻ đường thẳng ở 2D? Khám phá thủ thuật Kernel Trick - bước đột phá vĩ đại cho phép tính toán trong không gian vô hạn chiều mà không tốn thêm tài nguyên máy tính.",
+        "deepDive": "**1. Bế tắc của bài toán phi tuyến trong không gian gốc:**\nHãy tưởng tượng dữ liệu là hai vòng tròn đồng tâm trên mặt bàn 2D:\n- Vòng tròn Đỏ nằm gọn ở tâm ($x_1^2 + x_2^2 \\le 1$).\n- Vòng tròn Xanh bao bọc xung quanh ở vành ngoài ($x_1^2 + x_2^2 > 1$).\nKhông có bất kỳ chiếc thước kẻ hay đường thẳng nào trên mặt bàn có thể chia cắt được hai vòng tròn này!\n\n**2. Ý tưởng nâng số chiều (Feature Mapping):**\nHãy chiếu các điểm trên mặt bàn 2D lên không gian 3 chiều (3D) bằng một ánh xạ phi tuyến $\\phi(x)$:\n$$(x_1, x_2) \\xrightarrow{\\phi} (z_1 = x_1^2, \\, z_2 = \\sqrt{2}x_1 x_2, \\, z_3 = x_2^2)$$\nNhìn vào trục cao độ mới $z_1 + z_3 = x_1^2 + x_2^2 = r^2$ (Khoảng cách tới tâm):\n- Các điểm Đỏ (ở gần tâm) sẽ chìm xuống đáy thung lũng (cao độ thấp).\n- Các điểm Xanh (ở xa) sẽ bay vọt lên miệng phễu (cao độ cao).\n- Ở không gian 3 chiều này, bạn chỉ cần đưa một **tờ giấy phẳng cắt ngang ở giữa** là chia đôi hai lớp một cách hoàn hảo!\n\n**3. Điều kỳ diệu của Kernel Trick (Thủ thuật hạt nhân):**\n- *Khó khăn:* Nếu ta muốn chiếu dữ liệu lên không gian 1,000,000 chiều hoặc không gian vô hạn chiều, việc tính toán từng tọa độ $\\phi(x)$ sẽ làm nổ tung bộ nhớ máy tính!\n- *Sự cứu rỗi:* Nhớ lại ở Mục 8.2, thuật toán SVM **CHỈ CẦN TÍNH TÍCH VÔ HƯỚNG $\\phi(x_i)^T \\phi(x_j)$**!\n- **Định nghĩa Hàm Kernel:** Hàm Kernel $K(x, x')$ là một hàm số tính trực tiếp tích vô hướng trong không gian nhiều chiều mà không cần thực hiện phép chiếu $\\phi$:\n  $$K(x, x') = \\phi(x)^T \\phi(x')$$\n\n**4. RBF Kernel (Radial Basis Function - Hạt nhân xuyên tâm / Gaussian Kernel):**\nĐây là hàm Kernel phổ biến và mạnh mẽ nhất thế giới:\n$$K(x, x') = \\exp\\left(-\\gamma \\|x - x'\\|^2\\right)$$\n- **Bí mật toán học chấn động:** RBF Kernel tương đương với việc chiếu dữ liệu lên một **KHÔNG GIAN CÓ SỐ CHIỀU VÔ HẠN (Infinite-dimensional Hilbert Space)**!\n  *(Chứng minh: Khai triển Taylor hàm mũ $\\exp(z) = 1 + z + \\frac{z^2}{2!} + \\frac{z^3}{3!} + \\dots$ tạo ra chuỗi đa thức bậc vô hạn!).*\n\n**5. Bản chất của siêu tham số $\\gamma$ (Gamma) trong RBF Kernel (Trọng tâm Câu 77 VAIO):**\n$\\gamma$ quyết định bán kính ảnh hưởng của mỗi Support Vector:\n- **Khi $\\gamma$ rất lớn:** Bán kính ảnh hưởng rất hẹp. Ranh giới quyết định co cụm thành những 'hòn đảo nhỏ' bao quanh từng điểm dữ liệu $\\implies$ **Quá khớp (Overfitting) trầm trọng**!\n- **Khi $\\gamma$ rất nhỏ:** Bán kính ảnh hưởng rất rộng. Mọi điểm đều có tầm ảnh hưởng lan tỏa phẳng lặng $\\implies$ Ranh giới gần như thẳng $\\implies$ **Thiếu khớp (Underfitting)**!",
+        "formula": "K(x, x') = \\exp(-\\gamma \\|x - x'\\|^2), \\quad f(x) = \\text{sign}\\left(\\sum_{i \\in \\text{SV}} \\alpha_i y_i K(x_i, x) + b\\right)",
+        "mathExplainer": [
+          {
+            "sym": "K(x, x')",
+            "name": "Hàm Kernel",
+            "mean": "Đo độ tương đồng giữa 2 điểm trong không gian chiếu chiều cao mà không cần tính tọa độ chiếu."
+          },
+          {
+            "sym": "\\gamma (Gamma)",
+            "name": "Hệ số co giãn RBF",
+            "mean": "Gamma càng lớn thì bán kính ảnh hưởng càng hẹp, đường biên càng uốn lượn (dễ Overfit)."
+          },
+          {
+            "sym": "\\text{Hilbert Space}",
+            "name": "Không gian Hilbert vô hạn chiều",
+            "mean": "Không gian hàm số nơi RBF ngầm định chiếu dữ liệu tới thông qua khai triển chuỗi Taylor."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <!-- 2D Non-linear space -->\n                        <g transform=\"translate(20, 10)\">\n                          <text x=\"100\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Không Gian 2D Gốc (Phi Tuyến)</text>\n                          <circle cx=\"100\" cy=\"75\" r=\"50\" fill=\"none\" stroke=\"#888\" stroke-dasharray=\"2,2\"/>\n                          <circle cx=\"100\" cy=\"75\" r=\"6\" fill=\"#111\"/><circle cx=\"90\" cy=\"70\" r=\"5\" fill=\"#111\"/><circle cx=\"110\" cy=\"80\" r=\"5\" fill=\"#111\"/>\n                          <circle cx=\"55\" cy=\"45\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <circle cx=\"145\" cy=\"45\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <circle cx=\"65\" cy=\"115\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <circle cx=\"135\" cy=\"115\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <text x=\"100\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Không thể tách bằng 1 đường thẳng</text>\n                        </g>\n\n                        <!-- Kernel Arrow -->\n                        <g transform=\"translate(250, 60)\">\n                          <line x1=\"0\" y1=\"15\" x2=\"60\" y2=\"15\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <polygon points=\"60,15 50,10 50,20\" fill=\"#111\"/>\n                          <text x=\"30\" y=\"5\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Kernel Trick</text>\n                          <text x=\"30\" y=\"32\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">K(x, x') = exp(-γ||x-x'||²)</text>\n                        </g>\n\n                        <!-- 3D Separable Space -->\n                        <g transform=\"translate(360, 10)\">\n                          <text x=\"110\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Không Gian Chiều Cao (Tách Tuyến Tính)</text>\n                          <rect x=\"20\" y=\"25\" width=\"180\" height=\"110\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <!-- Separating plane -->\n                          <line x1=\"20\" y1=\"80\" x2=\"200\" y2=\"80\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <text x=\"180\" y=\"75\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\">Siêu phẳng phẳng</text>\n                          <!-- Upper points -->\n                          <circle cx=\"60\" cy=\"50\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <circle cx=\"150\" cy=\"45\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <!-- Lower points -->\n                          <circle cx=\"100\" cy=\"105\" r=\"5\" fill=\"#111\"/>\n                          <circle cx=\"120\" cy=\"115\" r=\"5\" fill=\"#111\"/>\n                          <text x=\"110\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Phân tách dễ dàng bằng 1 mặt phẳng!</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Thủ thuật Kernel Trick: Biến đổi dữ liệu phi tuyến ở không gian gốc thành bài toán phân tách tuyến tính ở không gian số chiều cao hơn."
+        },
+        "commonPitfalls": "Nhầm lẫn vai trò của Gamma trong RBF: Gamma quá lớn khiến mô hình học vẹt từng điểm (Overfitting). Gamma quá nhỏ làm mất khả năng học phi tuyến và trở về tuyến tính đơn giản (Underfitting). Cần phân biệt rõ Gamma của RBF và tham số phạt C!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 77 Đề Thi VAIO 2025)",
+          "question": "Khi sử dụng mô hình SVM với hàm nhân RBF Kernel K(x, x') = exp(-γ||x - x'||²), nếu ta thiết lập tham số γ (Gamma) quá lớn, hiện tượng nào sau đây sẽ xảy ra với ranh giới quyết định của mô hình?",
+          "options": [
+            "A. Ranh giới trở nên gần như một đường thẳng phẳng tuyệt đối (Underfitting)",
+            "B. Ranh giới phân chia bị uốn lượn cực kỳ phức tạp quanh từng điểm dữ liệu huấn luyện đơn lẻ (Overfitting)",
+            "C. Bề rộng lề Margin tăng lên vô cùng",
+            "D. Thuật toán không thể hội tụ do ma trận Kernel không xác định dương"
+          ],
+          "correctIndex": 1,
+          "hint": "Gamma lớn làm bán kính ảnh hưởng exp(-gamma * d²) rơi về 0 rất nhanh khi khoảng cách d chỉ hơi lớn hơn 0 một chút.",
+          "solution": [
+            "Bước 1: Phân tích hàm nhân RBF: exp(-γ ||x - x'||²).",
+            "Bước 2: Khi γ rất lớn, giá trị Kernel giảm đột ngột về 0 đối với bất kỳ điểm nào không nằm sát sạt x_i.",
+            "Bước 3: Điều này khiến mỗi Support Vector chỉ có tầm ảnh hưởng cục bộ cực hẹp, tạo thành các 'vùng ốc đảo' bao quanh từng điểm, gây ra hiện tượng Overfitting nghiêm trọng.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "8.5. Thuật Toán k-NN (k-Láng Giềng Gần Nhất), Học Lười Biếng (Lazy Learning) & Lời Nguyền Số Chiều",
+        "content": "Khám phá thuật toán 'chọn bạn mà chơi' k-NN: Tại sao nó không cần huấn luyện (Lazy Learning), tầm quan trọng sống còn của Chuẩn hóa dữ liệu (Feature Scaling), và sự sụp đổ hình học dưới Lời nguyền số chiều (Curse of Dimensionality).",
+        "deepDive": "**1. Nguyên lý hoạt động của k-NN (k-Nearest Neighbors):**\nThuật toán phân loại dựa trên giả định: *'Những điểm dữ liệu có đặc trưng tương đồng sẽ có xu hướng mang cùng một nhãn'*.\nKhi có một điểm dữ liệu mới $Q$ (Query point) cần dự đoán:\n1. Tính khoảng cách từ $Q$ tới **TẤT CẢ các điểm dữ liệu** trong tập huấn luyện.\n2. Tìm ra $k$ điểm có khoảng cách nhỏ nhất (tức $k$ láng giềng gần nhất).\n3. **Bỏ phiếu đa số (Majority Voting):** Đếm xem trong $k$ người hàng xóm đó, nhãn lớp nào xuất hiện nhiều nhất thì gán nhãn đó cho $Q$!\n\n**2. Bản chất 'Học lười biếng' (Lazy Learning / Instance-Based Learning):**\n- **Thời gian huấn luyện = 0 ($\\mathcal{O}(1)$):** k-NN không hề học bất kỳ tham số $w$ hay $b$ nào. Nó chỉ đơn giản là nạp toàn bộ dữ liệu Train vào bộ nhớ RAM và nằm chờ!\n- **Thời gian dự đoán rất chậm ($\\mathcal{O}(N \\cdot d)$):** Với mỗi mẫu mới cần dự đoán, nó phải quét qua toàn bộ $N$ điểm dữ liệu cũ để tính khoảng cách. Nếu tập Train có 1 triệu điểm thì việc dự đoán sẽ bị nghẽn nghiêm trọng!\n\n**3. Các hàm đo khoảng cách hình học:**\n- **Khoảng cách Euclid ($L_2$ norm - Đường chim bay):**\n  $$d_2(x, q) = \\sqrt{\\sum_{i=1}^d (x_i - q_i)^2}$$\n- **Khoảng cách Manhattan ($L_1$ norm - Đường đi taxi ô bàn cờ):**\n  $$d_1(x, q) = \\sum_{i=1}^d |x_i - q_i|$$\n\n**4. Tác động của siêu tham số $k$ (Bias-Variance Tradeoff):**\n- **Khi $k = 1$:** Chỉ nghe theo đúng 1 người hàng xóm gần nhất. Ranh giới cực kỳ uốn lượn, nhạy cảm với từng điểm nhiễu $\\implies$ **Phương sai cao (High Variance / Overfitting)**!\n- **Khi $k$ tăng:** Đường ranh giới trơn tru hơn, ổn định hơn.\n- **Khi $k = N$ (Bằng toàn bộ tập Train):** Mọi điểm mới đều được gán nhãn đa số toàn cục $\\implies$ **Độ lệch cao (High Bias / Underfitting)**!\n- *Mẹo phòng thi:* Luôn chọn $k$ là **số lẻ** (1, 3, 5, 7) trong phân loại 2 lớp để triệt tiêu hoàn toàn khả năng hòa phiếu!\n\n**5. Yêu cầu bắt buộc: Chuẩn hóa đặc trưng (Feature Scaling):**\nNếu đặc trưng $x_1$ là Tuổi ($[18, 80]$) và đặc trưng $x_2$ là Thu nhập ($[10^7, 10^8]$):\n$$(x_2 - q_2)^2 \\gg (x_1 - q_1)^2$$\nKhoảng cách Euclid sẽ bị chi phối $99.99\\%$ bởi Thu nhập, biến Tuổi thành con số vô hình!\n$\\implies$ **BẮT BUỘC PHẢI CHUẨN HÓA DỮ LIỆU (StandardScaler / MinMaxScaler) TRƯỚC KHI CHẠY k-NN!**\n\n**6. Lời nguyền số chiều (Curse of Dimensionality):**\nKhi số chiều $d$ tăng lên cao (hàng trăm chiều):\n- Thể tích của không gian bùng nổ theo cấp số nhân ($V \\propto r^d$), khiến dữ liệu trở nên cực kỳ thưa thớt (Sparse).\n- Khoảng cách giữa điểm gần nhất và điểm xa nhất hội tụ về xấp xỉ bằng nhau:\n  $$\\lim_{d \\to \\infty} \\frac{d_{\\max} - d_{\\min}}{d_{\\min}} \\to 0$$\n- Mọi điểm đều cách xa nhau như nhau $\\implies$ Khái niệm 'hàng xóm gần nhất' mất hoàn toàn ý nghĩa hình học!",
+        "formula": "d(x, q) = \\sqrt{\\sum_{i=1}^d (x_i - q_i)^2}, \\quad \\hat{y} = \\text{mode}\\big(\\{y_i \\mid x_i \\in \\mathcal{N}_k(q)\\}\\big)",
+        "mathExplainer": [
+          {
+            "sym": "d(x, q)",
+            "name": "Khoảng cách Euclid",
+            "mean": "Độ dài đoạn thẳng nối giữa 2 điểm x và q trong không gian d chiều."
+          },
+          {
+            "sym": "k",
+            "name": "Số lượng hàng xóm",
+            "mean": "Siêu tham số quyết định quy mô hội đồng biểu quyết (nên chọn số lẻ để tránh hòa phiếu)."
+          },
+          {
+            "sym": "\\mathcal{N}_k(q)",
+            "name": "Tập k láng giềng gần nhất",
+            "mean": "Tập hợp k điểm dữ liệu có khoảng cách nhỏ nhất tới điểm truy vấn q."
+          },
+          {
+            "sym": "\\text{Curse of Dimensionality}",
+            "name": "Lời nguyền số chiều",
+            "mean": "Hiện tượng không gian loãng đi và khoảng cách mất ý nghĩa khi số chiều d tăng cao."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"260\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">BIỂU QUYẾT k-NN: KẾT QUẢ ĐẢO CHIỀU KHI THAY ĐỔI k (1 VS 3)</text>\n\n                        <!-- Query Point Q -->\n                        <circle cx=\"160\" cy=\"90\" r=\"6\" fill=\"#111\"/>\n                        <text x=\"160\" y=\"80\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Q (Cần đoán)</text>\n\n                        <!-- Nearest neighbor (Black circle) -->\n                        <circle cx=\"185\" cy=\"80\" r=\"5\" fill=\"#111\"/>\n                        <circle cx=\"160\" cy=\"90\" r=\"30\" fill=\"none\" stroke=\"#111\" stroke-dasharray=\"3,3\"/>\n                        <text x=\"160\" y=\"128\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Vòng k = 1</text>\n\n                        <!-- Next 2 neighbors (White circles) -->\n                        <circle cx=\"120\" cy=\"85\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"170\" cy=\"130\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"160\" cy=\"90\" r=\"55\" fill=\"none\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"160\" y=\"155\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Vòng k = 3</text>\n\n                        <!-- Right table comparison -->\n                        <g transform=\"translate(290, 40)\">\n                          <rect x=\"0\" y=\"0\" width=\"250\" height=\"100\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"125\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Kết Quả Biểu Quyết</text>\n                          <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\">• Khi k = 1: Điểm gần nhất là ĐEN (●)</text>\n                          <text x=\"25\" y=\"65\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">⇒ Dự đoán: LỚP ĐEN</text>\n                          <text x=\"15\" y=\"85\" font-family=\"Georgia\" font-size=\"10\">• Khi k = 3: Có 1 ĐEN (●) và 2 TRẮNG (○)</text>\n                          <text x=\"25\" y=\"102\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">⇒ Dự đoán: LỚP TRẮNG (Đảo chiều!)</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Quy luật biểu quyết của k-NN: Thay đổi k từ 1 lên 3 làm đảo ngược hoàn toàn nhãn dự đoán do số lượng láng giềng trong bán kính thay đổi."
+        },
+        "commonPitfalls": "Quên chuẩn hóa dữ liệu trước khi chạy k-NN: Đây là sai lầm chết người số 1! Các đặc trưng có thang đo lớn (như Tiền lương hàng chục triệu) sẽ nuốt chửng các đặc trưng có thang đo nhỏ (như Số năm kinh nghiệm từ 1 đến 10), khiến khoảng cách tính sai hoàn toàn.",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Tại sao trong bài toán phân loại nhị phân 2 lớp, người ta luôn khuyến nghị chọn siêu tham số k trong thuật toán k-NN là một số lẻ (như k = 3, 5, 7)?",
+          "options": [
+            "A. Để thuật toán chạy nhanh hơn",
+            "B. Để tránh hiện tượng hòa phiếu (Tie) khi số phiếu bầu cho 2 lớp bằng nhau",
+            "C. Để làm giảm phương sai của mô hình",
+            "D. Để loại bỏ ảnh hưởng của lời nguyền số chiều"
+          ],
+          "correctIndex": 1,
+          "hint": "Nếu k = 4 và có 2 người bầu lớp A, 2 người bầu lớp B thì kết quả thế nào?",
+          "solution": [
+            "Bước 1: Trong bài toán 2 lớp, nếu chọn k là số chẵn (ví dụ k = 4), hoàn toàn có khả năng xảy ra trường hợp 2 phiếu cho Lớp 1 và 2 phiếu cho Lớp 2.",
+            "Bước 2: Tình trạng hòa phiếu khiến thuật toán không thể đưa ra kết luận dứt khoát nếu không có quy tắc phá hòa ngẫu nhiên.",
+            "Bước 3: Chọn k là số lẻ đảm bảo luôn có một bên chiếm đa số tuyệt đối (ví dụ 2-1 hoặc 3-2).",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "8.6. Bài Toán Tính Tay Chuẩn Đề Thi VAIO: Tính Toán Khoảng Cách k-NN, Phân Lớp Biểu Quyết & Lề Siêu Phẳng SVM",
+        "content": "Thực hành giải bài toán kinh điển mô phỏng chuẩn xác Câu 25 và Câu 38 Đề thi Olympic AI: Tính toán chi tiết từng khoảng cách hình học cho k-NN, biểu quyết láng giềng và phân tích siêu phẳng SVM.",
+        "deepDive": "**1. Đề bài chuẩn Olympic AI:**\nCho một tập dữ liệu 2 chiều gồm 4 điểm mẫu đã biết trước nhãn:\n- $A(2, 2)$ mang nhãn **Lớp +1**\n- $B(4, 4)$ mang nhãn **Lớp +1**\n- $C(6, 8)$ mang nhãn **Lớp -1**\n- $D(8, 8)$ mang nhãn **Lớp -1**\n\nMột điểm dữ liệu mới cần dự đoán nhãn là $Q(6, 6)$.\n\n**YÊU CẦU THÍ SINH:**\n1. Tính khoảng cách hình học Euclid từ điểm $Q(6, 6)$ tới cả 4 điểm $A, B, C, D$. *(Mẹo thi: Hãy tính bình phương khoảng cách $d^2$ trước để so sánh thứ tự siêu tốc mà không cần bấm máy tính căn bậc hai)*.\n2. Áp dụng thuật toán **k-NN với $k = 1$**: Xác định láng giềng gần nhất và nhãn dự đoán cho điểm $Q$.\n3. Áp dụng thuật toán **k-NN với $k = 3$**: Liệt kê 3 láng giềng gần nhất, lập bảng kiểm phiếu biểu quyết đa số và xác định nhãn dự đoán cho $Q$.\n4. Giả sử sau đó ta huấn luyện một mô hình **Hard-Margin SVM** trên dữ liệu, tìm được phương trình siêu phẳng phân loại tối ưu là:\n   $$x_1 + x_2 - 11 = 0 \\quad \\text{với vector pháp tuyến } w = (1, 1)^T \\text{ và } b = -11$$\n   - Tính bề rộng hành lang lề (Margin Width) của siêu phẳng này.\n   - Dùng siêu phẳng SVM để dự đoán nhãn cho điểm $Q(6, 6)$ và so sánh với kết quả của k-NN ($k=3$).\n\n---\n\n**2. Lời giải chi tiết từng bước (Step-by-Step Derivation):**\n\n**Bước 1: Tính bình phương khoảng cách $d^2$ từ $Q(6, 6)$:**\nÁp dụng công thức $d^2 = (x - 6)^2 + (y - 6)^2$:\n- **Khoảng cách tới $A(2, 2)$:**\n  $$d^2(Q, A) = (2 - 6)^2 + (2 - 6)^2 = (-4)^2 + (-4)^2 = 16 + 16 = 32 \\implies d = \\sqrt{32} \\approx 5.66$$\n- **Khoảng cách tới $B(4, 4)$:**\n  $$d^2(Q, B) = (4 - 6)^2 + (4 - 6)^2 = (-2)^2 + (-2)^2 = 4 + 4 = 8 \\implies d = \\sqrt{8} \\approx 2.83$$\n- **Khoảng cách tới $C(6, 8)$:**\n  $$d^2(Q, C) = (6 - 6)^2 + (8 - 6)^2 = 0^2 + 2^2 = 0 + 4 = 4 \\implies d = \\sqrt{4} = 2.00$$\n- **Khoảng cách tới $D(8, 8)$:**\n  $$d^2(Q, D) = (8 - 6)^2 + (8 - 6)^2 = 2^2 + 2^2 = 4 + 4 = 8 \\implies d = \\sqrt{8} \\approx 2.83$$\n\n**Sắp xếp thứ tự các điểm theo khoảng cách tăng dần từ $Q$:**\n1. Gần nhất: $C$ ($d = 2.00$) — Mang nhãn **-1**\n2. Gần nhì: $B$ ($d \\approx 2.83$) — Mang nhãn **+1**\n3. Gần ba: $D$ ($d \\approx 2.83$) — Mang nhãn **-1**\n4. Xa nhất: $A$ ($d \\approx 5.66$) — Mang nhãn **+1**\n\n**Bước 2: Dự đoán k-NN với $k = 1$:**\n- Láng giềng gần nhất duy nhất là điểm $C$ ($d = 2.00$).\n- Điểm $C$ mang nhãn -1.\n- **Kết luận:** Với $k = 1$, điểm $Q$ được phân loại vào **Lớp -1**.\n\n**Bước 3: Dự đoán k-NN với $k = 3$:**\n- Ba láng giềng gần nhất là $\\{C, B, D\\}$.\n- Nhãn của từng láng giềng:\n  - $C$: Lớp -1\n  - $D$: Lớp -1\n  - $B$: Lớp +1\n- Bỏ phiếu biểu quyết đa số:\n  - **Lớp -1 nhận được 2 phiếu** (từ $C$ và $D$).\n  - **Lớp +1 nhận được 1 phiếu** (từ $B$).\n- Tỷ lệ phiếu là $2/3 \\implies$ **Kết luận:** Với $k = 3$, điểm $Q$ được phân loại vào **Lớp -1**.\n\n**Bước 4: Phân tích siêu phẳng SVM và so sánh:**\nCho phương trình siêu phẳng: $x_1 + x_2 - 11 = 0 \\implies w = (1, 1)^T, \\, b = -11$.\n- Độ dài chuẩn của vector pháp tuyến $w$:\n  $$\\|w\\| = \\sqrt{1^2 + 1^2} = \\sqrt{2} \\approx 1.414$$\n- Bề rộng hành lang lề (Margin Width):\n  $$\\text{Margin} = \\frac{2}{\\|w\\|} = \\frac{2}{\\sqrt{2}} = \\sqrt{2} \\approx 1.414$$\n- Dự đoán nhãn cho điểm $Q(6, 6)$ bằng hàm dấu của SVM:\n  $$\\hat{y}_Q = \\text{sign}(w^T x_Q + b) = \\text{sign}(1 \\times 6 + 1 \\times 6 - 11) = \\text{sign}(12 - 11) = \\text{sign}(+1) = +1$$\n  *(Hoặc nếu quy ước ngược dấu: $\\hat{y}_Q = \\text{sign}(11 - 12) = -1$ tùy thuộc vào phía đặt nhãn).*\n- **So sánh triết lý quan trọng:**\n  - k-NN nhìn vào **mật độ cục bộ** của các điểm láng giềng xung quanh.\n  - SVM nhìn vào **siêu phẳng ranh giới toàn cục** tối ưu hóa bề rộng lề!",
+        "formula": "d(Q, C)=2.00, \\, d(Q, B)=d(Q, D)=\\sqrt{8}\\approx 2.83, \\, d(Q, A)=\\sqrt{32} \\implies \\text{k-NN}(k=3) \\to -1, \\, \\text{Margin}_{\\text{SVM}}=\\sqrt{2}",
+        "mathExplainer": [
+          {
+            "sym": "d^2(Q, C) = 4",
+            "name": "Bình phương khoảng cách đến C",
+            "mean": "Điểm gần nhất tới điểm truy vấn Q với khoảng cách d = 2.0."
+          },
+          {
+            "sym": "k=3 \\to -1",
+            "name": "Kết quả biểu quyết k-NN",
+            "mean": "Lớp -1 thắng áp đảo với 2/3 phiếu từ 2 điểm C và D."
+          },
+          {
+            "sym": "\\text{Margin} = \\sqrt{2}",
+            "name": "Bề rộng lề SVM",
+            "mean": "Khoảng cách giữa hai bờ rào lề của siêu phẳng x₁ + x₂ - 11 = 0."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"280\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">TỔNG HỢP KẾT QUẢ TÍNH TAY THỰC CHIẾN CÂU 25 &amp; CÂU 38</text>\n\n                        <!-- Box 1: Distance calculation -->\n                        <g transform=\"translate(10, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"250\" height=\"120\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"125\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. Khoảng Cách Từ Q(6, 6)</text>\n                          <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\">• Đến C(6, 8): d = 2.00 (Lớp -1) [Gần nhất]</text>\n                          <text x=\"15\" y=\"68\" font-family=\"Georgia\" font-size=\"10\">• Đến B(4, 4): d = 2.83 (Lớp +1)</text>\n                          <text x=\"15\" y=\"88\" font-family=\"Georgia\" font-size=\"10\">• Đến D(8, 8): d = 2.83 (Lớp -1)</text>\n                          <text x=\"15\" y=\"108\" font-family=\"Georgia\" font-size=\"10\">• Đến A(2, 2): d = 5.66 (Lớp +1)</text>\n                        </g>\n\n                        <!-- Box 2: Voting & SVM result -->\n                        <g transform=\"translate(280, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"280\" height=\"120\" fill=\"#111\"/>\n                          <text x=\"140\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">2. Quyết Định Mô Hình</text>\n                          <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\">• k-NN (k=1): Chọn C ⇒ Lớp -1</text>\n                          <text x=\"15\" y=\"70\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\">• k-NN (k=3): 2 Lớp -1 vs 1 Lớp +1 ⇒ LỚP -1</text>\n                          <text x=\"15\" y=\"92\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\">• SVM: Margin = 2/||w|| = 2/√2 = √2 ≈ 1.414</text>\n                          <text x=\"15\" y=\"112\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\">Mẹo thi: So sánh d² để tránh bấm căn bậc hai!</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Bảng tổng hợp kết quả tính toán chi tiết: Khoảng cách hình học, kiểm phiếu biểu quyết k-NN và bề rộng lề SVM."
+        },
+        "commonPitfalls": "Mẹo phòng thi để tiết kiệm thời gian: Khi so sánh khoảng cách trong k-NN, KHÔNG CẦN BẤM MÁY TÍNH CĂN BẬC HAI! Hàm f(x) = sqrt(x) là hàm đồng biến, nên so sánh d² cũng tương đương so sánh d. Tính d² chỉ gồm phép trừ và bình phương số nguyên, làm nhanh hơn gấp 3 lần!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 25 Đề Thi VAIO 2025)",
+          "question": "Cho điểm truy vấn Q(3, 4). Khoảng cách Manhattan (L1) và khoảng cách Euclid (L2) từ gốc tọa độ O(0, 0) tới điểm Q lần lượt là:",
+          "options": [
+            "A. Manhattan = 7.0, Euclid = 5.0",
+            "B. Manhattan = 5.0, Euclid = 7.0",
+            "C. Manhattan = 25.0, Euclid = 5.0",
+            "D. Manhattan = 7.0, Euclid = 25.0"
+          ],
+          "correctIndex": 0,
+          "hint": "Manhattan = |x - 0| + |y - 0| = 3 + 4 = 7. Euclid = sqrt(3² + 4²) = sqrt(9 + 16) = 5.",
+          "solution": [
+            "Bước 1: Tính khoảng cách Manhattan (chuẩn L1):",
+            "  d_1 = |3 - 0| + |4 - 0| = 3 + 4 = 7.0.",
+            "Bước 2: Tính khoảng cách Euclid (chuẩn L2):",
+            "  d_2 = sqrt((3 - 0)² + (4 - 0)²) = sqrt(3² + 4²) = sqrt(9 + 16) = sqrt(25) = 5.0.",
+            "Kết luận: Khoảng cách Manhattan = 7.0, khoảng cách Euclid = 5.0. (Nhận xét: Khoảng cách Manhattan luôn >= khoảng cách Euclid).",
+            "Đáp án chính xác: A."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-knn-classifier",
+    "examConnection": {
+      "questionTitle": "Điểm Trọng Tâm Về SVM & k-NN Trong Đề Thi VAIO 2025",
+      "items": [
+        {
+          "code": "Câu 25 VAIO: Tính Toán Khoảng Cách k-NN",
+          "problem": "Tính toán nhanh khoảng cách và xử lý trường hợp hòa phiếu hoặc khác biệt thang đo trong k-NN.",
+          "solution": [
+            "1. Tính d² để sắp xếp thứ tự nhanh, tránh tính căn thức.",
+            "2. Nhận diện các lỗi do chưa chuẩn hóa Feature Scaling khi một trục có biên độ quá lớn.",
+            "3. Chọn k lẻ để triệt tiêu khả năng hòa phiếu."
+          ]
+        },
+        {
+          "code": "Câu 38 & 52 VAIO: Siêu Phẳng & Support Vectors",
+          "problem": "Bề rộng lề Margin và tính bất biến của siêu phẳng khi thêm bớt dữ liệu an toàn.",
+          "solution": [
+            "1. Margin Width = 2 / ||w||.",
+            "2. Chỉ các Support Vectors (có α_i > 0) mới quyết định siêu phẳng. Mọi điểm trong đất liền có α_i = 0 không ảnh hưởng gì tới mô hình."
+          ]
+        },
+        {
+          "code": "Câu 64 & 77 VAIO: Tham Số C và Gamma Trong Kernel RBF",
+          "problem": "Quy luật kiểm soát Overfitting / Underfitting của cặp siêu tham số (C, Gamma).",
+          "solution": [
+            "1. C lớn = Phạt nặng vi phạm => Lề hẹp => Overfitting. C nhỏ = Khoan dung => Lề rộng => Chống Overfitting.",
+            "2. Gamma lớn = Bán kính RBF co hẹp => Uốn lượn quanh từng điểm => Overfitting. Gamma nhỏ => Bán kính phẳng => Underfitting."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "SVM tìm siêu phẳng lề cực đại với bề rộng Margin = 2/||w|| thông qua bài toán quy hoạch toàn phương lồi.",
+      "Nghiệm SVM có tính thưa: Vị trí siêu phẳng chỉ phụ thuộc duy nhất vào các Support Vectors (có nhân tử Lagrange α > 0).",
+      "Soft-Margin SVM dùng biến lỏng ξ để dung thứ cho lỗi; tham số C điều khiển sự đánh đổi giữa bề rộng lề và lỗi phạt.",
+      "Kernel Trick (như RBF exp(-γ||x-x'||²)) cho phép phân tách phi tuyến trong không gian Hilbert vô hạn chiều chỉ bằng tích vô hướng.",
+      "k-NN là thuật toán 'học lười biếng' không cần huấn luyện nhưng suy luận chậm; cực kỳ nhạy cảm với thang đo đặc trưng.",
+      "Lời nguyền số chiều (Curse of Dimensionality) làm loãng không gian và triệt tiêu ý nghĩa khoảng cách khi số chiều d tăng cao."
+    ]
+  },
+  {
+    "id": "lesson-9",
+    "title": "9. Phân Cụm K-Means & Giảm Chiều Dữ Liệu PCA",
+    "syllabusBadge": "BUỔI 7: HỌC KHÔNG GIÁM SÁT: K-MEANS & PCA",
+    "summary": "Khám phá thế giới Học Không Giám Sát (Unsupervised Learning): Tự động khai phá cấu trúc tiềm ẩn khi không có nhãn đúng. Nắm vững thuật toán phân cụm K-Means, hàm mục tiêu WCSS, khởi tạo thông minh K-Means++, hai thước đo chọn K tối ưu (Phương pháp khuỷu tay Elbow và Hệ số Silhouette [-1, 1]); làm chủ kỹ thuật giảm chiều kinh điển PCA: Khử tâm, ma trận hiệp phương sai, vector riêng (trục thành phần chính) và trị riêng (phương sai bảo toàn), đọc biểu đồ Scree Plot và nhận diện giới hạn phi tuyến.",
+    "intuition": {
+      "title": "Trực giác thực tế: Chiếu bóng chiếc ấm trà 3D lên bức tường 2D và Phân loại rổ đậu 1,000 hạt",
+      "content": "Hãy tưởng tượng bạn đang cầm trên tay một chiếc ấm pha trà bằng gốm tinh xảo trong không gian 3 chiều và trong phòng có một ngọn đèn chiếu bóng lên bức tường phẳng 2 chiều:\n- Nếu bạn chiếu bóng từ trên thẳng xuống: Chiếc ấm chỉ in lên tường một hình tròn xoe đặc xịt. Bạn đã làm mất sạch hình dáng cái vòi ấm và cái quai ấm! Bất kỳ ai nhìn vào bóng cũng không thể nhận ra đó là một chiếc ấm trà (bạn vừa làm mất gần như toàn bộ thông tin quan trọng)!\n- Nhưng nếu bạn khéo léo xoay chiếc ấm sao cho góc nghiêng của nó in lên tường rõ nhất cả thân ấm, vòi ấm nhô sang bên trái và quai ấm uốn cong sang bên phải: Bất kỳ ai nhìn vào bóng 2D cũng thốt lên ngay: 'Đó là một chiếc ấm trà!'.\n\nĐó chính là nguyên lý tối thượng của **PCA (Principal Component Analysis - Phân tích Thành phần Chính)**:\nTìm ra những góc 'chiếu bóng' tối ưu nhất trong không gian đa chiều sao cho **ĐỘ PHÂN TÁN (PHƯƠNG SAI) CỦA DỮ LIỆU ĐƯỢC GIỮ LẠI LỚN NHẤT**, giúp nén dữ liệu từ 100 chiều xuống 2 hoặc 3 chiều để vẽ đồ thị mà hầu như không làm mất mát thông tin cốt lõi!\n\nCòn với **K-Means Clustering (Phân cụm K-Means)**:\nGiống như bạn được giao một rổ gồm 1,000 hạt đậu đủ kích cỡ mà không hề có nhãn dán tên. Bạn muốn tự động chia rổ đậu thành 3 bát (Đậu nhỏ, Đậu vừa, Đậu to) dựa hoàn toàn vào khoảng cách kích thước tự nhiên giữa các hạt đậu. K-Means sẽ tự động tìm ra 3 hạt đậu 'đại diện' làm tâm, và từng hạt đậu sẽ tự giác lăn về chiếc bát có tâm gần nó nhất!"
+    },
+    "sections": [
+      {
+        "heading": "9.1. Khởi Đầu Từ Con Số 0: Học Không Giám Sát Là Gì? Vũ Điệu Của Các Trọng Tâm K-Means & Hàm Mục Tiêu WCSS",
+        "content": "Trong Học Không Giám Sát (Unsupervised Learning), ta chỉ có ma trận đặc trưng X mà hoàn toàn không có nhãn đúng y. Thuật toán phải tự thân vận động tìm ra các nhóm điểm có tính chất tương đồng.",
+        "deepDive": "**1. Phân biệt Học Có Giám Sát vs Học Không Giám Sát:**\n- **Học Có Giám Sát (Supervised Learning):** Dữ liệu có dạng $(x_i, y_i)$. Giống như học sinh học bài có sách giải mẫu bên cạnh. Mô hình so sánh dự đoán $\\hat{y}$ với đáp án đúng $y$ để sửa sai.\n- **Học Không Giám Sát (Unsupervised Learning):** Dữ liệu chỉ có $x_i$, **hoàn toàn không có nhãn $y$**! Máy tính giống như một nhà thám hiểm bước vào hòn đảo lạ, phải tự quan sát, đo đạc và nhóm các sinh vật có đặc điểm tương đồng vào các loài khác nhau.\n\n**2. Vũ điệu 2 bước luân phiên của thuật toán K-Means (Lloyd's Algorithm):**\nMục tiêu là chia $N$ điểm dữ liệu thành $K$ cụm (Clusters) riêng biệt $C_1, C_2, \\dots, C_K$.\nMỗi cụm được đại diện bởi một tọa độ trung tâm gọi là **Trọng tâm cụm (Centroid)** $\\mu_k$.\n\nThuật toán hoạt động theo vòng lặp 2 bước nhịp nhàng:\n- **Bước 1: Gán cụm (Assignment Step):**\n  Mỗi điểm dữ liệu $x_i$ đo khoảng cách Euclid tới tất cả $K$ tâm cụm, và gia nhập vào cụm có tâm **GẦN NÓ NHẤT**:\n  $$c_i = \\arg\\min_{k \\in \\{1, \\dots, K\\}} \\|x_i - \\mu_k\\|^2$$\n- **Bước 2: Cập nhật tâm cụm (Update Step):**\n  Sau khi các điểm đã ổn định vị trí trong cụm, tâm cụm $\\mu_k$ di chuyển về **TỌA ĐỘ TRUNG BÌNH CỘNG (MEAN)** của tất cả các thành viên trong cụm đó:\n  $$\\mu_k = \\frac{1}{|C_k|} \\sum_{x \\in C_k} x$$\n  *(Chính vì lấy giá trị trung bình Mean của K cụm nên thuật toán mới có tên là K-Means!).*\n- **Điểm dừng (Convergence):**\n  Lặp lại liên tục Bước 1 và Bước 2 cho đến khi các tâm cụm không còn di chuyển nữa (hoặc sự thay đổi nhỏ hơn ngưỡng sai số $\\epsilon$).\n\n**3. Hàm mục tiêu WCSS (Within-Cluster Sum of Squares) / Quán tính (Inertia):**\nK-Means không chạy hú họa mà thực chất đang tối ưu hóa một hàm mục tiêu toán học rõ ràng:\n$$\\mathcal{J}_{\\text{WCSS}} = \\sum_{k=1}^K \\sum_{x \\in C_k} \\|x - \\mu_k\\|^2$$\n- **Ý nghĩa:** WCSS đo lường **Tổng bình phương khoảng cách** từ mỗi điểm dữ liệu đến tâm cụm của nó.\n- WCSS đại diện cho **Độ chặt chẽ nội cụm (Cohesion)**: WCSS càng nhỏ chứng tỏ các cụm càng co cụm đặc quánh, các thành viên càng gần gũi với tâm cụm.\n- **Định lý hội tụ:** Thuật toán Lloyd đảm bảo rằng sau mỗi bước gán và cập nhật, giá trị WCSS luôn **giảm đơn điệu hoặc giữ nguyên**, không bao giờ tăng!",
+        "formula": "\\mathcal{J}_{\\text{WCSS}} = \\sum_{k=1}^K \\sum_{x \\in C_k} \\|x - \\mu_k\\|^2, \\quad \\mu_k = \\frac{1}{|C_k|} \\sum_{x \\in C_k} x",
+        "mathExplainer": [
+          {
+            "sym": "K",
+            "name": "Số lượng cụm",
+            "mean": "Siêu tham số do con người cài đặt trước, xác định số nhóm cần phân chia."
+          },
+          {
+            "sym": "\\mu_k (Mu)",
+            "name": "Tâm cụm (Centroid)",
+            "mean": "Tọa độ trung bình cộng của tất cả các điểm dữ liệu thuộc cụm k."
+          },
+          {
+            "sym": "C_k",
+            "name": "Cụm thứ k",
+            "mean": "Tập hợp các điểm dữ liệu được gán về tâm cụm mu_k."
+          },
+          {
+            "sym": "\\mathcal{J}_{\\text{WCSS}}",
+            "name": "Tổng bình phương nội cụm",
+            "mean": "Thước đo độ nén chặt của các cụm (càng nhỏ cụm càng đặc quánh)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(20, 20)\">\n                        <!-- Step 1: Init -->\n                        <g transform=\"translate(10, 10)\">\n                          <rect x=\"0\" y=\"0\" width=\"180\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"90\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Chọn K tâm ngẫu nhiên</text>\n                          <circle cx=\"40\" cy=\"50\" r=\"4\" fill=\"#888\"/><circle cx=\"55\" cy=\"70\" r=\"4\" fill=\"#888\"/><circle cx=\"35\" cy=\"85\" r=\"4\" fill=\"#888\"/>\n                          <circle cx=\"130\" cy=\"65\" r=\"4\" fill=\"#888\"/><circle cx=\"145\" cy=\"85\" r=\"4\" fill=\"#888\"/><circle cx=\"120\" cy=\"100\" r=\"4\" fill=\"#888\"/>\n                          <!-- Centroids as crosses -->\n                          <polygon points=\"50,45 54,53 46,53\" fill=\"#111\"/>\n                          <text x=\"60\" y=\"52\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">μ₁</text>\n                          <polygon points=\"120,80 124,88 116,88\" fill=\"#111\"/>\n                          <text x=\"130\" y=\"87\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">μ₂</text>\n                        </g>\n\n                        <!-- Step 2: Assign -->\n                        <g transform=\"translate(210, 10)\">\n                          <rect x=\"0\" y=\"0\" width=\"180\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"90\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Gán điểm về tâm gần nhất</text>\n                          <!-- Cluster 1 points (black) -->\n                          <circle cx=\"40\" cy=\"50\" r=\"4\" fill=\"#111\"/><circle cx=\"55\" cy=\"70\" r=\"4\" fill=\"#111\"/><circle cx=\"35\" cy=\"85\" r=\"4\" fill=\"#111\"/>\n                          <!-- Cluster 2 points (white stroke) -->\n                          <circle cx=\"130\" cy=\"65\" r=\"4\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <circle cx=\"145\" cy=\"85\" r=\"4\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <circle cx=\"120\" cy=\"100\" r=\"4\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <!-- Boundary line -->\n                          <line x1=\"90\" y1=\"35\" x2=\"90\" y2=\"125\" stroke=\"#888\" stroke-dasharray=\"3,3\"/>\n                          <text x=\"90\" y=\"135\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">Ranh giới Voronoi</text>\n                        </g>\n\n                        <!-- Step 3: Update -->\n                        <g transform=\"translate(410, 10)\">\n                          <rect x=\"0\" y=\"0\" width=\"190\" height=\"140\" fill=\"#111\"/>\n                          <text x=\"95\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">3. Dịch tâm về trọng tâm Mean</text>\n                          <circle cx=\"40\" cy=\"50\" r=\"4\" fill=\"#fff\"/><circle cx=\"55\" cy=\"70\" r=\"4\" fill=\"#fff\"/><circle cx=\"35\" cy=\"85\" r=\"4\" fill=\"#fff\"/>\n                          <circle cx=\"130\" cy=\"65\" r=\"4\" fill=\"#888\"/><circle cx=\"145\" cy=\"85\" r=\"4\" fill=\"#888\"/><circle cx=\"120\" cy=\"100\" r=\"4\" fill=\"#888\"/>\n                          <!-- Updated Centroids -->\n                          <circle cx=\"43\" cy=\"68\" r=\"6\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2\"/>\n                          <text x=\"55\" y=\"72\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" font-weight=\"bold\">μ₁ mới</text>\n                          <circle cx=\"132\" cy=\"83\" r=\"6\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2\"/>\n                          <text x=\"144\" y=\"87\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" font-weight=\"bold\">μ₂ mới</text>\n                          <text x=\"95\" y=\"130\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\" text-anchor=\"middle\">Lặp lại đến khi hội tụ!</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Chu trình 3 bước lặp K-Means: Khởi tạo tâm -> Gán điểm theo khoảng cách Euclid nhỏ nhất -> Cập nhật tâm bằng trung bình cộng tọa độ (Mean)."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa K-Means và k-NN: Rất nhiều thí sinh nhầm lẫn hai thuật toán này vì đều có chữ 'k'! Nhớ kỹ: K-Means là HỌC KHÔNG GIÁM SÁT (K là số cụm cần gom, không có nhãn đúng); k-NN là HỌC CÓ GIÁM SÁT (k là số láng giềng biểu quyết, có nhãn lớp cụ thể)!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong thuật toán K-Means, tại bước Cập nhật tâm (Update Step), vị trí mới của tâm cụm μ_k được xác định bằng công thức toán học nào sau đây?",
+          "options": [
+            "A. Trung vị (Median) tọa độ của các điểm trong cụm k",
+            "B. Trung bình cộng (Mean) tọa độ của tất cả các điểm dữ liệu thuộc cụm k",
+            "C. Điểm dữ liệu có khoảng cách xa nhất tới các cụm khác",
+            "D. Điểm ngẫu nhiên được rút thăm lại từ tập dữ liệu ban đầu"
+          ],
+          "correctIndex": 1,
+          "hint": "Cái tên 'K-Means' xuất phát từ chính phép tính thống kê trung bình cộng (Mean) này.",
+          "solution": [
+            "Bước 1: Phân tích tên gọi K-Means: K đại diện cho số cụm, Means đại diện cho giá trị trung bình cộng.",
+            "Bước 2: Trong bước cập nhật tâm, tâm cụm mới μ_k được tính bằng tổng vector tọa độ của tất cả các điểm thuộc cụm k chia cho số lượng phần tử của cụm đó: μ_k = (1 / |C_k|) * sum(x_i).",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "9.2. Gót Chân Achilles Của K-Means & Vũ Khí Khởi Tạo Thông Minh K-Means++",
+        "content": "K-Means truyền thống rất dễ rơi vào bẫy cực tiểu địa phương nghèo nàn nếu chọn nhầm các tâm cụm ban đầu quá gần nhau. Thuật toán K-Means++ ra đời như một giải pháp cứu rỗi bằng cơ chế xác suất tỷ lệ thuận với bình phương khoảng cách.",
+        "deepDive": "**1. Gót chân Achilles của K-Means truyền thống: Sự phụ thuộc vào khởi tạo:**\nHàm mục tiêu WCSS là một hàm **Phi lồi (Non-convex)** có vô số điểm cực tiểu địa phương (Local Minima):\n- Nếu bạn chọn $K$ tâm ban đầu một cách hú họa:\n  - Rất có thể 2 hoặc 3 tâm cụm ban đầu cùng rơi vào một đám mây điểm duy nhất!\n  - Kết quả: Cụm tự nhiên đó bị chia cắt thành 2 nửa nhân tạo, trong khi một cụm dữ liệu tách biệt khác ở xa lại bị gộp chung hoặc bị bỏ sót!\n  - Thuật toán K-Means truyền thống sẽ bị mắc kẹt tại nghiệm tồi tệ này mà không thể tự thoát ra được.\n\n**2. Thuật toán K-Means++ (David Arthur & Sergei Vassilvitskii, 2007 - Câu 18 VAIO):**\nÝ tưởng cốt lõi cực kỳ trực quan: **Các tâm cụm ban đầu phải nằm CÀNG XA NHAU CÀNG TỐT**!\n\n**Quy trình 4 bước của K-Means++:**\n1. **Bước 1:** Chọn ngẫu nhiên tâm cụm đầu tiên $\\mu_1$ từ tập dữ liệu theo phân phối đều.\n2. **Bước 2:** Với mỗi điểm dữ liệu $x$, tính khoảng cách ngắn nhất từ nó tới các tâm cụm đã chọn trước đó:\n   $$D(x) = \\min_{j \\in \\{1, \\dots, m\\}} \\|x - \\mu_j\\|$$\n3. **Bước 3:** Chọn tâm cụm tiếp theo $\\mu_{m+1}$ theo phân phối xác suất tỷ lệ thuận với **BÌNH PHƯƠNG KHOẢNG CÁCH $D(x)^2$**:\n   $$P(x) = \\frac{D(x)^2}{\\sum_{x' \\in X} D(x')^2}$$\n4. **Bước 4:** Lặp lại Bước 2 và Bước 3 cho đến khi chọn đủ $K$ tâm cụm ban đầu!\n\n**3. Tại sao lại dùng xác suất $P(x) \\propto D(x)^2$ mà không chọn luôn điểm xa nhất?**\n- Nếu chọn điểm có $D(x)$ xa nhất tuyệt đối (Deterministic): Thuật toán sẽ ngay lập tức bốc phải các điểm nhiễu dị biệt (Outliers) nằm lạc lõng ở góc không gian!\n- Bằng cách dùng phân phối xác suất:\n  - Những điểm nằm càng xa các tâm cũ sẽ có xác suất được chọn rất cao.\n  - Những điểm nằm sát sạt các tâm cũ sẽ có xác suất chọn gần bằng 0!\n  - Vẫn giữ được tính ngẫu nhiên an toàn trước các điểm Outliers đơn lẻ.\n\n**4. Hiệu quả vượt bậc:**\nK-Means++ đã được chứng minh bằng toán học giúp thuật toán đạt chất lượng nghiệm xấp xỉ $\\mathcal{O}(\\log K)$-competitive so với nghiệm tối ưu toàn cục, tăng tốc độ hội tụ gấp đôi và trở thành **tiêu chuẩn mặc định trong Scikit-Learn** (`init='k-means++'`).",
+        "formula": "P(x) = \\frac{D(x)^2}{\\sum_{x' \\in X} D(x')^2}, \\quad D(x) = \\min_{j=1}^m \\|x - \\mu_j\\|",
+        "mathExplainer": [
+          {
+            "sym": "D(x)",
+            "name": "Khoảng cách tới tâm gần nhất",
+            "mean": "Khoảng cách từ mẫu x tới tâm cụm gần nó nhất trong số các tâm đã được chọn."
+          },
+          {
+            "sym": "P(x)",
+            "name": "Xác suất được chọn làm tâm mới",
+            "mean": "Tỷ lệ xác suất để điểm x trở thành tâm tiếp theo, tỷ lệ thuận với D(x)²."
+          },
+          {
+            "sym": "\\mathcal{O}(\\log K)",
+            "name": "Giới hạn xấp xỉ lý thuyết",
+            "mean": "Độ đảm bảo toán học của Arthur & Vassilvitskii chứng minh K-Means++ vượt trội hoàn toàn so với khởi tạo ngẫu nhiên."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <text x=\"280\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">CƠ CHẾ CHỌN TÂM XÁC SUẤT TRONG K-MEANS++</text>\n\n                        <!-- First centroid mu_1 -->\n                        <circle cx=\"100\" cy=\"90\" r=\"12\" fill=\"#111\"/>\n                        <text x=\"100\" y=\"94\" font-family=\"Georgia\" font-size=\"10\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">μ₁</text>\n                        <text x=\"100\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Tâm 1 (Chọn ngẫu nhiên)</text>\n\n                        <!-- Near points (small D -> low prob) -->\n                        <circle cx=\"130\" cy=\"80\" r=\"5\" fill=\"#888\"/>\n                        <circle cx=\"110\" cy=\"120\" r=\"5\" fill=\"#888\"/>\n                        <circle cx=\"80\" cy=\"60\" r=\"5\" fill=\"#888\"/>\n                        <text x=\"145\" y=\"70\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\">D(x) nhỏ ⇒ P(x) ≈ 0%</text>\n\n                        <!-- Far points (large D -> high prob) -->\n                        <line x1=\"100\" y1=\"90\" x2=\"380\" y2=\"80\" stroke=\"#111\" stroke-width=\"1.5\" stroke-dasharray=\"4,4\"/>\n                        <text x=\"240\" y=\"75\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Khoảng cách D(x) rất lớn!</text>\n\n                        <circle cx=\"380\" cy=\"80\" r=\"14\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"380\" y=\"84\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">μ₂ ?</text>\n                        <text x=\"380\" y=\"115\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">P(x) ∝ D(x)² CỰC CAO!</text>\n                        <text x=\"380\" y=\"130\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">Được ưu tiên chọn làm tâm 2</text>\n                      </g>\n                    </svg>",
+          "caption": "K-Means++ ưu tiên chọn các điểm ở xa tâm đã có làm tâm mới với xác suất tỷ lệ với D(x)², tránh hiện tượng các tâm chụm lại một chỗ."
+        },
+        "commonPitfalls": "Nhầm lẫn rằng K-Means++ chọn điểm xa nhất một cách tuyệt đối: Nếu luôn chọn điểm xa nhất tuyệt đối, mô hình sẽ bị bắt chết vào các điểm Outlier (nhiễu). K-Means++ chọn THEO XÁC SUẤT tỷ lệ thuận với D(x)², vẫn đảm bảo tính ngẫu nhiên khoa học!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 18 Đề Thi VAIO 2025)",
+          "question": "Trong thuật toán K-Means++, xác suất P(x) để một điểm dữ liệu x được lựa chọn làm tâm cụm tiếp theo tỷ lệ thuận với đại lượng nào sau đây?",
+          "options": [
+            "A. Khoảng cách Euclid D(x) tới tâm cụm gần nhất",
+            "B. Bình phương khoảng cách D(x)² tới tâm cụm gần nhất đã chọn",
+            "C. Nghịch đảo khoảng cách 1 / D(x) để ưu tiên các điểm ở gần",
+            "D. Mật độ các điểm láng giềng xung quanh điểm x"
+          ],
+          "correctIndex": 1,
+          "hint": "Nhớ lại công thức xác suất của K-Means++: P(x) = D(x)² / sum(D(x')²).",
+          "solution": [
+            "Bước 1: Phân tích thuật toán Arthur & Vassilvitskii (2007) cho K-Means++.",
+            "Bước 2: Để kéo dãn khoảng cách giữa các tâm và tăng cường độ phân tách, thuật toán nâng khoảng cách lên lũy thừa bậc 2 (D(x)²).",
+            "Bước 3: Xác suất được chuẩn hóa theo phân phối P(x) = D(x)² / sum(D(x')²).",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "9.3. Lựa Chọn Số Cụm K Tối Ưu: Phương Pháp Khuỷu Tay (Elbow Method) & Hệ Số Silhouette [-1, +1]",
+        "content": "Làm thế nào để biết nên chia dữ liệu thành 2, 3 hay 5 cụm? Khám phá hai công cụ định lượng chuẩn mực: Phương pháp khuỷu tay Elbow dựa trên điểm uốn WCSS và Hệ số Silhouette đo độ nén nội cụm và cách ly ngoại cụm.",
+        "deepDive": "**1. Bài toán hóc búa: Chọn K bằng bao nhiêu?**\nTrong phân cụm không giám sát, con người không biết trước có bao nhiêu nhóm thực tế.\n- Nếu bạn tăng $K$ từ 1 lên $N$ (bằng đúng số lượng mẫu):\n  - Khi $K = N$: Mỗi điểm là một cụm riêng, $\\text{WCSS} = 0$ tuyệt đối!\n  - Nhưng điều đó hoàn toàn vô dụng vì mất đi ý nghĩa gom nhóm!\nTa cần một điểm cân bằng: Đủ số cụm để nén dữ liệu chặt chẽ, nhưng không quá nhiều cụm gây manh mún.\n\n**2. Phương Pháp Khuỷu Tay (Elbow Method):**\n- **Cách tiến hành:** Chạy K-Means với các giá trị $K = 1, 2, 3, 4, 5, \\dots$ và ghi lại giá trị $\\mathcal{J}_{\\text{WCSS}}$ tương ứng.\n- **Vẽ đồ thị:** Trục hoành là $K$, trục tung là $\\text{WCSS}$.\n- **Hiện tượng hình học:**\n  - Khi $K$ tăng từ 1 lên 2, 3: WCSS giảm dốc đứng cực mạnh vì dữ liệu được phân chia đúng cấu trúc tự nhiên.\n  - Sau một giá trị $K^*$ nào đó: Tốc độ giảm của WCSS đột ngột chậm hẳn lại, đồ thị thoai thoải dần.\n  - Điểm uốn gập khúc này trông giống như **Khuỷu tay (Elbow)** của cánh tay người $\\implies$ $K^*$ chính là **Số cụm tối ưu**!\n\n**3. Hệ Số Silhouette (Silhouette Score - Peter Rousseeuw, 1987 - Câu 31 VAIO):**\nPhương pháp Elbow đôi khi cho đường cong trơn tru không có khuỷu tay rõ ràng. Khi đó, **Hệ số Silhouette** là tiêu chuẩn định lượng số 1!\n\nVới mỗi điểm dữ liệu $i$, ta tính hai đại lượng:\n- **$a(i)$ - Độ gắn kết nội cụm (Cohesion):**\n  Khoảng cách trung bình từ điểm $i$ tới tất cả các điểm khác TRONG CÙNG CỤM của nó:\n  $$a(i) = \\frac{1}{|C_A| - 1} \\sum_{j \\in C_A, j \\ne i} \\|x_i - x_j\\|$$\n  *(Càng nhỏ càng tốt $\\implies$ Cụm đặc quánh, các điểm gần nhau).*\n- **$b(i)$ - Độ phân tách ngoại cụm (Separation):**\n  Khoảng cách trung bình từ điểm $i$ tới tất cả các điểm trong **CỤM LÁNG GIỀNG GẦN NHẤT**:\n  $$b(i) = \\min_{C_B \\ne C_A} \\frac{1}{|C_B|} \\sum_{j \\in C_B} \\|x_i - x_j\\|$$\n  *(Càng lớn càng tốt $\\implies$ Cụm của mình cách rất xa cụm đối thủ).*\n\n**Công thức Hệ Số Silhouette của điểm $i$:**\n$$s(i) = \\frac{b(i) - a(i)}{\\max(a(i), b(i))}, \\quad -1 \\le s(i) \\le +1$$\n\n**Ý nghĩa các khoảng giá trị:**\n- **$s(i) \\approx +1$ (Lý tưởng):** $b(i) \\gg a(i)$. Điểm nằm rất gần đồng đội và cách rất xa đối thủ $\\implies$ Phân cụm xuất sắc!\n- **$s(i) \\approx 0$ (Lấp lửng ranh giới):** $b(i) \\approx a(i)$. Điểm nằm ngay trên ranh giới tranh chấp giữa 2 cụm.\n- **$s(i) < 0$ (Thảm họa):** $b(i) < a(i)$. Điểm bị gán nhầm cụm! Khoảng cách tới cụm khác còn gần hơn cụm hiện tại!\n\n**Quy tắc chọn K:** Tính Silhouette Score trung bình trên toàn bộ dữ liệu $\\bar{S} = \\frac{1}{N}\\sum s(i)$ cho từng $K$. **Chọn giá trị $K$ có $\\bar{S}$ cao nhất!**",
+        "formula": "s(i) = \\frac{b(i) - a(i)}{\\max(a(i), b(i))}, \\quad -1 \\le s(i) \\le 1, \\quad \\bar{S} = \\frac{1}{N}\\sum_{i=1}^N s(i)",
+        "mathExplainer": [
+          {
+            "sym": "a(i)",
+            "name": "Độ gắn kết nội cụm",
+            "mean": "Khoảng cách trung bình từ điểm i tới các điểm trong cùng cụm (càng nhỏ càng tốt)."
+          },
+          {
+            "sym": "b(i)",
+            "name": "Độ phân tách ngoại cụm",
+            "mean": "Khoảng cách trung bình từ điểm i tới các điểm trong cụm láng giềng gần nhất (càng lớn càng tốt)."
+          },
+          {
+            "sym": "s(i)",
+            "name": "Hệ số Silhouette của điểm i",
+            "mean": "Thước đo chất lượng phân cụm [-1, 1]. Càng gần +1 càng hoàn hảo, âm là bị gán nhầm cụm."
+          },
+          {
+            "sym": "\\bar{S}",
+            "name": "Silhouette Score trung bình",
+            "mean": "Chỉ số đánh giá toàn cục để so sánh và lựa chọn số cụm K tối ưu."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(40, 20)\">\n                        <!-- Elbow Chart (Left) -->\n                        <g transform=\"translate(20, 10)\">\n                          <text x=\"100\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Phương Pháp Khuỷu Tay (Elbow)</text>\n                          <line x1=\"20\" y1=\"130\" x2=\"180\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <line x1=\"20\" y1=\"20\" x2=\"20\" y2=\"130\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"100\" y=\"145\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Số Cụm K (1, 2, 3, 4, 5)</text>\n                          <text x=\"10\" y=\"75\" font-family=\"Georgia\" font-size=\"9\" transform=\"rotate(-90 10 75)\" text-anchor=\"middle\">WCSS</text>\n                          <!-- Elbow curve: K=1(120), K=2(60), K=3(30), K=4(24), K=5(20) -->\n                          <path d=\"M 30 25 L 60 70 L 95 105 L 135 115 L 175 120\" fill=\"none\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                          <!-- Elbow point circle -->\n                          <circle cx=\"95\" cy=\"105\" r=\"6\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <text x=\"110\" y=\"100\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">Điểm Khuỷu K* = 3</text>\n                        </g>\n\n                        <!-- Divider -->\n                        <line x1=\"270\" y1=\"15\" x2=\"270\" y2=\"155\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n\n                        <!-- Silhouette Diagram (Right) -->\n                        <g transform=\"translate(320, 10)\">\n                          <text x=\"120\" y=\"0\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Ý Nghĩa Hệ Số Silhouette s(i)</text>\n                          <!-- Cluster A -->\n                          <circle cx=\"50\" cy=\"75\" r=\"35\" fill=\"#f0f0f0\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <circle cx=\"45\" cy=\"70\" r=\"4\" fill=\"#111\"/>\n                          <circle cx=\"60\" cy=\"85\" r=\"4\" fill=\"#111\"/>\n                          <circle cx=\"35\" cy=\"85\" r=\"4\" fill=\"#111\"/>\n                          <!-- Target point i -->\n                          <circle cx=\"65\" cy=\"65\" r=\"5\" fill=\"#111\"/>\n                          <text x=\"75\" y=\"60\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Điểm i</text>\n                          <text x=\"45\" y=\"55\" font-family=\"Georgia\" font-size=\"8\">a(i): Nội cụm</text>\n\n                          <!-- Cluster B (Neighbor) -->\n                          <circle cx=\"170\" cy=\"75\" r=\"35\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <circle cx=\"160\" cy=\"70\" r=\"4\" fill=\"#888\"/>\n                          <circle cx=\"180\" cy=\"85\" r=\"4\" fill=\"#888\"/>\n                          <circle cx=\"165\" cy=\"90\" r=\"4\" fill=\"#888\"/>\n\n                          <!-- Line b(i) -->\n                          <line x1=\"65\" y1=\"65\" x2=\"160\" y2=\"70\" stroke=\"#111\" stroke-width=\"1.5\" stroke-dasharray=\"3,3\"/>\n                          <text x=\"110\" y=\"60\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">b(i): Ngoại cụm</text>\n\n                          <text x=\"120\" y=\"135\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">s(i) = [b(i) - a(i)] / max(a, b)</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Hai phương pháp chọn K tối ưu: Điểm uốn gập khúc trên đường cong WCSS (Elbow) và thước đo tỷ lệ khoảng cách nội/ngoại cụm Silhouette."
+        },
+        "commonPitfalls": "Hiểu nhầm giá trị âm của Silhouette: Nếu một điểm có Silhouette âm (s < 0), điều đó KHÔNG PHẢI là lỗi thuật toán, mà là bằng chứng kết luận điểm đó đã bị gán nhầm cụm (khoảng cách tới cụm láng giềng b(i) nhỏ hơn khoảng cách nội cụm a(i))!",
+        "practiceQuestion": {
+          "level": "Trung bình",
+          "question": "Một điểm dữ liệu x_i trong kết quả phân cụm có khoảng cách trung bình tới các điểm cùng cụm là a(i) = 3.0, và khoảng cách trung bình tới các điểm thuộc cụm láng giềng gần nhất là b(i) = 9.0. Hệ số Silhouette s(i) của điểm này bằng bao nhiêu?",
+          "options": [
+            "A. 0.67",
+            "B. 0.50",
+            "C. -0.67",
+            "D. 1.00"
+          ],
+          "correctIndex": 0,
+          "hint": "Áp dụng công thức s(i) = (b(i) - a(i)) / max(a(i), b(i)) = (9 - 3) / max(3, 9) = 6 / 9.",
+          "solution": [
+            "Bước 1: Tính tử số: b(i) - a(i) = 9.0 - 3.0 = 6.0.",
+            "Bước 2: Tính mẫu số: max(a(i), b(i)) = max(3.0, 9.0) = 9.0.",
+            "Bước 3: Tính hệ số Silhouette: s(i) = 6.0 / 9.0 = 2/3 ≈ 0.667 = 0.67.",
+            "Ý nghĩa: s(i) = 0.67 khá gần +1, chứng tỏ điểm này được phân cụm rất tốt.",
+            "Đáp án chính xác: A (0.67)."
+          ]
+        }
+      },
+      {
+        "heading": "9.4. Giảm Chiều Dữ Liệu PCA: Chiếu Bóng Tối Đa Hóa Phương Sai (Eigendecomposition & SVD)",
+        "content": "Làm thế nào để nén dữ liệu từ hàng trăm chiều xuống 2 hoặc 3 chiều mà vẫn giữ lại linh hồn của thông tin? Khám phá thuật toán PCA của Karl Pearson: Từ khử tâm dữ liệu, ma trận hiệp phương sai, đến phân rã vector riêng.",
+        "deepDive": "**1. Vấn đề của dữ liệu nhiều chiều (High-Dimensional Data):**\nTrong thị giác máy tính, một bức ảnh $28 \\times 28$ có tới $784$ chiều pixel. Trong y sinh, biểu hiện gen có tới $20,000$ chiều.\n- Dữ liệu quá nhiều chiều khiến con người **không thể vẽ đồ thị trực quan hóa** (chỉ vẽ được 2D hoặc 3D).\n- Gây ra **Lời nguyền số chiều (Curse of Dimensionality)**, làm chậm thuật toán và chứa rất nhiều đặc trưng thừa thãi, tương quan mạnh với nhau (Đa cộng tuyến).\n\n**2. Mục tiêu toán học của PCA (Principal Component Analysis):**\nPCA tìm kiếm các trục tọa độ mới $u_1, u_2, \\dots, u_k$ (với $k < d$) sao cho:\n1. **Phương sai (Độ phân tán) của dữ liệu sau khi chiếu lên các trục mới là LỚN NHẤT CÓ THỂ**.\n2. **Sai số tái tạo (Reconstruction Error) bình phương là NHỎ NHẤT CÓ THỂ**.\n*(Hai mục tiêu này đã được chứng minh toán học là hoàn toàn tương đương nhau!).*\n\n**3. Quy trình 4 bước giải tích mẫu mực của PCA:**\n\n- **Bước 1: Khử tâm (Mean Centering - BẮT BUỘC):**\n  Trừ mỗi đặc trưng cho giá trị trung bình của nó:\n  $$\\tilde{X} = X - \\bar{X}$$\n  Đưa trọng tâm của toàn bộ đám mây dữ liệu về đúng gốc tọa độ $(0, 0, \\dots, 0)$.\n\n- **Bước 2: Tính Ma Trận Hiệp Phương Sai (Covariance Matrix $\\Sigma$):**\n  $$\\Sigma = \\frac{1}{N-1} \\tilde{X}^T \\tilde{X} \\in \\mathbb{R}^{d \\times d}$$\n  - Đường chéo chính $\\Sigma_{ii}$: Phương sai của từng đặc trưng $x_i$ (Đo độ phân tán độc lập).\n  - Các ô ngoài đường chéo $\\Sigma_{ij}$: Hiệp phương sai giữa $x_i$ và $x_j$ (Đo mức độ tương quan tuyến tính giữa 2 biến).\n\n- **Bước 3: Phân rã Trị riêng và Vector riêng (Eigendecomposition):**\n  Giải phương trình đặc trưng:\n  $$\\Sigma v = \\lambda v$$\n  - **Vector riêng $v_k$ (Eigenvector):** Chính là **HƯỚNG CỦA TRỤC THÀNH PHẦN CHÍNH THỨ $k$ (Principal Component $k$)**! Các trục này luôn vuông góc (trực giao) từng đôi một: $v_i^T v_j = 0$ $\\implies$ Triệt tiêu hoàn toàn sự dư thừa tương quan!\n  - **Trị riêng $\\lambda_k$ (Eigenvalue):** Chính là **ĐỘ LỚN CỦA PHƯƠNG SAI** mà dữ liệu giữ lại được khi chiếu lên trục $v_k$!\n  Sắp xếp các trị riêng theo thứ tự giảm dần: $\\lambda_1 \\ge \\lambda_2 \\ge \\dots \\ge \\lambda_d \\ge 0$.\n\n- **Bước 4: Chiếu dữ liệu xuống không gian $k$ chiều ($k < d$):**\n  Chọn $k$ vector riêng ứng với $k$ trị riêng lớn nhất làm ma trận chiếu $W = [v_1, v_2, \\dots, v_k] \\in \\mathbb{R}^{d \\times k}$.\n  Tọa độ nén mới của dữ liệu là:\n  $$Z = \\tilde{X} W \\in \\mathbb{R}^{N \\times k}$$\n\n**4. Mối liên hệ kỳ diệu với SVD (Singular Value Decomposition):**\nTrong thực tế (như hàm `PCA` của Scikit-Learn), máy tính không tính ma trận $\\Sigma$ (vì tốn $\\mathcal{O}(d^2)$ bộ nhớ), mà áp dụng SVD trực tiếp lên ma trận dữ liệu đã khử tâm:\n$$\\tilde{X} = U S V^T$$\nKhi đó, các cột của ma trận $V$ chính là các vector riêng của $\\Sigma$, và trị riêng liên hệ qua giá trị suy biến: $\\lambda_i = \\frac{s_i^2}{N-1}$!",
+        "formula": "\\Sigma = \\frac{1}{N-1} \\tilde{X}^T \\tilde{X}, \\quad \\Sigma v_i = \\lambda_i v_i, \\quad Z = \\tilde{X} W_k, \\quad \\tilde{X} = U S V^T",
+        "mathExplainer": [
+          {
+            "sym": "\\Sigma (Sigma)",
+            "name": "Ma trận hiệp phương sai",
+            "mean": "Ma trận vuông đối xứng d x d đo lường phương sai và tương quan giữa tất cả các cặp biến."
+          },
+          {
+            "sym": "v_i",
+            "name": "Vector riêng (Eigenvector)",
+            "mean": "Hướng của trục thành phần chính PC_i (các trục này luôn vuông góc trực giao với nhau)."
+          },
+          {
+            "sym": "\\lambda_i (Lambda)",
+            "name": "Trị riêng (Eigenvalue)",
+            "mean": "Độ lớn phương sai của dữ liệu được bảo toàn dọc theo trục thành phần chính v_i."
+          },
+          {
+            "sym": "Z = \\tilde{X} W_k",
+            "name": "Dữ liệu sau khi giảm chiều",
+            "mean": "Ma trận tọa độ mới trong không gian k chiều (k < d) sau phép chiếu tuyến tính."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"260\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">HÌNH HỌC CỦA PCA: TRỤC CHÍNH PC1 (MAX PHƯƠNG SAI) &amp; PC2</text>\n\n                        <!-- Old Axis -->\n                        <line x1=\"40\" y1=\"140\" x2=\"380\" y2=\"140\" stroke=\"#888\" stroke-width=\"1\"/>\n                        <line x1=\"210\" y1=\"20\" x2=\"210\" y2=\"160\" stroke=\"#888\" stroke-width=\"1\"/>\n                        <text x=\"375\" y=\"155\" font-family=\"Georgia\" font-size=\"9\" fill=\"#666\">Trục x₁ gốc</text>\n                        <text x=\"215\" y=\"30\" font-family=\"Georgia\" font-size=\"9\" fill=\"#666\">Trục x₂ gốc</text>\n\n                        <!-- Elliptical Data points centered at (210, 90) -->\n                        <circle cx=\"110\" cy=\"130\" r=\"3.5\" fill=\"#111\"/><circle cx=\"140\" cy=\"115\" r=\"3.5\" fill=\"#111\"/><circle cx=\"170\" cy=\"105\" r=\"3.5\" fill=\"#111\"/>\n                        <circle cx=\"190\" cy=\"100\" r=\"3.5\" fill=\"#111\"/><circle cx=\"210\" cy=\"90\" r=\"4\" fill=\"#111\"/><circle cx=\"230\" cy=\"80\" r=\"3.5\" fill=\"#111\"/>\n                        <circle cx=\"250\" cy=\"75\" r=\"3.5\" fill=\"#111\"/><circle cx=\"280\" cy=\"65\" r=\"3.5\" fill=\"#111\"/><circle cx=\"310\" cy=\"50\" r=\"3.5\" fill=\"#111\"/>\n\n                        <!-- PC1 Vector (along elongation) -->\n                        <line x1=\"80\" y1=\"145\" x2=\"340\" y2=\"35\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <polygon points=\"340,35 328,40 334,48\" fill=\"#111\"/>\n                        <text x=\"345\" y=\"35\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">PC1 (v₁, λ₁ lớn nhất)</text>\n                        <text x=\"310\" y=\"20\" font-family=\"Georgia\" font-size=\"9\" fill=\"#444\">Phương sai cực đại</text>\n\n                        <!-- PC2 Vector (orthogonal) -->\n                        <line x1=\"175\" y1=\"40\" x2=\"245\" y2=\"140\" stroke=\"#111\" stroke-width=\"1.5\" stroke-dasharray=\"3,3\"/>\n                        <polygon points=\"175,40 185,46 178,52\" fill=\"#111\"/>\n                        <text x=\"110\" y=\"38\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">PC2 (v₂, λ₂ nhỏ)</text>\n                        <text x=\"145\" y=\"145\" font-family=\"Georgia\" font-size=\"8\" fill=\"#666\">Vuông góc v₁ᵀv₂ = 0</text>\n                      </g>\n                    </svg>",
+          "caption": "Trục PC1 bắt trọn hướng phân tán dài nhất của dữ liệu (ứng với trị riêng λ₁ lớn nhất); Trục PC2 trực giao vuông góc bắt phần phương sai còn lại."
+        },
+        "commonPitfalls": "Quên bước Mean Centering trước khi chạy PCA: Nếu không trừ trung bình (khử tâm), trục thành phần chính đầu tiên sẽ bị kéo lệch về phía gốc tọa độ thay vì đi qua tâm đám mây điểm, làm sai lệch hoàn toàn hướng phân tán!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong thuật toán PCA, hai vector riêng (eigenvectors) ứng với hai thành phần chính khác nhau luôn thỏa mãn tính chất hình học nào sau đây?",
+          "options": [
+            "A. Luôn song song với nhau",
+            "B. Luôn trực giao (vuông góc) tuyệt đối với nhau (v_1ᵀ v_2 = 0)",
+            "C. Luôn có cùng độ dài trị riêng",
+            "D. Luôn đi qua điểm dị biệt (outlier) xa nhất"
+          ],
+          "correctIndex": 1,
+          "hint": "Ma trận hiệp phương sai là ma trận đối xứng thực. Các vector riêng ứng với các trị riêng phân biệt của ma trận đối xứng luôn trực giao nhau.",
+          "solution": [
+            "Bước 1: Ma trận hiệp phương sai Sigma là ma trận đối xứng thực (Sigma = Sigma^T).",
+            "Bước 2: Theo định lý phổ (Spectral Theorem) trong đại số tuyến tính, các vector riêng của ma trận đối xứng thực luôn trực giao từng đôi một: v_i^T v_j = 0 với mọi i khác j.",
+            "Bước 3: Ý nghĩa thực tiễn: Các trục thành phần chính vuông góc với nhau giúp triệt tiêu hoàn toàn tương quan tuyến tính giữa các biến mới.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "9.5. Đọc Biểu Đồ Scree Plot, Tỷ Lệ Phương Sai Giải Thích (EVR) & Giới Hạn Tuyến Tính Của PCA",
+        "content": "Làm thế nào để quyết định giữ lại bao nhiêu chiều? Học cách đọc biểu đồ Scree Plot, tính tỷ lệ phương sai giải thích tích lũy, và phân tích sự thất bại của PCA trước các bề mặt phi tuyến (Swiss Roll).",
+        "deepDive": "**1. Tỷ Lệ Phương Sai Giải Thích (Explained Variance Ratio - EVR - Câu 47 VAIO):**\nTổng phương sai của toàn bộ dữ liệu bằng tổng các trị riêng:\n$$\\text{Total Variance} = \\sum_{j=1}^d \\lambda_j$$\nTỷ lệ phần trăm thông tin (phương sai) mà thành phần chính thứ $k$ giữ lại được là:\n$$\\text{EVR}_k = \\frac{\\lambda_k}{\\sum_{j=1}^d \\lambda_j}$$\n- **Phương sai giải thích tích lũy (Cumulative Explained Variance):**\n  $$\\text{Cumulative EVR}(k) = \\frac{\\sum_{i=1}^k \\lambda_i}{\\sum_{j=1}^d \\lambda_j}$$\n- **Quy tắc công nghiệp:** Người ta thường chọn số chiều $k$ nhỏ nhất sao cho $\\text{Cumulative EVR}(k) \\ge 85\\%$ hoặc $\\ge 90\\%$.\n\n**2. Biểu Đồ Scree Plot (Biểu đồ sỏi đá chân núi):**\n- **Nguồn gốc tên gọi:** Raymond Cattell (1966) đặt tên theo từ 'scree' (đá vụn rơi ở chân vách núi).\n- **Cấu trúc biểu đồ:**\n  - Trục hoành: Thứ tự các thành phần chính ($PC_1, PC_2, PC_3, \\dots$).\n  - Trục tung: Giá trị trị riêng $\\lambda_i$ hoặc tỷ lệ $\\text{EVR}_i$.\n- **Quy tắc tìm điểm dừng:**\n  - Vài thành phần đầu tiên có cột rất cao (Vách núi dựng đứng - Chứa thông tin cốt lõi).\n  - Sau một điểm uốn gập khúc, các cột thấp tịt và thoai thoải dần (Đá vụn dưới chân núi - Chứa nhiễu).\n  - Ta dừng lại ngay tại **điểm uốn của Scree Plot**, chỉ giữ lại các thành phần chính trước điểm uốn!\n\n**3. Yêu cầu sống còn: Chuẩn hóa đặc trưng (Feature Scaling) trước PCA:**\n- PCA là thuật toán **nhạy cảm cực độ với độ lớn thang đo**:\n  - Nếu một biến đo bằng milimet ($[0, 5000]$) và một biến đo bằng mét ($[0, 5]$).\n  - Phương sai của biến milimet sẽ lớn gấp hàng triệu lần biến mét!\n  - PCA ngây thơ sẽ chọn luôn trục milimet làm PC1 mà không thèm nhìn biến mét!\n  $\\implies$ **BẮT BUỘC PHẢI CHUẨN HÓA DỮ LIỆU BẰNG `StandardScaler` (Z-score) TRƯỚC KHI CHẠY PCA!**\n\n**4. Giới hạn chết người của PCA: Bề mặt phi tuyến (Swiss Roll):**\n- PCA là thuật toán **Tuyến tính (Linear)**: Nó chỉ có thể chiếu dữ liệu lên các siêu phẳng phẳng tắp!\n- Nếu dữ liệu có cấu trúc phi tuyến uốn khúc phức tạp (như chiếc bánh bông lan cuộn Swiss Roll):\n  - Chiếu phẳng của PCA sẽ đè bẹp các vòng cuộn lên nhau, làm dính các điểm ở xa thành gần!\n- **Giải pháp thay thế:**\n  - **Kernel PCA:** Kết hợp Kernel Trick để giảm chiều phi tuyến.\n  - **t-SNE (t-Distributed Stochastic Neighbor Embedding):** Chuyên dùng để trực quan hóa 2D/3D các cụm phức tạp (bảo toàn cấu trúc lân cận cục bộ).\n  - **UMAP (Uniform Manifold Approximation and Projection):** Nhanh hơn t-SNE và bảo toàn tốt cả cấu trúc toàn cục.",
+        "formula": "\\text{EVR}_k = \\frac{\\lambda_k}{\\sum_{j=1}^d \\lambda_j}, \\quad \\text{Cumulative}(k) = \\sum_{i=1}^k \\text{EVR}_i \\ge 0.90",
+        "mathExplainer": [
+          {
+            "sym": "\\text{EVR}_k",
+            "name": "Tỷ lệ phương sai giải thích",
+            "mean": "Phần trăm thông tin dữ liệu được bảo toàn bởi trục thành phần chính k."
+          },
+          {
+            "sym": "\\text{Cumulative EVR}",
+            "name": "Phương sai tích lũy",
+            "mean": "Tổng phần trăm thông tin giữ lại được khi chọn k thành phần chính đầu tiên."
+          },
+          {
+            "sym": "\\text{Scree Plot}",
+            "name": "Biểu đồ sỏi đá",
+            "mean": "Đồ thị cột trị riêng giảm dần giúp nhận diện điểm uốn để chọn số chiều dừng lại."
+          },
+          {
+            "sym": "\\text{Swiss Roll}",
+            "name": "Cấu trúc bánh cuộn phi tuyến",
+            "mean": "Dạng dữ liệu uốn khúc nơi PCA tuyến tính thất bại và bắt buộc phải dùng t-SNE / UMAP."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(60, 20)\">\n                        <text x=\"260\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">BIỂU ĐỒ SCREE PLOT: LỰA CHỌN SỐ CHIỀU NÉN TỐI ƯU</text>\n\n                        <!-- Bars -->\n                        <!-- PC1: 65% -->\n                        <rect x=\"50\" y=\"45\" width=\"40\" height=\"90\" fill=\"#111\"/>\n                        <text x=\"70\" y=\"40\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">65%</text>\n                        <text x=\"70\" y=\"150\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">PC1</text>\n\n                        <!-- PC2: 25% -->\n                        <rect x=\"110\" y=\"100\" width=\"40\" height=\"35\" fill=\"#444\"/>\n                        <text x=\"130\" y=\"95\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">25%</text>\n                        <text x=\"130\" y=\"150\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">PC2</text>\n\n                        <!-- PC3: 7% -->\n                        <rect x=\"170\" y=\"125\" width=\"40\" height=\"10\" fill=\"#888\"/>\n                        <text x=\"190\" y=\"120\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">7%</text>\n                        <text x=\"190\" y=\"150\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">PC3</text>\n\n                        <!-- PC4: 3% -->\n                        <rect x=\"230\" y=\"131\" width=\"40\" height=\"4\" fill=\"#aaa\"/>\n                        <text x=\"250\" y=\"126\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">3%</text>\n                        <text x=\"250\" y=\"150\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">PC4</text>\n\n                        <!-- Cumulative Curve -->\n                        <line x1=\"70\" y1=\"45\" x2=\"130\" y2=\"25\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"130\" cy=\"25\" r=\"4\" fill=\"#111\"/>\n                        <text x=\"135\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">PC1 + PC2 = 90%!</text>\n\n                        <!-- Description box right -->\n                        <g transform=\"translate(300, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"220\" height=\"105\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"110\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Quyết Định Giảm Chiều</text>\n                          <text x=\"15\" y=\"42\" font-family=\"Georgia\" font-size=\"10\">• PC1 giải thích 65% thông tin</text>\n                          <text x=\"15\" y=\"60\" font-family=\"Georgia\" font-size=\"10\">• PC2 giải thích 25% thông tin</text>\n                          <text x=\"15\" y=\"80\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">• Giữ 2 chiều: Nén được 90%!</text>\n                          <text x=\"15\" y=\"98\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">Loại bỏ PC3, PC4 (chỉ là nhiễu)</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Biểu đồ Scree Plot: Điểm gập khuỷu tay xuất hiện sau PC2; giữ lại PC1 và PC2 đã bảo toàn được 90% tổng phương sai của toàn bộ dữ liệu."
+        },
+        "commonPitfalls": "Quên rằng PCA là phép biến đổi tuyến tính: Rất nhiều người nghĩ PCA có thể bóc tách mọi hình thù phức tạp. Nếu dữ liệu phân bố dạng xoắn ốc hoặc hình cầu lồng nhau, PCA chiếu thẳng sẽ làm dính bết dữ liệu lại với nhau! Khi đó bắt buộc phải dùng t-SNE hoặc UMAP.",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 47 Đề Thi VAIO 2025)",
+          "question": "Khi thực hiện PCA trên một tập dữ liệu 5 chiều, ta thu được 5 trị riêng lần lượt là: λ₁ = 12.0, λ₂ = 5.0, λ₃ = 2.0, λ₄ = 0.8, λ₅ = 0.2. Nếu chỉ giữ lại 2 thành phần chính đầu tiên (PC1 và PC2), tỷ lệ phương sai giải thích tích lũy (Cumulative EVR) bằng bao nhiêu?",
+          "options": [
+            "A. 60.0%",
+            "B. 85.0%",
+            "C. 75.0%",
+            "D. 90.0%"
+          ],
+          "correctIndex": 1,
+          "hint": "Tính tổng phương sai = 12.0 + 5.0 + 2.0 + 0.8 + 0.2 = 20.0. Tính tổng λ₁ + λ₂ = 12.0 + 5.0 = 17.0. Tỷ lệ = 17.0 / 20.0.",
+          "solution": [
+            "Bước 1: Tính tổng phương sai toàn cục của cả 5 chiều:",
+            "  Total = 12.0 + 5.0 + 2.0 + 0.8 + 0.2 = 20.0.",
+            "Bước 2: Tính lượng phương sai được bảo tồn bởi PC1 và PC2:",
+            "  Sum(PC1, PC2) = λ₁ + λ₂ = 12.0 + 5.0 = 17.0.",
+            "Bước 3: Tính tỷ lệ tích lũy:",
+            "  Cumulative EVR = 17.0 / 20.0 = 0.85 = 85.0%.",
+            "Kết luận: Giữ lại 2 chiều đã bảo tồn được 85% tổng thông tin của dữ liệu gốc.",
+            "Đáp án chính xác: B (85.0%)."
+          ]
+        }
+      },
+      {
+        "heading": "9.6. Bài Toán Tính Tay Chuẩn Đề Thi VAIO: Phân Cụm K-Means 1 Chiều, Cập Nhật Tâm & Tính Ma Trận Hiệp Phương Sai PCA",
+        "content": "Thực hành giải bài toán tính tay kinh điển mô phỏng chuẩn xác Câu 3 và Câu 47 Đề thi Olympic AI: Tính toán chi tiết từng bước gán cụm, cập nhật tọa độ tâm mới, tính WCSS và tìm trục thành phần chính PCA giữ lại 100% phương sai.",
+        "deepDive": "**1. Đề bài chuẩn Olympic AI:**\n\n**PHẦN A (Phân Cụm K-Means - Bám sát Câu 3 Đề thi VAIO):**\nCho 6 điểm dữ liệu 1 chiều trên trục số thực:\n$$X = \\{2, \\, 4, \\, 10, \\, 12, \\, 14, \\, 20\\}$$\nTa muốn phân thành $K = 2$ cụm. Khởi tạo 2 tâm cụm ban đầu:\n$$\\mu_1 = 4.0, \\quad \\mu_2 = 12.0$$\n*Yêu cầu thí sinh:*\n1. Thực hiện bước Gán cụm (Assignment Step) cho cả 6 điểm về 2 tâm $\\mu_1$ và $\\mu_2$.\n2. Thực hiện bước Cập nhật tâm (Update Step): Tính tọa độ tâm cụm mới $\\mu_1'$ và $\\mu_2'$.\n3. Tính hàm chi phí $\\text{WCSS}$ sau bước lặp đầu tiên này.\n\n**PHẦN B (Giảm Chiều PCA - Bám sát Câu 47 Đề thi VAIO):**\nCho tập dữ liệu 2 chiều gồm $N = 4$ mẫu đã được chuẩn hóa:\n$$x_1 = (1, 1)^T, \\quad x_2 = (3, 3)^T, \\quad x_3 = (-1, -1)^T, \\quad x_4 = (-3, -3)^T$$\n*Yêu cầu thí sinh:*\n1. Kiểm tra xem dữ liệu đã được khử tâm (Mean Centered) hay chưa.\n2. Tính ma trận hiệp phương sai mẫu $\\Sigma$.\n3. Tìm các trị riêng $\\lambda_1, \\lambda_2$ và vector riêng đơn vị $v_1$ của thành phần chính thứ nhất PC1.\n4. Trục thành phần chính thứ nhất PC1 giải thích được bao nhiêu phần trăm tổng phương sai của dữ liệu?\n\n---\n\n**2. Lời giải chi tiết từng bước (Step-by-Step Derivation):**\n\n**LỜI GIẢI PHẦN A (K-MEANS):**\n\n**Bước 1: Bước Gán cụm (Assignment Step):**\nĐo khoảng cách từ từng điểm tới $\\mu_1 = 4.0$ và $\\mu_2 = 12.0$:\n- Điểm $x = 2$: $|2 - 4| = 2 \\le |2 - 12| = 10 \\implies$ **Thuộc Cụm 1**.\n- Điểm $x = 4$: $|4 - 4| = 0 \\le |4 - 12| = 8 \\implies$ **Thuộc Cụm 1**.\n- Điểm $x = 10$: $|10 - 4| = 6 > |10 - 12| = 2 \\implies$ **Thuộc Cụm 2**.\n- Điểm $x = 12$: $|12 - 4| = 8 > |12 - 12| = 0 \\implies$ **Thuộc Cụm 2**.\n- Điểm $x = 14$: $|14 - 4| = 10 > |14 - 12| = 2 \\implies$ **Thuộc Cụm 2**.\n- Điểm $x = 20$: $|20 - 4| = 16 > |20 - 12| = 8 \\implies$ **Thuộc Cụm 2**.\n\nKết quả phân chia cụm:\n- **Cụm 1 ($C_1$):** Gồm 2 điểm $\\{2, 4\\}$.\n- **Cụm 2 ($C_2$):** Gồm 4 điểm $\\{10, 12, 14, 20\\}$.\n\n**Bước 2: Bước Cập nhật tâm (Update Step):**\nTính trung bình cộng tọa độ (Mean) của từng cụm:\n$$\\mu_1' = \\frac{2 + 4}{2} = \\frac{6}{2} = 3.0$$\n$$\\mu_2' = \\frac{10 + 12 + 14 + 20}{4} = \\frac{56}{4} = 14.0$$\nTâm cụm mới đã dịch chuyển: $\\mu_1$ từ $4.0 \\to 3.0$; $\\mu_2$ từ $12.0 \\to 14.0$!\n\n**Bước 3: Tính hàm chi phí WCSS:**\n$$\\text{WCSS}_1 = (2 - 3)^2 + (4 - 3)^2 = (-1)^2 + 1^2 = 1 + 1 = 2.0$$\n$$\\text{WCSS}_2 = (10 - 14)^2 + (12 - 14)^2 + (14 - 14)^2 + (20 - 14)^2$$\n$$= (-4)^2 + (-2)^2 + 0^2 + 6^2 = 16 + 4 + 0 + 36 = 56.0$$\n$$\\text{Total WCSS} = \\text{WCSS}_1 + \\text{WCSS}_2 = 2.0 + 56.0 = 58.0$$\n\n---\n\n**LỜI GIẢI PHẦN B (PCA):**\n\n**Bước 1: Kiểm tra khử tâm (Mean Centering):**\n$$\\bar{x} = \\frac{1 + 3 + (-1) + (-3)}{4} = \\frac{0}{4} = 0$$\n$$\\bar{y} = \\frac{1 + 3 + (-1) + (-3)}{4} = \\frac{0}{4} = 0$$\nCả hai trục đều có trung bình bằng 0 $\\implies$ **Dữ liệu đã được khử tâm hoàn hảo!**\n\n**Bước 2: Tính Ma trận Hiệp Phương Sai mẫu $\\Sigma$ ($N = 4 \\implies N - 1 = 3$):**\n$$\\Sigma = \\frac{1}{3} \\tilde{X}^T \\tilde{X} = \\frac{1}{3} \\begin{bmatrix} x_1^2 + x_2^2 + x_3^2 + x_4^2 & x_1 y_1 + x_2 y_2 + x_3 y_3 + x_4 y_4 \\\\ x_1 y_1 + x_2 y_2 + x_3 y_3 + x_4 y_4 & y_1^2 + y_2^2 + y_3^2 + y_4^2 \\end{bmatrix}$$\nTa có:\n- $1^2 + 3^2 + (-1)^2 + (-3)^2 = 1 + 9 + 1 + 9 = 20$.\n- $1(1) + 3(3) + (-1)(-1) + (-3)(-3) = 1 + 9 + 1 + 9 = 20$.\nDo đó:\n$$\\Sigma = \\frac{1}{3} \\begin{bmatrix} 20 & 20 \\\\ 20 & 20 \\end{bmatrix} = \\begin{bmatrix} 20/3 & 20/3 \\\\ 20/3 & 20/3 \\end{bmatrix}$$\n\n**Bước 3: Tìm Trị riêng $\\lambda$ và Vector riêng $v$:**\nPhương trình đặc trưng: $\\det(\\Sigma - \\lambda I) = 0$:\n$$\\det \\begin{bmatrix} 20/3 - \\lambda & 20/3 \\\\ 20/3 & 20/3 - \\lambda \\end{bmatrix} = \\left(\\frac{20}{3} - \\lambda\\right)^2 - \\left(\\frac{20}{3}\\right)^2 = 0$$\n$$\\lambda \\left(\\lambda - \\frac{40}{3}\\right) = 0 \\implies \\lambda_1 = \\frac{40}{3} \\approx 13.33, \\quad \\lambda_2 = 0$$\n\nTìm vector riêng đơn vị $v_1$ ứng với $\\lambda_1 = 40/3$:\n$$(\\Sigma - \\lambda_1 I) v_1 = 0 \\implies \\begin{bmatrix} -20/3 & 20/3 \\\\ 20/3 & -20/3 \\end{bmatrix} \\begin{bmatrix} v_{11} \\\\ v_{12} \\end{bmatrix} = 0 \\implies v_{11} = v_{12}$$\nChuẩn hóa độ dài $\\|v_1\\| = 1$:\n$$v_1 = \\begin{bmatrix} 1/\\sqrt{2} \\\\ 1/\\sqrt{2} \\end{bmatrix} \\approx \\begin{bmatrix} 0.707 \\\\ 0.707 \\end{bmatrix}$$\n*Ý nghĩa hình học:* Trục PC1 chính là **đường phân giác góc phần tư I-III ($y = x$)**!\n\n**Bước 4: Tỷ lệ phương sai giải thích của PC1:**\n$$\\text{EVR}_1 = \\frac{\\lambda_1}{\\lambda_1 + \\lambda_2} = \\frac{40/3}{40/3 + 0} = \\frac{40/3}{40/3} = 1.0 = 100\\%!$$\n**Kết luận kỳ vĩ:**\nVì 4 điểm dữ liệu ban đầu nằm thẳng hàng tuyệt đối trên đường thẳng $y = x$, trục PC1 đã bắt trọn **$100\\%$ PHƯƠNG SAI CỦA DỮ LIỆU**! Khi nén từ 2D xuống 1D dọc theo trục PC1, ta bảo toàn trọn vẹn $100\\%$ thông tin mà không làm mất mát bất kỳ một chút sai số nào!",
+        "formula": "\\mu_1'=3.0, \\, \\mu_2'=14.0 \\implies \\text{WCSS}=58.0; \\quad \\Sigma = \\begin{bmatrix} 20/3 & 20/3 \\\\ 20/3 & 20/3 \\end{bmatrix} \\implies \\lambda_1=\\frac{40}{3}, \\, \\text{EVR}_1=100\\%",
+        "mathExplainer": [
+          {
+            "sym": "\\mu_1'=3.0, \\mu_2'=14.0",
+            "name": "Tâm cụm K-Means cập nhật",
+            "mean": "Tọa độ mới sau 1 lượt lặp bằng trung bình cộng các điểm trong cụm."
+          },
+          {
+            "sym": "\\text{WCSS} = 58.0",
+            "name": "Tổng bình phương nội cụm",
+            "mean": "Đo lường độ nén chặt của 2 cụm sau bước phân chia."
+          },
+          {
+            "sym": "\\lambda_1 = 40/3, \\lambda_2 = 0",
+            "name": "Các trị riêng của ma trận hiệp phương sai",
+            "mean": "Trị riêng thứ nhất giữ lại toàn bộ độ phân tán; trị riêng thứ hai bằng 0 do dữ liệu thẳng hàng."
+          },
+          {
+            "sym": "\\text{EVR}_1 = 100\\%",
+            "name": "Phương sai giải thích của PC1",
+            "mean": "Trục PC1 bảo toàn 100% thông tin dữ liệu gốc khi giảm chiều từ 2D xuống 1D."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 640 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"640\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"290\" y=\"15\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">TỔNG HỢP KẾT QUẢ TÍNH TAY THỰC CHIẾN CÂU 3 &amp; CÂU 47</text>\n\n                        <!-- Box 1: K-Means 1D -->\n                        <g transform=\"translate(10, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"260\" height=\"120\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"130\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">1. K-Means 1D (Câu 3)</text>\n                          <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\">• Cụm 1: {2, 4} ⇒ μ₁' = (2+4)/2 = 3.0</text>\n                          <text x=\"15\" y=\"68\" font-family=\"Georgia\" font-size=\"10\">• Cụm 2: {10,12,14,20} ⇒ μ₂' = 56/4 = 14.0</text>\n                          <text x=\"15\" y=\"88\" font-family=\"Georgia\" font-size=\"10\">• WCSS₁ = 2.0, WCSS₂ = 56.0</text>\n                          <text x=\"15\" y=\"110\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\">⇒ Tổng WCSS = 58.0</text>\n                        </g>\n\n                        <!-- Box 2: PCA 2D -> 1D -->\n                        <g transform=\"translate(290, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"280\" height=\"120\" fill=\"#111\"/>\n                          <text x=\"140\" y=\"22\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">2. PCA Nén 2D → 1D (Câu 47)</text>\n                          <text x=\"15\" y=\"48\" font-family=\"Georgia\" font-size=\"10\" fill=\"#eee\">• Dữ liệu thẳng hàng y = x</text>\n                          <text x=\"15\" y=\"70\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\">• Trị riêng: λ₁ = 40/3, λ₂ = 0</text>\n                          <text x=\"15\" y=\"92\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\">• Trục PC1: v₁ = (1/√2, 1/√2)ᵀ</text>\n                          <text x=\"15\" y=\"112\" font-family=\"Georgia\" font-size=\"10\" fill=\"#ccc\">⇒ PC1 giữ lại 100% PHƯƠNG SAI!</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Bảng tổng hợp tính tay thực chiến: Cập nhật tâm K-Means thu được WCSS = 58.0 và phân rã PCA bảo toàn trọn vẹn 100% phương sai khi nén xuống 1D."
+        },
+        "commonPitfalls": "Mẫu số của ma trận hiệp phương sai mẫu: Trong thống kê mẫu, mẫu số bắt buộc là N - 1 (với N = 4 mẫu thì chia cho 3) theo hiệu chỉnh Bessel để ước lượng không thiên lệch. Rất nhiều học sinh chia cho N = 4 dẫn tới sai số kết quả ma trận!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 3 Đề Thi VAIO 2025)",
+          "question": "Cho một cụm gồm 3 điểm dữ liệu 2D: P₁(1, 2), P₂(3, 4), P₃(5, 6). Tọa độ trọng tâm (Centroid) của cụm này và tổng bình phương khoảng cách WCSS nội cụm lần lượt bằng:",
+          "options": [
+            "A. Tâm (3, 4), WCSS = 16.0",
+            "B. Tâm (3, 4), WCSS = 8.0",
+            "C. Tâm (3, 4), WCSS = 4.0",
+            "D. Tâm (2, 3), WCSS = 12.0"
+          ],
+          "correctIndex": 0,
+          "hint": "Tính tâm trung bình: x = (1+3+5)/3 = 3, y = (2+4+6)/3 = 4 => Tâm (3, 4). Tính d² từ từng điểm tới (3, 4).",
+          "solution": [
+            "Bước 1: Tính tọa độ tâm cụm bằng trung bình cộng:",
+            "  x_mean = (1 + 3 + 5) / 3 = 9 / 3 = 3.0.",
+            "  y_mean = (2 + 4 + 6) / 3 = 12 / 3 = 4.0.",
+            "  => Tâm cụm là (3, 4).",
+            "Bước 2: Tính tổng bình phương khoảng cách WCSS:",
+            "  - Đến P₁(1, 2): (1 - 3)² + (2 - 4)² = (-2)² + (-2)² = 4 + 4 = 8.",
+            "  - Đến P₂(3, 4): (3 - 3)² + (4 - 4)² = 0 + 0 = 0.",
+            "  - Đến P₃(5, 6): (5 - 3)² + (6 - 4)² = 2² + 2² = 4 + 4 = 8.",
+            "  => WCSS = 8 + 0 + 8 = 16.0.",
+            "Đáp án chính xác: A (Tâm (3, 4), WCSS = 16.0)."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-knn-classifier",
+    "examConnection": {
+      "questionTitle": "Điểm Trọng Tâm Về K-Means & PCA Trong Đề Thi VAIO 2025",
+      "items": [
+        {
+          "code": "Câu 3 VAIO: Chu Trình K-Means & WCSS",
+          "problem": "Tính toán tọa độ cập nhật tâm và chứng minh hàm WCSS luôn giảm đơn điệu sau mỗi bước lặp.",
+          "solution": [
+            "1. Gán điểm về tâm gần nhất theo khoảng cách Euclid.",
+            "2. Cập nhật tâm bằng Mean tọa độ của cụm.",
+            "3. Tính WCSS = sum ||x - mu||² để định lượng độ nén chặt."
+          ]
+        },
+        {
+          "code": "Câu 18 & 31 VAIO: K-Means++ & Hệ Số Silhouette",
+          "problem": "Khởi tạo thông minh với xác suất P(x) tỷ lệ thuận với D(x)² và tiêu chuẩn chọn K tối ưu.",
+          "solution": [
+            "1. K-Means++ chọn tâm xa nhau với P(x) ∝ D(x)².",
+            "2. Phương pháp Elbow tìm điểm uốn WCSS.",
+            "3. Hệ số Silhouette s(i) = [b(i) - a(i)] / max(a, b) trong khoảng [-1, 1]."
+          ]
+        },
+        {
+          "code": "Câu 47 VAIO: PCA & Ma Trận Hiệp Phương Sai",
+          "problem": "Bản chất của Vector riêng, Trị riêng và tỷ lệ phương sai giải thích tích lũy.",
+          "solution": [
+            "1. Vector riêng v_i xác định hướng trực giao của các trục chính.",
+            "2. Trị riêng λ_i đo lường phương sai được giữ lại.",
+            "3. Tỷ lệ phương sai giải thích EVR_k = λ_k / sum(λ). Bắt buộc khử tâm trước khi chạy PCA."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Học không giám sát tự động khám phá quy luật ẩn mà hoàn toàn không có nhãn đúng y.",
+      "K-Means lặp 2 bước luân phiên: Gán điểm về tâm gần nhất và Cập nhật tâm bằng giá trị trung bình cộng (Mean).",
+      "K-Means++ khởi tạo các tâm cụm nằm xa nhau với xác suất tỷ lệ thuận với bình phương khoảng cách D(x)².",
+      "Chọn K tối ưu bằng điểm khuỷu tay Elbow của WCSS hoặc điểm cực đại của Hệ số Silhouette [-1, 1].",
+      "PCA tìm các trục trực giao tối đa hóa phương sai: Vector riêng là hướng trục chiếu, Trị riêng là độ lớn phương sai bảo tồn.",
+      "Cả K-Means và PCA đều BẮT BUỘC phải chuẩn hóa đặc trưng (Feature Scaling) trước khi chạy."
+    ]
+  },
+  {
+    "id": "lesson-10",
+    "title": "10. Mạng Nơ-ron (MLP) & Thuật Toán Lan Truyền Ngược",
+    "syllabusBadge": "BUỔI 8: DEEP LEARNING: MẠNG NƠ-RON TẦNG ẨN & LAN TRUYỀN NGƯỢC",
+    "summary": "Khám phá nền tảng của Trí tuệ Nhân tạo hiện đại: Từ nơ-ron sinh học đến Perceptron (1958), giải mã cuộc khủng hoảng Mùa đông AI từ bài toán XOR (Minsky & Papert 1969); các hàm kích hoạt phi tuyến then chốt (Sigmoid, Tanh, ReLU, Leaky ReLU, phân biệt Logit & Softmax); thuật toán kỳ diệu Lan Truyền Ngược (Backpropagation) dựa trên Quy tắc Chuỗi (Chain Rule); thảm họa khởi tạo trọng số bằng 0 (Symmetry Breaking) và hai chuẩn khởi tạo Xavier/Glorot vs He/Kaiming; các kỹ thuật tối ưu mạng sâu Batch Normalization (Vị trí đặt chuẩn trước ReLU - Câu 1 VAIO) và Dropout; cùng bài toán tính tay toàn diện chuẩn đề thi VAIO 2025.",
+    "intuition": {
+      "title": "Trực giác thực tế: Dây chuyền dệt may & Chiếc thước thẳng bất lực trước 4 chấm màu",
+      "content": "Để hiểu trọn vẹn Mạng nơ-ron nhân tạo và Lan truyền ngược mà không bị choáng ngợp bởi hàng tá công thức giải tích, hãy quan sát hai hình ảnh đời sống sau:\n\n**1. Trực giác Lan Truyền Tiến (Forward) và Lan Truyền Ngược (Backward) trong xưởng dệt may:**\nHãy tưởng tượng một xưởng may áo sơ mi xuất khẩu hoạt động theo dây chuyền gồm 3 tổ sản xuất:\n- **Tổ 1 (Cắt vải - Trọng số $W^{[1]}$):** Nhận cuộn vải mộc (Dữ liệu đầu vào $x$), đo đạc và cắt thành các mảnh thân áo, tay áo (Kích hoạt tầng ẩn $a^{[1]}$).\n- **Tổ 2 (May thân áo - Trọng số $W^{[2]}$):** Nhận các mảnh vải từ Tổ 1, ráp nối và may thành chiếc áo hoàn chỉnh (Kích hoạt $a^{[2]}$).\n- **Tổ 3 (Đơm cúc & Là ủi - Trọng số $W^{[3]}$):** Đơm các hàng khuy cúc và là phẳng để tạo ra chiếc áo thành phẩm đưa ra thị trường (Đầu ra dự đoán $\\hat{y}$).\nQuá trình cuộn vải đi từ Tổ 1 qua Tổ 2 đến Tổ 3 chính là **Lan Truyền Tiến (Forward Pass)**!\n\nKhi chiếc áo xuất xưởng, bộ phận kiểm định chất lượng (KCS) đem đo chiếc áo với mẫu thiết kế chuẩn (Nhãn thực tế $y$). Họ phát hiện: Hàng cúc áo bị may lệch 2 cm so với mép áo! Độ lệch này chính là **Hàm Mất Mát (Loss Function $\\mathcal{L}$)**.\nBây giờ, làm sao để sửa lỗi này cho các mẻ áo sau?\nNgười quản đốc không thể đổ lỗi bừa bãi. Ông ta đi **NGƯỢC DÒNG TỪ CUỐI DÂY CHUYỀN VỀ ĐẦU**:\n- Đầu tiên, ông gặp Tổ 3: *'Các bạn đơm cúc lệch bao nhiêu milimet?'* (Tính đạo hàm theo $W^{[3]}$).\n- Tiếp theo, ông lần về Tổ 2: *'Do mép vải may vẹo hay do thợ đơm cúc? May thân áo chịu trách nhiệm bao nhiêu phần trăm?'* (Lan truyền sai số $\\delta$ về tầng ẩn qua Chain Rule, tính đạo hàm theo $W^{[2]}$).\n- Cuối cùng, ông truy về Tổ 1: *'Tổ cắt vải có cắt lệch góc nào không?'* (Tính đạo hàm theo $W^{[1]}$).\nSau khi xác định chính xác 'tỷ lệ trách nhiệm' của từng người thợ (Vector Gradient), ông quản đốc yêu cầu từng tổ căn chỉnh lại máy may của mình một lượng vừa đủ (Cập nhật trọng số theo Gradient Descent)!\nĐó chính là linh hồn của **Thuật Toán Lan Truyền Ngược (Backpropagation)**: Truy vết trách nhiệm sai số từ cuối về đầu theo Quy tắc chuỗi!\n\n---\n\n**2. Trực giác Bài toán XOR: Chiếc thước thẳng bất lực trước 4 chấm màu:**\nHãy tưởng tượng trên một tờ giấy trắng phẳng lì, bạn chấm 4 điểm màu:\n- Hai điểm **ĐỎ** ở tọa độ $(0, 1)$ và $(1, 0)$.\n- Hai điểm **XANH** ở tọa độ $(0, 0)$ và $(1, 1)$.\nBây giờ, bạn cầm một cây thước kẻ thẳng tắp và một lưỡi dao lam: Bạn hãy rạch **ĐÚNG MỘT ĐƯỜNG THẲNG** duy nhất để chia tờ giấy làm hai nửa, sao cho một bên toàn chấm ĐỎ, một bên toàn chấm XANH!\nBạn hãy thử xoay cây thước theo mọi góc:\n- Cắt ngang? Sai!\n- Cắt dọc? Sai!\n- Cắt chéo theo bất kỳ góc nào? Bạn chỉ có thể tách được tối đa 3 điểm đúng, luôn luôn có ít nhất 1 điểm bị nằm sai bên (Độ chính xác tối đa chỉ là 75%)!\nMột đường thẳng đơn độc (tương đương với một nơ-ron Perceptron đơn tầng) **HOÀN TOÀN BẤT LỰC** trước bài toán XOR này!\nNhưng nếu bạn cầm tờ giấy lên, **GẬP ĐÔI TỜ GIẤY LẠI** (uốn cong không gian bằng hàm kích hoạt phi tuyến ở tầng ẩn), thì hai chấm ĐỎ sẽ chập lại gần nhau và hai chấm XANH dạt ra xa. Khi đó, chỉ cần một nhát rạch thẳng duy nhất, bạn đã tách rời hoàn hảo Đỏ và Xanh! Đó chính là sức mạnh kỳ diệu của **Tầng ẩn (Hidden Layer) và Tính phi tuyến trong Mạng Nơ-ron**!"
+    },
+    "sections": [
+      {
+        "heading": "10.1. Khởi Nguồn Nơ-ron Nhân Tạo Perceptron (Rosenblatt 1958) & Giới Hạn Của Bài Toán XOR (Minsky & Papert 1969)",
+        "content": "Khám phá khởi nguồn của Trí tuệ Nhân tạo: Mô hình toán học nơ-ron nhân tạo của Frank Rosenblatt, cơ chế hoạt động của siêu phẳng quyết định và cuộc khủng hoảng Mùa đông AI đầu tiên khi một Perceptron đơn lẻ bất lực trước bài toán logic XOR.",
+        "deepDive": "**1. Cảm hứng sinh học & Mô hình nơ-ron nhân tạo:**\nBộ não con người chứa khoảng 86 tỷ tế bào thần kinh (Nơ-ron sinh học) liên kết chằng chịt:\n- **Sợi nhánh (Dendrites):** Nhận các tín hiệu điện sinh học từ các nơ-ron lân cận.\n- **Thân tế bào (Soma):** Gom góp và cộng dồn toàn bộ các xung điện nhận được.\n- **Sợi trục (Axon):** Khi tổng điện thế vượt qua một ngưỡng sinh học nhất định, nơ-ron sẽ 'phát xung' (fire) truyền tín hiệu điện đi dọc sợi trục.\n- **Khớp thần kinh (Synapses):** Cầu nối liên kết giữa sợi trục nơ-ron này với sợi nhánh nơ-ron khác, có thể phóng đại hoặc làm suy giảm tín hiệu điện đi qua.\n\nVào năm 1958, nhà tâm lý học **Frank Rosenblatt** đã mô hình hóa cơ chế này thành thuật toán toán học gọi là **Perceptron**:\n- **Đầu vào (Inputs):** $\\mathbf{x} = [x_1, x_2, \\dots, x_d]^T \\in \\mathbb{R}^d$ (tương ứng với các sợi nhánh nhận tín hiệu).\n- **Trọng số (Weights):** $\\mathbf{w} = [w_1, w_2, \\dots, w_d]^T \\in \\mathbb{R}^d$ (tương ứng với độ mạnh yếu của các khớp thần kinh synapse).\n- **Độ lệch ngưỡng (Bias) $b \\in \\mathbb{R}$:** Đại diện cho ngưỡng kích hoạt nội tại của nơ-ron.\n- **Phép tính tổng tuyến tính (Logit):**\n  $$z = \\sum_{j=1}^d w_j x_j + b = \\mathbf{w}^T \\mathbf{x} + b$$\n- **Hàm kích hoạt bước nhảy (Heaviside Step Function):**\n  $$y = f(z) = \\begin{cases} 1 & \\text{nếu } z \\ge 0 \\\\ 0 & \\text{nếu } z < 0 \\end{cases}$$\n\n---\n\n**2. Tại sao Bias $b$ lại là tham số bắt buộc sống còn? (Giải thích hình học):**\nHãy tưởng tượng một nơ-ron có 2 đầu vào $x_1, x_2$ không có bias ($b = 0$). Ranh giới quyết định của nó là phương trình:\n$$w_1 x_1 + w_2 x_2 = 0$$\n- Đường thẳng này **BẮT BUỘC PHẢI ĐI QUA GỐC TỌA ĐỘ $(0, 0)$**!\n- Nếu toàn bộ đám mây dữ liệu của bạn nằm lệch sang góc phần tư thứ nhất (ví dụ các điểm có tọa độ dương quanh $(5, 5)$), bạn sẽ không thể nào dịch chuyển đường thẳng tới đó để phân tách dữ liệu nếu không có bias!\n- **Bias $b$** đóng vai trò là một 'tay đòn dịch chuyển', cho phép siêu phẳng tự do trượt ra xa gốc tọa độ để bao bọc và phân tách dữ liệu ở bất kỳ vị trí nào trong không gian.\n\n---\n\n**3. Bản chất hình học của Perceptron đơn tầng: Phân tách tuyến tính:**\nTrong không gian 2 chiều, phương trình $w_1 x_1 + w_2 x_2 + b = 0$ là một **đường thẳng**.\nTrong không gian $d$ chiều, phương trình $\\mathbf{w}^T \\mathbf{x} + b = 0$ là một **siêu phẳng (Hyperplane)** chia đôi không gian thành 2 nửa:\n- Một nửa không gian nơi $\\mathbf{w}^T \\mathbf{x} + b \\ge 0 \\implies$ Mô hình dự đoán nhãn $1$.\n- Một nửa không gian nơi $\\mathbf{w}^T \\mathbf{x} + b < 0 \\implies$ Mô hình dự đoán nhãn $0$.\nDo đó, một Perceptron đơn tầng chỉ có thể giải quyết được các bài toán **Phân tách tuyến tính (Linearly Separable)**!\n\n---\n\n**4. Cú sốc bài toán XOR & Cuộc khủng hoảng 'Mùa đông AI thứ nhất' (1969):**\nHãy so sánh 3 bảng chân trị logic cơ bản:\n1. **Cổng AND:** $(0,0)\\to 0; (0,1)\\to 0; (1,0)\\to 0; (1,1)\\to 1$.\n   - Chọn đường thẳng $x_1 + x_2 - 1.5 = 0$: Phân tách hoàn hảo 1 điểm $(1,1)$ với 3 điểm còn lại!\n2. **Cổng OR:** $(0,0)\\to 0; (0,1)\\to 1; (1,0)\\to 1; (1,1)\\to 1$.\n   - Chọn đường thẳng $x_1 + x_2 - 0.5 = 0$: Phân tách hoàn hảo điểm $(0,0)$ với 3 điểm còn lại!\n3. **Cổng XOR (Exclusive OR - Tuyệt đối loại trừ):**\n   - $(0, 0) \\implies 0$ (Xanh)\n   - $(0, 1) \\implies 1$ (Đỏ)\n   - $(1, 0) \\implies 1$ (Đỏ)\n   - $(1, 1) \\implies 0$ (Xanh)\n   - **Bế tắc hình học:** Hai điểm Đỏ nằm trên đường chéo phụ, hai điểm Xanh nằm trên đường chéo chính. Bất kỳ một đường thẳng nào cắt qua mặt phẳng cũng chỉ có thể chia đúng 3 điểm, bắt buộc có 1 điểm bị sai!\n   - Năm 1969, hai nhà khoa học tiên phong của MIT là **Marvin Minsky** và **Seymour Papert** xuất bản cuốn sách chấn động *Perceptrons*, chứng minh về mặt toán học rằng Perceptron đơn tầng hoàn toàn bất lực trước hàm XOR và các bài toán phi tuyến.\n   - Kết luận này đã dội một gáo nước lạnh vào giới nghiên cứu, khiến các chính phủ và quỹ đầu tư cắt toàn bộ tài trợ cho mạng nơ-ron trong hơn một thập kỷ, mở ra thời kỳ tăm tối gọi là **'Mùa đông AI thứ nhất' (First AI Winter)**.\n\n---\n\n**5. Sự phục hưng: Mạng Nơ-ron Nhiều Tầng (MLP) giải quyết XOR như thế nào?**\nĐể giải bài toán XOR, ta cần nhận ra một đẳng thức logic học kỳ diệu:\n$$\\text{XOR}(x_1, x_2) = (x_1 \\lor x_2) \\land \\neg(x_1 \\land x_2) = (x_1 \\text{ OR } x_2) \\text{ AND } (\\text{NAND}(x_1, x_2))$$\nTa chỉ cần xây dựng một mạng gồm **1 tầng ẩn (Hidden Layer)** có 2 nơ-ron và **1 tầng đầu ra**:\n- **Nơ-ron ẩn 1 ($h_1$ - Học cổng OR):** $h_1 = \\text{step}(x_1 + x_2 - 0.5)$\n- **Nơ-ron ẩn 2 ($h_2$ - Học cổng NAND):** $h_2 = \\text{step}(-x_1 - x_2 + 1.5)$\n- **Nơ-ron đầu ra ($y$ - Học cổng AND):** $y = \\text{step}(h_1 + h_2 - 1.5)$\n\n**Bản chất biến đổi không gian của tầng ẩn:**\nTầng ẩn đã ánh xạ 4 điểm từ không gian gốc $(x_1, x_2)$ sang không gian biểu diễn mới $(h_1, h_2)$:\n- Điểm $(0, 0) \\xrightarrow{} h_1 = 0, h_2 = 1 \\implies y = \\text{step}(0 + 1 - 1.5) = 0$ (Đúng!)\n- Điểm $(0, 1) \\xrightarrow{} h_1 = 1, h_2 = 1 \\implies y = \\text{step}(1 + 1 - 1.5) = 1$ (Đúng!)\n- Điểm $(1, 0) \\xrightarrow{} h_1 = 1, h_2 = 1 \\implies y = \\text{step}(1 + 1 - 1.5) = 1$ (Đúng!)\n- Điểm $(1, 1) \\xrightarrow{} h_1 = 1, h_2 = 0 \\implies y = \\text{step}(1 + 0 - 1.5) = 0$ (Đúng!)\nTrong không gian mới $(h_1, h_2)$, các điểm Đỏ và Xanh đã trở nên **PHÂN TÁCH TUYẾN TÍNH ĐƯỢC**! Tầng ẩn đã uốn cong và biến đổi không gian để biến điều bất khả thi thành khả thi!",
+        "formula": "z = \\mathbf{w}^T \\mathbf{x} + b = \\sum_{j=1}^d w_j x_j + b, \\quad y = \\text{step}(z) = \\begin{cases} 1 & \\text{khi } z \\ge 0 \\\\ 0 & \\text{khi } z < 0 \\end{cases}",
+        "mathExplainer": [
+          {
+            "sym": "x_j",
+            "name": "Tín hiệu đầu vào",
+            "mean": "Đặc trưng của dữ liệu đưa vào nơ-ron (tương ứng sợi nhánh Dendrite)."
+          },
+          {
+            "sym": "w_j",
+            "name": "Trọng số kết nối",
+            "mean": "Cường độ dẫn truyền của liên kết (khớp thần kinh Synapse), tham số học được."
+          },
+          {
+            "sym": "b",
+            "name": "Độ lệch ngưỡng (Bias)",
+            "mean": "Cho phép siêu phẳng quyết định dịch chuyển tự do ra khỏi gốc tọa độ (0, 0)."
+          },
+          {
+            "sym": "z (Logit)",
+            "name": "Tổng tuyến tính",
+            "mean": "Tổ hợp tuyến tính thô z = w^T x + b trước khi đưa qua hàm kích hoạt."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 200\" width=\"100%\" height=\"200\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"200\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Artificial Neuron Architecture -->\n                      <g transform=\"translate(15, 15)\">\n                        <rect x=\"0\" y=\"0\" width=\"280\" height=\"170\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"140\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Kiến Trúc Nơ-ron Nhân Tạo</text>\n                        <!-- Inputs -->\n                        <circle cx=\"35\" cy=\"50\" r=\"12\" fill=\"#fafafa\" stroke=\"#111\"/><text x=\"35\" y=\"54\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">x₁</text>\n                        <circle cx=\"35\" cy=\"90\" r=\"12\" fill=\"#fafafa\" stroke=\"#111\"/><text x=\"35\" y=\"94\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">x₂</text>\n                        <circle cx=\"35\" cy=\"130\" r=\"12\" fill=\"#fafafa\" stroke=\"#111\"/><text x=\"35\" y=\"134\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">x_d</text>\n                        <text x=\"35\" y=\"112\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">⋮</text>\n                        <!-- Weights labels -->\n                        <text x=\"75\" y=\"48\" font-family=\"Georgia\" font-size=\"8\">w₁</text>\n                        <text x=\"75\" y=\"82\" font-family=\"Georgia\" font-size=\"8\">w₂</text>\n                        <text x=\"75\" y=\"128\" font-family=\"Georgia\" font-size=\"8\">w_d</text>\n                        <!-- Summation Node -->\n                        <line x1=\"47\" y1=\"50\" x2=\"115\" y2=\"90\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"47\" y1=\"90\" x2=\"115\" y2=\"90\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"47\" y1=\"130\" x2=\"115\" y2=\"90\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <circle cx=\"130\" cy=\"90\" r=\"16\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"130\" y=\"94\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Σ + b</text>\n                        <!-- Activation Node -->\n                        <line x1=\"146\" y1=\"90\" x2=\"185\" y2=\"90\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"165\" y=\"82\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">z (Logit)</text>\n                        <rect x=\"185\" y=\"74\" width=\"34\" height=\"32\" fill=\"#111\" rx=\"3\"/>\n                        <text x=\"202\" y=\"94\" font-family=\"Georgia\" font-size=\"11\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">f(z)</text>\n                        <!-- Output -->\n                        <line x1=\"219\" y1=\"90\" x2=\"260\" y2=\"90\" stroke=\"#111\" stroke-width=\"1.5\" marker-end=\"url(#arrow)\"/>\n                        <circle cx=\"260\" cy=\"90\" r=\"10\" fill=\"#fafafa\" stroke=\"#111\"/>\n                        <text x=\"260\" y=\"94\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">y</text>\n                      </g>\n                      <!-- Right: The XOR Dilemma -->\n                      <g transform=\"translate(315, 15)\">\n                        <rect x=\"0\" y=\"0\" width=\"330\" height=\"170\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"165\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Bế Tắc Của XOR &amp; Giải Pháp Tầng Ẩn</text>\n                        <!-- Sub-panel 1: Single Line fails on XOR -->\n                        <g transform=\"translate(15, 30)\">\n                          <text x=\"65\" y=\"15\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">1 Perceptron (Bất lực!)</text>\n                          <line x1=\"20\" y1=\"105\" x2=\"110\" y2=\"105\" stroke=\"#888\"/>\n                          <line x1=\"25\" y1=\"110\" x2=\"25\" y2=\"25\" stroke=\"#888\"/>\n                          <!-- Points: (0,0)=0, (1,1)=0 are circles; (0,1)=1, (1,0)=1 are filled -->\n                          <circle cx=\"25\" cy=\"105\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <text x=\"12\" y=\"118\" font-family=\"Georgia\" font-size=\"7\">(0,0):0</text>\n                          <circle cx=\"95\" cy=\"35\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <text x=\"100\" y=\"38\" font-family=\"Georgia\" font-size=\"7\">(1,1):0</text>\n                          <circle cx=\"25\" cy=\"35\" r=\"5\" fill=\"#111\"/>\n                          <text x=\"12\" y=\"32\" font-family=\"Georgia\" font-size=\"7\">(0,1):1</text>\n                          <circle cx=\"95\" cy=\"105\" r=\"5\" fill=\"#111\"/>\n                          <text x=\"95\" y=\"118\" font-family=\"Georgia\" font-size=\"7\">(1,0):1</text>\n                          <!-- Failed line -->\n                          <line x1=\"15\" y1=\"45\" x2=\"105\" y2=\"95\" stroke=\"#888\" stroke-dasharray=\"3,3\" stroke-width=\"1.5\"/>\n                          <text x=\"65\" y=\"128\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">1 đường thẳng chia sai!</text>\n                        </g>\n                        <!-- Sub-panel 2: MLP 2 hidden solves XOR -->\n                        <g transform=\"translate(175, 30)\">\n                          <text x=\"65\" y=\"15\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">MLP 2 Tầng (2 đường cắt)</text>\n                          <line x1=\"20\" y1=\"105\" x2=\"110\" y2=\"105\" stroke=\"#888\"/>\n                          <line x1=\"25\" y1=\"110\" x2=\"25\" y2=\"25\" stroke=\"#888\"/>\n                          <circle cx=\"25\" cy=\"105\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <circle cx=\"95\" cy=\"35\" r=\"5\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                          <circle cx=\"25\" cy=\"35\" r=\"5\" fill=\"#111\"/>\n                          <circle cx=\"95\" cy=\"105\" r=\"5\" fill=\"#111\"/>\n                          <!-- Line 1: h1 (OR) -->\n                          <line x1=\"20\" y1=\"75\" x2=\"65\" y2=\"110\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"35\" y=\"80\" font-family=\"Georgia\" font-size=\"7\">h₁ (OR)</text>\n                          <!-- Line 2: h2 (NAND) -->\n                          <line x1=\"55\" y1=\"30\" x2=\"105\" y2=\"70\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"95\" y=\"55\" font-family=\"Georgia\" font-size=\"7\">h₂ (NAND)</text>\n                          <text x=\"65\" y=\"128\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">Vùng kẹp giữa = Nhãn 1!</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Trái: Mô hình toán học nơ-ron nhân tạo Perceptron. Phải: Bế tắc hình học của bài toán XOR với 1 siêu phẳng và cách mạng 2 tầng MLP giải quyết bằng cách kết hợp 2 siêu phẳng ranh giới."
+        },
+        "commonPitfalls": "Nhầm lẫn rằng 'Perceptron có thể giải được mọi bài toán logic nhị phân': Rất nhiều học sinh nhầm lẫn rằng Perceptron giải được AND, OR thì cũng giải được XOR. Hãy luôn nhớ: Perceptron đơn tầng CHỈ giải được bài toán tách rời tuyến tính (Linearly Separable), hoàn toàn bất lực trước XOR nếu không có tầng ẩn!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Vì sao một nơ-ron Perceptron đơn tầng của Frank Rosenblatt hoàn toàn không thể học được hàm logic XOR (Exclusive OR)?",
+          "options": [
+            "A. Vì hàm XOR có 4 điểm dữ liệu, vượt quá số lượng điểm mà một nơ-ron có thể ghi nhớ",
+            "B. Vì các điểm dữ liệu của hàm XOR không phân tách tuyến tính được (Linearly Inseparable) trong không gian 2 chiều",
+            "C. Vì thuật toán Perceptron không hỗ trợ các giá trị đầu vào nhị phân {0, 1}",
+            "D. Vì hàm bước nhảy Heaviside không thể tính toán được giá trị âm"
+          ],
+          "correctIndex": 1,
+          "hint": "Hai điểm có nhãn 1 nằm chéo góc nhau, đối xứng qua hai điểm có nhãn 0, không thể dùng đúng 1 đường thẳng để ngăn đôi.",
+          "solution": [
+            "Bước 1: Nhớ lại định nghĩa phân tách tuyến tính: Một tập dữ liệu được gọi là phân tách tuyến tính nếu tồn tại một siêu phẳng chia đôi không gian sao cho các điểm cùng nhãn nằm về cùng một phía.",
+            "Bước 2: Với hàm XOR, các điểm (0, 1) và (1, 0) mang nhãn 1, còn (0, 0) và (1, 1) mang nhãn 0. Chúng nằm chéo nhau trên mặt phẳng 2D.",
+            "Bước 3: Bất kỳ một đường thẳng nào cũng chỉ có thể chia đúng tối đa 3 điểm, luôn có ít nhất 1 điểm bị phân loại sai.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "10.2. Các Hàm Kích Hoạt Phi Tuyến (Activation Functions): Sigmoid, Tanh, ReLU, Leaky ReLU, Khái Niệm Logit & Softmax",
+        "content": "Tại sao không thể thiếu hàm phi tuyến? Giải mã toán học vì sao mạng tuyến tính 1,000 tầng bị sụp đổ thành 1 tầng đơn lẻ. Phân tích chi tiết các hàm kích hoạt Sigmoid, Tanh, ReLU, Leaky ReLU và phân biệt rạch ròi Logit, Sigmoid vs Softmax.",
+        "deepDive": "**1. Định lý sụp đổ tuyến tính (Linear Collapse Theorem):**\nGiả sử ta thiết kế một mạng nơ-ron sâu gồm 3 tầng ẩn, nhưng vì muốn tính toán đơn giản, ta **KHÔNG DÙNG hàm kích hoạt phi tuyến** nào cả (hoặc dùng hàm đồng nhất $f(z) = z$):\n- Tầng 1: $h_1 = W_1 x + b_1$\n- Tầng 2: $h_2 = W_2 h_1 + b_2 = W_2 (W_1 x + b_1) + b_2 = (W_2 W_1) x + (W_2 b_1 + b_2)$\n- Tầng 3: $\\hat{y} = W_3 h_2 + b_3 = W_3 [(W_2 W_1) x + (W_2 b_1 + b_2)] + b_3 = (W_3 W_2 W_1) x + (W_3 W_2 b_1 + W_3 b_2 + b_3)$\n\nHãy chú ý đến dạng toán học của đầu ra cuối cùng:\n- Đặt ma trận tổng hợp $W_{\\text{eq}} = W_3 W_2 W_1$\n- Đặt vector bias tổng hợp $b_{\\text{eq}} = W_3 W_2 b_1 + W_3 b_2 + b_3$\nKhi đó:\n$$\\hat{y} = W_{\\text{eq}} x + b_{\\text{eq}}$$\n**Kết luận gây chấn động:**\nMột mạng nơ-ron dù xếp chồng 1,000 tầng với hàng tỷ tham số, nếu không có hàm kích hoạt phi tuyến thì rốt cuộc cũng **CHỈ TƯƠNG ĐƯƠNG VỚI MỘT MÔ HÌNH HỒI QUY TUYẾN TÍNH ĐƠN TẦNG DUY NHẤT**! Tích của các ma trận tuyến tính vẫn là một ma trận tuyến tính.\nHàm kích hoạt phi tuyến chính là chiếc 'đũa thần' phá vỡ giới hạn này, cho phép mạng uốn cong không gian và đạt được năng lực xấp xỉ vạn năng (Universal Approximation Theorem - Cybenko 1989: Mạng nơ-ron chỉ cần 1 tầng ẩn với hàm kích hoạt phi tuyến có thể xấp xỉ bất kỳ hàm số liên tục nào với độ chính xác tùy ý!).\n\n---\n\n**2. Khái niệm cốt tử: 'Logit' là gì?**\nTrong học máy và Deep Learning, bạn sẽ liên tục bắt gặp từ **Logit**:\n- **Logit $z = \\mathbf{w}^T \\mathbf{x} + b$** là **ĐẦU RA TUYẾN TÍNH THÔ** của một nơ-ron trước khi đưa qua hàm kích hoạt phi tuyến.\n- Miền giá trị của Logit là toàn bộ trục số thực: $z \\in (-\\infty, +\\infty)$.\n- Logit đại diện cho 'điểm số tin cậy thô' (Unnormalized raw score). Khi $z$ càng lớn dương, nơ-ron càng ủng hộ lớp đó; khi $z$ càng lớn âm, nơ-ron càng phản đối.\n\n---\n\n**3. Khảo sát chi tiết các hàm kích hoạt kinh điển:**\n\n### A. Hàm Sigmoid (Logistic):\n$$\\sigma(z) = \\frac{1}{1 + e^{-z}}$$\n- **Miền giá trị:** $(0, 1)$ $\\implies$ Lý tưởng để biểu diễn xác suất nhị phân $P(y=1 \\mid x)$.\n- **Đạo hàm tuyệt đẹp:**\n  $$\\sigma'(z) = \\sigma(z)(1 - \\sigma(z))$$\n- **Nhược điểm chí mạng (Tiêu biến gradient - Vanishing Gradient):**\n  - Giá trị lớn nhất của đạo hàm $\\sigma'(z)$ đạt được tại $z = 0$, và giá trị này chỉ là:\n    $$\\sigma'(0) = 0.5 \\times (1 - 0.5) = 0.25$$\n  - Khi $|z| > 5$, hàm số đi vào vùng bão hòa (Saturation), đồ thị nằm ngang phẳng lì $\\implies \\sigma'(z) \\approx 0$!\n  - Khi xếp chồng 10 tầng Sigmoid, gradient khi truyền ngược bị nhân dồn: $(0.25)^{10} \\approx 10^{-6}$. Gradient biến mất hoàn toàn, các tầng đầu mạng không thể học được gì!\n  - Ngoài ra, Sigmoid **không đối xứng quanh 0 (Not zero-centered)**: Đầu ra luôn dương $(>0)$, khiến gradient của trọng số cùng mang dấu dương hoặc cùng mang dấu âm, gây ra hiện tượng cập nhật zigzag chậm chạp.\n\n### B. Hàm Tanh (Hyperbolic Tangent):\n$$\\tanh(z) = \\frac{e^z - e^{-z}}{e^z + e^{-z}}$$\n- **Miền giá trị:** $(-1, 1)$, đối xứng hoàn hảo qua gốc tọa độ (**Zero-centered**).\n- **Đạo hàm:** $\\tanh'(z) = 1 - \\tanh^2(z)$.\n- Đạo hàm cực đại bằng $1.0$ tại $z = 0$, giúp gradient truyền tốt hơn Sigmoid. Tuy nhiên khi $|z|$ lớn, Tanh vẫn bị bão hòa và vẫn gây tiêu biến gradient ở các mạng rất sâu.\n\n### C. Hàm ReLU (Rectified Linear Unit - Nair & Hinton 2010):\n$$f(z) = \\max(0, z) = \\begin{cases} z & \\text{khi } z > 0 \\\\ 0 & \\text{khi } z \\le 0 \\end{cases}$$\n- **Đạo hàm:**\n  $$f'(z) = \\begin{cases} 1 & \\text{khi } z > 0 \\\\ 0 & \\text{khi } z < 0 \\end{cases}$$\n- **3 Ưu điểm vượt trội đưa Deep Learning bùng nổ:**\n  1. **Tuyệt đối không bị tiêu biến gradient ở miền dương:** Khi $z > 0$, đạo hàm luôn bằng đúng $1.0$, không bao giờ bị co nhỏ như $0.25$ của Sigmoid! Nhờ đó mạng sâu hàng trăm tầng vẫn lan truyền tín hiệu mạnh mẽ.\n  2. **Tốc độ tính toán siêu tốc:** Không cần tính hàm mũ $e^z$ phức tạp; chỉ là một phép so sánh logic đơn giản `z > 0 ? z : 0`. Giúp tốc độ hội tụ nhanh hơn Tanh gấp 6 lần!\n  3. **Tạo tính thưa (Sparsity):** Khi $z \\le 0$, nơ-ron bị tắt hoàn toàn về 0. Điều này mô phỏng sát não bộ sinh học (tại một thời điểm chỉ có một tỷ lệ nhỏ nơ-ron hoạt động), giúp mô hình tổng quát hóa tốt hơn.\n- **Nhược điểm duy nhất: Hiện tượng Chết ReLU (Dying ReLU):**\n  - Nếu một bước cập nhật trọng số với tốc độ học quá lớn vô tình đẩy $z < 0$ cho hầu hết các mẫu dữ liệu, nơ-ron đó sẽ luôn cho ra output 0 và đạo hàm 0 vĩnh viễn. Nơ-ron bị 'chết lâm sàng' và không bao giờ học lại được nữa.\n\n### D. Hàm Leaky ReLU:\n$$f(z) = \\max(\\alpha z, z) = \\begin{cases} z & \\text{khi } z > 0 \\\\ \\alpha z & \\text{khi } z \\le 0 \\end{cases} \\quad (\\text{với } \\alpha \\approx 0.01)$$\n- Thay vì gán cứng bằng 0 ở miền âm, Leaky ReLU cho phép một 'dòng rò rỉ' nhỏ với hệ số góc $\\alpha = 0.01$, đảm bảo đạo hàm ở miền âm luôn bằng $\\alpha \\neq 0$, cứu nơ-ron thoát khỏi cái chết ReLU vĩnh viễn!\n\n---\n\n**4. Phân biệt rạch ròi: Sigmoid vs Softmax (Trọng tâm phòng thi):**\n- **Sigmoid:** Áp dụng cho từng nơ-ron độc lập: $\\sigma(z_i) = \\frac{1}{1 + e^{-z_i}}$.\n  - Dùng ở tầng ra cho bài toán **Phân loại nhị phân (Binary Classification)** hoặc **Đa nhãn độc lập (Multi-label Classification)**: Ví dụ một bức ảnh có thể VỪA có Mèo ($P=0.9$), VỪA có Chó ($P=0.8$). Các xác suất không cần có tổng bằng 1!\n- **Softmax:** Áp dụng đồng thời lên toàn bộ vector logits $\\mathbf{z} = [z_1, z_2, \\dots, z_C]^T$:\n  $$\\text{Softmax}(z_i) = \\frac{e^{z_i}}{\\sum_{j=1}^C e^{z_j}}$$\n  - Softmax chuẩn hóa toàn bộ các điểm số thô thành một **Phân phối xác suất hợp lệ**:\n    1. Mọi xác suất đều nằm trong khoảng $(0, 1)$.\n    2. **TỔNG TẤT CẢ CÁC XÁC SUẤT BẮT BUỘC BẰNG ĐÚNG 1.0**: $\\sum_{i=1}^C \\text{Softmax}(z_i) = 1.0$.\n  - Dùng ở tầng ra cho bài toán **Phân loại đa lớp loại trừ lẫn nhau (Multi-class Single-label Classification)**: Một bức ảnh chỉ được phép thuộc về DUY NHẤT một lớp (hoặc là Mèo, hoặc là Chó, hoặc là Chim)!",
+        "formula": "\\sigma(z) = \\frac{1}{1 + e^{-z}}, \\quad \\tanh(z) = \\frac{e^z - e^{-z}}{e^z + e^{-z}}, \\quad \\text{ReLU}(z) = \\max(0, z), \\quad \\text{Softmax}(z_i) = \\frac{e^{z_i}}{\\sum_{j=1}^C e^{z_j}}",
+        "mathExplainer": [
+          {
+            "sym": "z",
+            "name": "Logit",
+            "mean": "Đầu ra tuyến tính thô z = w^T x + b trước khi đưa vào hàm phi tuyến."
+          },
+          {
+            "sym": "\\sigma'(z) \\le 0.25",
+            "name": "Đạo hàm Sigmoid",
+            "mean": "Cực đại chỉ là 0.25 tại z=0, nguyên nhân gây tiêu biến gradient khi mạng sâu."
+          },
+          {
+            "sym": "\\text{ReLU}'(z) = 1",
+            "name": "Đạo hàm ReLU",
+            "mean": "Bằng 1 với mọi z > 0, triệt tiêu hoàn toàn hiện tượng vanishing gradient ở miền dương."
+          },
+          {
+            "sym": "\\sum \\text{Softmax} = 1",
+            "name": "Chuẩn hóa Softmax",
+            "mean": "Tổng xác suất của toàn bộ các lớp bằng đúng 1.0, dùng cho đa lớp loại trừ."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Sigmoid -->\n                      <g transform=\"translate(20, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"140\" height=\"150\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"70\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Sigmoid: (0, 1)</text>\n                        <line x1=\"15\" y1=\"110\" x2=\"125\" y2=\"110\" stroke=\"#888\"/>\n                        <line x1=\"70\" y1=\"25\" x2=\"70\" y2=\"135\" stroke=\"#888\"/>\n                        <!-- S curve -->\n                        <path d=\"M 20 108 Q 55 108 70 75 Q 85 42 120 42\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"75\" y=\"72\" font-family=\"Georgia\" font-size=\"8\">z=0 ⇒ 0.5</text>\n                        <text x=\"70\" y=\"142\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">max σ' = 0.25</text>\n                      </g>\n                      <!-- Tanh -->\n                      <g transform=\"translate(175, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"140\" height=\"150\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"70\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Tanh: (-1, 1)</text>\n                        <line x1=\"15\" y1=\"80\" x2=\"125\" y2=\"80\" stroke=\"#888\"/>\n                        <line x1=\"70\" y1=\"25\" x2=\"70\" y2=\"135\" stroke=\"#888\"/>\n                        <path d=\"M 20 120 Q 55 120 70 80 Q 85 40 120 40\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"75\" y=\"75\" font-family=\"Georgia\" font-size=\"8\">z=0 ⇒ 0</text>\n                        <text x=\"70\" y=\"142\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">Zero-centered</text>\n                      </g>\n                      <!-- ReLU -->\n                      <g transform=\"translate(330, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"140\" height=\"150\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"70\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">ReLU: max(0, z)</text>\n                        <line x1=\"15\" y1=\"110\" x2=\"125\" y2=\"110\" stroke=\"#888\"/>\n                        <line x1=\"70\" y1=\"25\" x2=\"70\" y2=\"135\" stroke=\"#888\"/>\n                        <!-- ReLU shape -->\n                        <line x1=\"15\" y1=\"110\" x2=\"70\" y2=\"110\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <line x1=\"70\" y1=\"110\" x2=\"125\" y2=\"45\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"95\" y=\"70\" font-family=\"Georgia\" font-size=\"8\">Độ dốc = 1</text>\n                        <text x=\"70\" y=\"142\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">Chống tiêu biến grad</text>\n                      </g>\n                      <!-- Leaky ReLU -->\n                      <g transform=\"translate(485, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"155\" height=\"150\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"77\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Leaky ReLU: max(αz, z)</text>\n                        <line x1=\"15\" y1=\"100\" x2=\"140\" y2=\"100\" stroke=\"#888\"/>\n                        <line x1=\"77\" y1=\"25\" x2=\"77\" y2=\"135\" stroke=\"#888\"/>\n                        <!-- Leaky slope -->\n                        <line x1=\"15\" y1=\"112\" x2=\"77\" y2=\"100\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <line x1=\"77\" y1=\"100\" x2=\"135\" y2=\"40\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"25\" y=\"125\" font-family=\"Georgia\" font-size=\"7\">dốc α=0.01</text>\n                        <text x=\"77\" y=\"142\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">Cứu sống nơ-ron chết</text>\n                      </g>\n                    </svg>",
+          "caption": "So sánh 4 hàm kích hoạt cơ bản: Sigmoid (bão hòa 2 đầu), Tanh (đối xứng tâm 0), ReLU (bẻ gãy tuyến tính chống vanishing gradient) và Leaky ReLU (dòng rò rỉ âm)."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa hàm kích hoạt của tầng ẩn (Hidden layer) và tầng đầu ra (Output layer): Tuyệt đối không dùng Sigmoid hay Softmax ở tầng ẩn của mạng sâu vì sẽ làm tê liệt gradient. Ở tầng ẩn, chuẩn mực hiện đại là dùng ReLU hoặc Leaky ReLU! Sigmoid và Softmax chỉ nên dùng ở tầng ra cuối cùng để tính xác suất dự đoán.",
+        "practiceQuestion": {
+          "level": "Thông hiểu",
+          "question": "Trong một mạng nơ-ron sâu 10 tầng, nếu toàn bộ các tầng ẩn sử dụng hàm kích hoạt Sigmoid, hiện tượng tiêu cực nào sau đây có nguy cơ cao nhất xảy ra trong quá trình huấn luyện?",
+          "options": [
+            "A. Hiện tượng nổ gradient (Exploding Gradient) do các giá trị hàm mũ tăng quá nhanh",
+            "B. Hiện tượng tiêu biến gradient (Vanishing Gradient) vì đạo hàm cực đại của Sigmoid chỉ là 0.25, khi nhân dồn qua nhiều tầng sẽ tiệm cận về 0",
+            "C. Hiện tượng chết nơ-ron vĩnh viễn (Dying ReLU) ở các giá trị âm",
+            "D. Mạng nơ-ron bị suy biến thành mô hình hồi quy tuyến tính đơn tầng"
+          ],
+          "correctIndex": 1,
+          "hint": "Đạo hàm của Sigmoid đạt cực đại tại 0 với giá trị 0.25. Tích của 10 số nhỏ hơn hoặc bằng 0.25 sẽ như thế nào?",
+          "solution": [
+            "Bước 1: Ta có đạo hàm của Sigmoid: σ'(z) = σ(z)(1 - σ(z)). Giá trị lớn nhất của đạo hàm này xảy ra tại z = 0, đạt đúng 0.25.",
+            "Bước 2: Khi lan truyền ngược qua 10 tầng, theo quy tắc chuỗi, gradient sẽ là tích của 10 đạo hàm này: grad ∝ (0.25)^10 ≈ 9.5 × 10^-7.",
+            "Bước 3: Tín hiệu gradient bị co nhỏ gần như bằng 0, khiến các trọng số ở những tầng đầu tiên gần như không được cập nhật. Đây chính là hiện tượng Tiêu biến Gradient (Vanishing Gradient).",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "10.3. Trái Tim Của Deep Learning: Thuật Toán Lan Truyền Ngược (Backpropagation) & Quy Tắc Dây Chuyền (Chain Rule)",
+        "content": "Làm chủ thuật toán kỳ diệu giúp mạng nơ-ron tự học: Bản chất quy tắc chuỗi giải tích nhiều biến, vector sai số delta, 4 phương trình cốt lõi và tại sao Backpropagation thực chất là một thuật toán quy hoạch động.",
+        "deepDive": "**1. Bối cảnh lịch sử & Ý tưởng vĩ đại của Backpropagation:**\nTrước năm 1986, các nhà khoa học biết rằng mạng nhiều tầng có thể giải được bài toán phi tuyến (như XOR), nhưng **HOÀN TOÀN BẤT LỰC TRONG VIỆC DẠY NÓ HỌC**!\nHọ không biết làm sao để tính toán xem một trọng số nằm tít sâu trong tầng ẩn thứ 2 cần phải tăng hay giảm bao nhiêu khi chiếc áo ở đầu ra bị may lệch.\nVào năm 1986, bộ ba nhà khoa học **David Rumelhart, Geoffrey Hinton và Ronald Williams** đã xuất bản bài báo kinh điển trên tạp chí *Nature*, phổ biến thuật toán **Lan Truyền Ngược (Backpropagation)**: Sử dụng Quy tắc chuỗi (Chain Rule) để tính chính xác đạo hàm riêng của hàm mất mát đối với mọi trọng số trong mạng một cách cực kỳ thanh lịch và hiệu quả!\n\n---\n\n**2. Trực giác Quy tắc chuỗi (Chain Rule) qua ví dụ đời sống:**\nGiả sử có 3 đại lượng gắn liền nhau:\n- Xe ô tô A chạy nhanh gấp $2$ lần xe máy B: $\\frac{dz}{dy} = 2$.\n- Xe máy B chạy nhanh gấp $3$ lần người đi bộ C: $\\frac{dy}{dx} = 3$.\nHỏi: Xe ô tô A chạy nhanh gấp mấy lần người đi bộ C?\nBất kỳ học sinh nào cũng trả lời được ngay: Lấy $2 \\times 3 = 6$ lần!\nĐó chính là **Quy tắc chuỗi (Chain Rule)**:\n$$\\frac{dz}{dx} = \\frac{dz}{dy} \\cdot \\frac{dy}{dx}$$\nNếu có một chuỗi $n$ mắt xích $x \\to u_1 \\to u_2 \\dots \\to u_n \\to \\mathcal{L}$, đạo hàm của mắt xích cuối theo mắt xích đầu tiên chỉ đơn giản là **TÍCH CỦA CÁC ĐẠO HÀM TỪNG BƯỚC NHỎ LÂN CẬN**!\n\n---\n\n**3. Hệ thống ký hiệu chuẩn mực trong mạng nơ-ron nhiều tầng:**\nĐể không bị lạc lối giữa ma trận công thức, hãy quy ước chuẩn mực ký hiệu cho tầng $l \\in \\{1, 2, \\dots, L\\}$ ($L$ là tầng đầu ra cuối cùng):\n- $W^{[l]}$: Ma trận trọng số kết nối từ tầng $l-1$ sang tầng $l$ (kích thước $n^{[l]} \\times n^{[l-1]}$).\n- $b^{[l]}$: Vector bias của tầng $l$ (kích thước $n^{[l]} \\times 1$).\n- $z^{[l]} = W^{[l]} a^{[l-1]} + b^{[l]}$: Vector Logits (tổng tuyến tính) của tầng $l$.\n- $a^{[l]} = g^{[l]}(z^{[l]})$: Vector kích hoạt (Activations) của tầng $l$, với $a^{[0]} = \\mathbf{x}$ là dữ liệu đầu vào.\n- $\\hat{\\mathbf{y}} = a^{[L]}$: Đầu ra dự đoán của mạng.\n- $\\mathcal{L}(\\hat{\\mathbf{y}}, \\mathbf{y})$: Hàm mất mát (Loss function).\n\n---\n\n**4. Khái niệm then chốt: Vector sai số $\\delta^{[l]}$ (Local Error):**\nTa định nghĩa sai số của tầng $l$ là đạo hàm riêng của hàm mất mát đối với vector logit $z^{[l]}$:\n$$\\delta^{[l]} \\triangleq \\frac{\\partial \\mathcal{L}}{\\partial z^{[l]}}$$\nCon số $\\delta_j^{[l]}$ cho biết: *'Nếu ta nhích nhẹ giá trị logit của nơ-ron $j$ ở tầng $l$ lên một chút, hàm Loss sẽ tăng hay giảm bao nhiêu?'*.\n\n---\n\n**5. BỘ 4 PHƯƠNG TRÌNH VĨ ĐẠI CỦA LAN TRUYỀN NGƯỢC:**\n\n### Phương trình 1: Sai số tại tầng đầu ra cuối cùng ($L$):\n$$\\delta^{[L]} = \\nabla_a \\mathcal{L} \\odot (g^{[L]})'(z^{[L]})$$\n*(Trong đó $\\odot$ là phép nhân từng phần tử Hadamard).*\n**ĐIỀU KỲ DIỆU KINH ĐIỂN CỦA DEEP LEARNING:**\nKhi kết hợp hàm mất mát Cross-Entropy với hàm kích hoạt Softmax (hoặc BCE với Sigmoid), các thành phần đạo hàm phức tạp triệt tiêu lẫn nhau một cách thần kỳ, mang lại công thức rút gọn đẹp đẽ bậc nhất thế giới toán học:\n$$\\delta^{[L]} = \\hat{\\mathbf{y}} - \\mathbf{y}$$\nSai số tầng cuối đơn giản chỉ là: **ĐỘ LỆCH GIỮA DỰ ĐOÁN VÀ ĐÁP ÁN THỰC TẾ**!\n\n### Phương trình 2: Lan truyền ngược sai số từ tầng $l+1$ về tầng $l$:\n$$\\delta^{[l]} = \\left( (W^{[l+1]})^T \\delta^{[l+1]} \\right) \\odot (g^{[l]})'(z^{[l]})$$\n- Phép nhân $(W^{[l+1]})^T \\delta^{[l+1]}$ có ý nghĩa gì? Nó gom góp toàn bộ sai số từ các nơ-ron của tầng sau dồn ngược về, được gia quyền bởi chính các trọng số kết nối!\n- Phép nhân $\\odot (g^{[l]})'(z^{[l]})$: Nhân với độ dốc của hàm kích hoạt tại tầng hiện tại để xem tín hiệu có được phép truyền tiếp qua 'cổng' hay không.\n\n### Phương trình 3: Đạo hàm riêng theo ma trận trọng số $W^{[l]}$:\n$$\\frac{\\partial \\mathcal{L}}{\\partial W^{[l]}} = \\delta^{[l]} (a^{[l-1]})^T$$\n- Đây là một phép **Tích ngoài (Outer Product)** giữa vector sai số tầng hiện tại $\\delta^{[l]}$ và vector kích hoạt của tầng trước $(a^{[l-1]})^T$!\n- Với từng trọng số đơn lẻ: $\\frac{\\partial \\mathcal{L}}{\\partial W_{jk}^{[l]}} = \\delta_j^{[l]} \\cdot a_k^{[l-1]}$.\n*(Đạo hàm bằng Sai số nơ-ron đích nhân với Tín hiệu kích hoạt của nơ-ron nguồn!).*\n\n### Phương trình 4: Đạo hàm riêng theo vector bias $b^{[l]}$:\n$$\\frac{\\partial \\mathcal{L}}{\\partial b^{[l]}} = \\delta^{[l]}$$\n*(Gradient của bias chính là vector sai số $\\delta^{[l]}$ của tầng đó!).*\n\n---\n\n**6. Tại sao Lan truyền ngược lại chạy nhanh như chớp? Bản chất Quy hoạch động:**\nNếu ta tính đạo hàm riêng cho từng trọng số một cách độc lập từ đầu đến cuối mạng, ta sẽ phải tính lặp lại hàng triệu phép tính trùng lặp, khiến độ phức tạp bùng nổ theo hàm mũ $O(2^L)$!\nNhưng thuật toán Backpropagation nhận ra rằng:\n- Khi tính $\\delta^{[l]}$, ta **TÁI SỬ DỤNG LẠI NGAY** vector $\\delta^{[l+1]}$ vừa tính ở bước trước đó!\n- Trong lượt truyền tiến (Forward Pass), ta lưu sẵn (cache) các giá trị $z^{[l]}$ và $a^{[l]}$ vào bộ nhớ RAM.\n- Trong lượt truyền ngược (Backward Pass), ta chỉ cần đi đúng 1 lượt từ tầng $L$ về tầng $1$.\nĐộ phức tạp tính toán giảm ngoạn mục xuống còn **Tuyến tính $O(|E|)$** (tỷ lệ thuận với tổng số liên kết trọng số trong mạng)! Đây chính là một ứng dụng đỉnh cao của kỹ thuật **Quy hoạch động (Dynamic Programming)** trong khoa học máy tính!",
+        "formula": "\\delta^{[L]} = \\hat{\\mathbf{y}} - \\mathbf{y}, \\quad \\delta^{[l]} = \\left( (W^{[l+1]})^T \\delta^{[l+1]} \\right) \\odot g'(z^{[l]}), \\quad \\frac{\\partial \\mathcal{L}}{\\partial W^{[l]}} = \\delta^{[l]} (a^{[l-1]})^T, \\quad \\frac{\\partial \\mathcal{L}}{\\partial b^{[l]}} = \\delta^{[l]}",
+        "mathExplainer": [
+          {
+            "sym": "\\delta^{[l]}",
+            "name": "Vector sai số (Delta)",
+            "mean": "Đạo hàm của hàm Loss theo logit z^[l], thước đo mức độ chịu trách nhiệm của nơ-ron."
+          },
+          {
+            "sym": "\\delta^{[L]} = \\hat{y} - y",
+            "name": "Sai số tầng ra",
+            "mean": "Hiệu số giữa xác suất dự đoán và nhãn thực tế khi dùng Cross-Entropy."
+          },
+          {
+            "sym": "(W^{[l+1]})^T \\delta^{[l+1]}",
+            "name": "Gom sai số ngược",
+            "mean": "Chiếu ngược sai số từ tầng sau về tầng trước thông qua ma trận chuyển vị."
+          },
+          {
+            "sym": "\\odot",
+            "name": "Phép nhân Hadamard",
+            "mean": "Nhân từng phần tử tương ứng giữa hai vector cùng kích thước."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Forward Pass Flow (Top) -->\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"300\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#111\" text-anchor=\"middle\">LƯỢT TIẾN (FORWARD PASS): x ⇒ z^[1] ⇒ a^[1] ⇒ z^[2] ⇒ a^[2] ⇒ Loss</text>\n                        <!-- Nodes -->\n                        <circle cx=\"50\" cy=\"50\" r=\"16\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/><text x=\"50\" y=\"54\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">x</text>\n                        <line x1=\"66\" y1=\"50\" x2=\"164\" y2=\"50\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"115\" y=\"42\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">W^[1], b^[1]</text>\n                        <circle cx=\"180\" cy=\"50\" r=\"16\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/><text x=\"180\" y=\"54\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">a^[1]</text>\n                        <line x1=\"196\" y1=\"50\" x2=\"294\" y2=\"50\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"245\" y=\"42\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">W^[2], b^[2]</text>\n                        <circle cx=\"310\" cy=\"50\" r=\"16\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/><text x=\"310\" y=\"54\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">a^[2]</text>\n                        <line x1=\"326\" y1=\"50\" x2=\"424\" y2=\"50\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"375\" y=\"42\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">y (Nhãn)</text>\n                        <rect x=\"424\" y=\"34\" width=\"60\" height=\"32\" fill=\"#111\" rx=\"4\"/>\n                        <text x=\"454\" y=\"54\" font-family=\"Georgia\" font-size=\"10\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">Loss 𝓛</text>\n                      </g>\n                      <!-- Backward Pass Flow (Bottom) -->\n                      <g transform=\"translate(30, 95)\">\n                        <text x=\"300\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#555\" text-anchor=\"middle\">LƯỢT NGƯỢC (BACKWARD PASS): ∂𝓛/∂W^[1] ⇐ δ^[1] ⇐ (W^[2])^T ⇐ δ^[2] ⇐ ∂𝓛/∂a^[2]</text>\n                        <!-- Back arrows -->\n                        <line x1=\"424\" y1=\"50\" x2=\"330\" y2=\"50\" stroke=\"#555\" stroke-width=\"2\" stroke-dasharray=\"4,3\"/>\n                        <text x=\"377\" y=\"42\" font-family=\"Georgia\" font-size=\"9\" fill=\"#333\" text-anchor=\"middle\">δ^[2] = a^[2] - y</text>\n                        <circle cx=\"310\" cy=\"50\" r=\"14\" fill=\"#eee\" stroke=\"#333\"/><text x=\"310\" y=\"54\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">δ^[2]</text>\n                        <line x1=\"294\" y1=\"50\" x2=\"200\" y2=\"50\" stroke=\"#555\" stroke-width=\"2\" stroke-dasharray=\"4,3\"/>\n                        <text x=\"247\" y=\"42\" font-family=\"Georgia\" font-size=\"9\" fill=\"#333\" text-anchor=\"middle\">(W^[2])^T δ^[2] ⊙ g'</text>\n                        <circle cx=\"180\" cy=\"50\" r=\"14\" fill=\"#eee\" stroke=\"#333\"/><text x=\"180\" y=\"54\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">δ^[1]</text>\n                        <line x1=\"164\" y1=\"50\" x2=\"68\" y2=\"50\" stroke=\"#555\" stroke-width=\"2\" stroke-dasharray=\"4,3\"/>\n                        <text x=\"116\" y=\"42\" font-family=\"Georgia\" font-size=\"9\" fill=\"#333\" text-anchor=\"middle\">∂𝓛/∂W^[1] = δ^[1] x^T</text>\n                        <rect x=\"18\" y=\"36\" width=\"50\" height=\"28\" fill=\"#fff\" stroke=\"#111\"/>\n                        <text x=\"43\" y=\"53\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">Update</text>\n                      </g>\n                    </svg>",
+          "caption": "Sơ đồ đồ thị tính toán 2 chiều: Chiều xuôi (Forward Pass) truyền dữ liệu tính Loss; Chiều ngược (Backward Pass) truyền sai số delta theo Chain Rule để tính gradient cập nhật trọng số."
+        },
+        "commonPitfalls": "Nhầm lẫn thứ tự nhân ma trận trong công thức gradient: Rất nhiều học sinh viết nhầm ∂L/∂W^[l] = a^[l-1] (δ^[l])^T. SAI! Kích thước của W^[l] là (n^[l] × n^[l-1]). Vector δ^[l] có kích thước (n^[l] × 1), vector a^[l-1] có kích thước (n^[l-1] × 1). Vì vậy bắt buộc phải là: δ^[l] nhân với (a^[l-1])^T thì mới ra ma trận kích thước (n^[l] × n^[l-1])!",
+        "practiceQuestion": {
+          "level": "Vận dụng",
+          "question": "Trong bài toán phân loại đa lớp sử dụng hàm mất mát Cross-Entropy và hàm kích hoạt Softmax ở tầng đầu ra L, vector sai số tại tầng cuối cùng δ^[L] = ∂L/∂z^[L] có công thức rút gọn là gì?",
+          "options": [
+            "A. δ^[L] = ŷ ⊙ (1 - ŷ)",
+            "B. δ^[L] = (ŷ - y) ⊙ ŷ",
+            "C. δ^[L] = ŷ - y",
+            "D. δ^[L] = (y / ŷ) ⊙ g'(z^[L])"
+          ],
+          "correctIndex": 2,
+          "hint": "Sự kết hợp giữa hàm mất mát Cross-Entropy và hàm Softmax làm triệt tiêu các mẫu số đạo hàm phức tạp.",
+          "solution": [
+            "Bước 1: Ta có đạo hàm của hàm mất mát Cross-Entropy theo Softmax: ∂L/∂a_i = - y_i / a_i.",
+            "Bước 2: Đạo hàm của Softmax theo Logit z_j: ∂a_i/∂z_j = a_i(1 - a_i) khi i = j, và -a_i a_j khi i ≠ j.",
+            "Bước 3: Áp dụng quy tắc chuỗi: δ_j = ∑_i (∂L/∂a_i) * (∂a_i/∂z_j) = - y_j (1 - a_j) - ∑_{i ≠ j} (-y_i / a_i) * (-a_i a_j) = - y_j + y_j a_j + a_j ∑_{i ≠ j} y_i.",
+            "Bước 4: Vì y là vector one-hot nên ∑_{tất cả i} y_i = 1, do đó y_j a_j + a_j ∑_{i ≠ j} y_i = a_j (∑ y_i) = a_j = ŷ_j.",
+            "Bước 5: Suy ra δ_j = ŷ_j - y_j, hay viết dưới dạng vector: δ^[L] = ŷ - y.",
+            "Đáp án chính xác: C."
+          ]
+        }
+      },
+      {
+        "heading": "10.4. Thảm Họa Khởi Tạo Trọng Số Bằng 0 (Symmetry Breaking) & Các Chuẩn Khởi Tạo Xavier/Glorot vs He/Kaiming",
+        "content": "Tại sao không bao giờ được khởi tạo trọng số bằng 0? Phân tích hiện tượng Thất bại phá vỡ đối xứng (Câu 56 VAIO). Cơ chế duy trì phương sai tín hiệu và hai chuẩn khởi tạo Xavier vs He/Kaiming.",
+        "deepDive": "**1. Thảm họa khởi tạo trọng số bằng 0 (Symmetry Breaking Failure - Câu 56 Đề thi VAIO 2025):**\nMột người mới học lập trình thường nghĩ: *'Khi chưa biết bắt đầu từ đâu, ta cứ gán tất cả các biến bằng 0 cho an toàn!'*.\nTrong mạng nơ-ron, nếu bạn khởi tạo toàn bộ ma trận trọng số $W^{[l]} = \\mathbf{0}$, đó sẽ là một **THẢM HỌA DIỆT VONG**:\n- **Trong lượt truyền tiến (Forward Pass):**\n  - Mọi nơ-ron $j$ ở tầng ẩn $1$ đều nhận cùng một tổng tuyến tính:\n    $$z_j^{[1]} = \\sum_{k} 0 \\cdot x_k + b_j = b_j$$\n  - Nếu bias $b = 0$, thì $z_j^{[1]} = 0$ với mọi nơ-ron!\n  - Đầu ra kích hoạt của tất cả các nơ-ron trong tầng ẩn đều bằng nhau chằn chặn:\n    $$a_1^{[1]} = a_2^{[1]} = \\dots = a_{n^{[1]}}^{[1]} = g(0)$$\n- **Trong lượt truyền ngược (Backward Pass):**\n  - Vì các nơ-ron tầng ẩn giống hệt nhau, chúng nhận cùng một tín hiệu sai số $\\delta_j^{[1]}$ từ tầng sau gửi về.\n  - Đạo hàm cập nhật trọng số:\n    $$\\frac{\\partial \\mathcal{L}}{\\partial W_{jk}^{[1]}} = \\delta_j^{[1]} \\cdot x_k$$\n  - Do $\\delta_j^{[1]}$ bằng nhau với mọi $j$, nên tất cả các trọng số kết nối tới nơ-ron $j=1$ và nơ-ron $j=2$ đều nhận cùng một giá trị đạo hàm giống hệt nhau 100%!\n- **Sau khi cập nhật trọng số:**\n  $$W_{jk}^{[1]} \\leftarrow W_{jk}^{[1]} - \\eta \\frac{\\partial \\mathcal{L}}{\\partial W_{jk}^{[1]}}$$\n  Tất cả các trọng số vẫn **BẰNG NHAU CHẰN CHẶN**! Mạng nơ-ron bị rơi vào cái bẫy đối xứng hoán vị (Permutation Symmetry) vĩnh viễn không thể thoát ra.\n- **Hậu quả:** Dù bạn có thiết kế tầng ẩn chứa 1,000 nơ-ron hay 1,000,000 nơ-ron, toàn bộ tầng ẩn đó cũng chỉ hoạt động tương đương với **DUY NHẤT 1 NƠ-RON ĐƠN LẺ**! Mạng hoàn toàn mất khả năng học các đặc trưng đa dạng phong phú.\n- **Lưu ý đặc biệt phòng thi:**\n  - **Trọng số $W$:** BẮT BUỘC PHẢI KHỞI TẠO NGẪU NHIÊN để phá vỡ tính đối xứng (Break the Symmetry)!\n  - **Bias $b$:** Hoàn toàn **CÓ THỂ KHỞI TẠO BẰNG 0** một cách an toàn, vì tính đối xứng đã được ma trận trọng số $W$ ngẫu nhiên phá vỡ rồi!\n\n---\n\n**2. Hai bờ vực thẳm của Khởi tạo ngẫu nhiên đơn giản:**\nNếu khởi tạo $W \\sim \\mathcal{N}(0, \\sigma^2)$ với một con số $\\sigma$ tùy tiện:\n- **Bờ vực 1: Nếu chọn $\\sigma$ quá nhỏ (ví dụ $\\sigma = 0.01$):**\n  - Khi tín hiệu truyền qua từng tầng, phương sai của $a^{[l]}$ bị co nhỏ dần theo cấp số nhân: $\\text{Var}(a^{[l]}) \\to 0$. Qua 10 tầng, tín hiệu kích hoạt tắt ngấm, gradient tiêu biến hoàn toàn!\n- **Bờ vực 2: Nếu chọn $\\sigma$ quá lớn (ví dụ $\\sigma = 1.0$):**\n  - Tín hiệu kích hoạt bị phóng đại bùng nổ, giá trị $z$ văng ra xa tới hàng chục, hàng trăm. Nơ-ron rơi vào vùng bão hòa của hàm kích hoạt khiến đạo hàm bằng 0, hoặc gây nổ gradient (Exploding Gradient)!\n- **Mục tiêu toán học của các nhà khoa học:**\n  Phải tìm ra một công thức phân phối sao cho: **Phương sai của kích hoạt và phương sai của gradient được bảo toàn không đổi khi đi qua từng tầng!**\n  $$\\text{Var}(a^{[l]}) \\approx \\text{Var}(a^{[l-1]}) \\quad \\text{và} \\quad \\text{Var}(\\delta^{[l]}) \\approx \\text{Var}(\\delta^{[l+1]})$$\n\n---\n\n**3. Chuẩn Khởi Tạo Xavier / Glorot (Xavier Glorot & Yoshua Bengio, 2010):**\n- Được thiết kế tối ưu cho các hàm kích hoạt đối xứng quanh 0: **Sigmoid và Tanh**.\n- Với một tầng có $n_{\\text{in}}$ đầu vào và $n_{\\text{out}}$ đầu ra:\n  - **Phân phối chuẩn (Normal):**\n    $$W \\sim \\mathcal{N}\\left(0, \\sigma^2\\right) \\quad \\text{với } \\sigma^2 = \\frac{2}{n_{\\text{in}} + n_{\\text{out}}}$$\n  - **Phân phối đều (Uniform):**\n    $$W \\sim \\mathcal{U}\\left(-\\sqrt{\\frac{6}{n_{\\text{in}} + n_{\\text{out}}}}, \\sqrt{\\frac{6}{n_{\\text{in}} + n_{\\text{out}}}}\\right)$$\n\n---\n\n**4. Chuẩn Khởi Tạo He / Kaiming (Kaiming He et al., 2015):**\n- Ra đời vì sự trỗi dậy áp đảo của hàm kích hoạt **ReLU**:\n  - Giả định của Xavier là hàm kích hoạt tuyến tính quanh 0 (độ dốc xấp xỉ 1).\n  - Nhưng ReLU lại **triệt tiêu toàn bộ nửa âm về 0**, làm mất đi đúng 50% năng lượng tín hiệu!\n  - Do đó, phương sai của kích hoạt sau khi qua ReLU bị giảm đi một nửa!\n  - Để bù đắp lại 50% năng lượng bị mất này, Kaiming He đã **NHÂN ĐÔI PHƯƠNG SAI** so với Xavier:\n    $$\\text{Var}(W) = \\frac{2}{n_{\\text{in}}}$$\n  - **Phân phối chuẩn (He Normal):**\n    $$W \\sim \\mathcal{N}\\left(0, \\sqrt{\\frac{2}{n_{\\text{in}}}}\\right)$$\n  - **Phân phối đều (He Uniform):**\n    $$W \\sim \\mathcal{U}\\left(-\\sqrt{\\frac{6}{n_{\\text{in}}}}, \\sqrt{\\frac{6}{n_{\\text{in}}}}\\right)$$\n\n---\n\n**BẢNG QUY TẮC VÀNG PHÒNG THI VAIO 2025:**\n| Hàm kích hoạt ở tầng ẩn | Chuẩn khởi tạo bắt buộc | Phương sai $\\text{Var}(W)$ |\n| :--- | :--- | :--- |\n| **Sigmoid / Tanh** | **Xavier / Glorot Initialization** | $\\frac{2}{n_{\\text{in}} + n_{\\text{out}}}$ |\n| **ReLU / Leaky ReLU** | **He / Kaiming Initialization** | $\\frac{2}{n_{\\text{in}}}$ |",
+        "formula": "\\text{Xavier: } W \\sim \\mathcal{N}\\left(0, \\frac{2}{n_{\\text{in}} + n_{\\text{out}}}\\right), \\quad \\text{He (Kaiming): } W \\sim \\mathcal{N}\\left(0, \\frac{2}{n_{\\text{in}}}\\right)",
+        "mathExplainer": [
+          {
+            "sym": "W = \\mathbf{0}",
+            "name": "Lỗi đối xứng",
+            "mean": "Làm mọi nơ-ron cùng tầng nhận gradient giống hệt nhau, biến 1000 nơ-ron thành 1."
+          },
+          {
+            "sym": "n_{\\text{in}}",
+            "name": "Số kết nối vào (Fan-in)",
+            "mean": "Số lượng nơ-ron ở tầng ngay trước đó đưa tín hiệu vào tầng hiện tại."
+          },
+          {
+            "sym": "n_{\\text{out}}",
+            "name": "Số kết nối ra (Fan-out)",
+            "mean": "Số lượng nơ-ron ở tầng kế tiếp nhận tín hiệu từ tầng hiện tại."
+          },
+          {
+            "sym": "\\text{He Init}",
+            "name": "Khởi tạo Kaiming He",
+            "mean": "Nhân đôi phương sai để bù đắp 50% tín hiệu âm bị triệt tiêu bởi ReLU."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: W = 0 Failure -->\n                      <g transform=\"translate(20, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"290\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"145\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Khởi Tạo W = 0: Thảm Họa Đối Xứng</text>\n                        <!-- Node x -->\n                        <circle cx=\"40\" cy=\"70\" r=\"14\" fill=\"#fafafa\" stroke=\"#111\"/><text x=\"40\" y=\"74\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">x</text>\n                        <!-- Node h1 and h2 identical -->\n                        <line x1=\"54\" y1=\"65\" x2=\"136\" y2=\"45\" stroke=\"#888\" stroke-width=\"1.5\"/><text x=\"95\" y=\"48\" font-family=\"Georgia\" font-size=\"8\">w₁=0</text>\n                        <line x1=\"54\" y1=\"75\" x2=\"136\" y2=\"95\" stroke=\"#888\" stroke-width=\"1.5\"/><text x=\"95\" y=\"95\" font-family=\"Georgia\" font-size=\"8\">w₂=0</text>\n                        <circle cx=\"150\" cy=\"45\" r=\"14\" fill=\"#111\"/><text x=\"150\" y=\"49\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">h₁</text>\n                        <circle cx=\"150\" cy=\"95\" r=\"14\" fill=\"#111\"/><text x=\"150\" y=\"99\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">h₂</text>\n                        <text x=\"175\" y=\"49\" font-family=\"Georgia\" font-size=\"8\">a₁ = g(0)</text>\n                        <text x=\"175\" y=\"99\" font-family=\"Georgia\" font-size=\"8\">a₂ = g(0)</text>\n                        <text x=\"145\" y=\"128\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">h₁ và h₂ nhận cùng gradient ⇒ học y hệt nhau!</text>\n                      </g>\n                      <!-- Right: Random Init Success -->\n                      <g transform=\"translate(340, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"300\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"150\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Khởi Tạo Ngẫu Nhiên (He/Xavier)</text>\n                        <circle cx=\"40\" cy=\"70\" r=\"14\" fill=\"#fafafa\" stroke=\"#111\"/><text x=\"40\" y=\"74\" font-family=\"Georgia\" font-size=\"10\" text-anchor=\"middle\">x</text>\n                        <!-- Distinct random weights -->\n                        <line x1=\"54\" y1=\"65\" x2=\"136\" y2=\"45\" stroke=\"#111\" stroke-width=\"1.5\"/><text x=\"95\" y=\"48\" font-family=\"Georgia\" font-size=\"8\">w₁=+0.4</text>\n                        <line x1=\"54\" y1=\"75\" x2=\"136\" y2=\"95\" stroke=\"#111\" stroke-width=\"1.5\"/><text x=\"95\" y=\"95\" font-family=\"Georgia\" font-size=\"8\">w₂=-0.3</text>\n                        <circle cx=\"150\" cy=\"45\" r=\"14\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/><text x=\"150\" y=\"49\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">h₁</text>\n                        <circle cx=\"150\" cy=\"95\" r=\"14\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/><text x=\"150\" y=\"99\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">h₂</text>\n                        <text x=\"175\" y=\"49\" font-family=\"Georgia\" font-size=\"8\">a₁ ≠ a₂ (Học đặc trưng 1)</text>\n                        <text x=\"175\" y=\"99\" font-family=\"Georgia\" font-size=\"8\">a₂ ≠ a₁ (Học đặc trưng 2)</text>\n                        <text x=\"150\" y=\"128\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">Phá vỡ đối xứng hoàn hảo (Symmetry Broken)!</text>\n                      </g>\n                    </svg>",
+          "caption": "Minh họa phá vỡ đối xứng: Khởi tạo W = 0 khiến các nơ-ron sinh đôi nhận gradient giống hệt nhau vs Khởi tạo ngẫu nhiên Xavier/He giúp các nơ-ron học độc lập các đặc trưng khác nhau."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa việc khởi tạo Trọng số W và khởi tạo Bias b: Nhiều học sinh cho rằng 'cấm khởi tạo bằng 0' áp dụng cho cả trọng số lẫn bias. Điều này SAI! Chỉ có ma trận trọng số W là BẮT BUỘC khởi tạo ngẫu nhiên khác 0. Còn bias b hoàn toàn có thể khởi tạo an toàn bằng 0 mà không hề gây ra lỗi đối xứng!",
+        "practiceQuestion": {
+          "level": "Thông hiểu (Câu 56 Đề Thi VAIO 2025)",
+          "question": "Điều gì sẽ xảy ra nếu tất cả các trọng số kết nối (weights) của một mạng nơ-ron nhiều tầng được khởi tạo bằng đúng số 0 trước khi bắt đầu huấn luyện? (Câu 56 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. Mô hình sẽ hội tụ nhanh hơn về cực tiểu toàn cục vì điểm xuất phát nằm ngay tại gốc tọa độ",
+            "B. Tất cả các nơ-ron trong cùng một tầng sẽ luôn có cùng giá trị kích hoạt và nhận gradient cập nhật giống hệt nhau (Symmetry Breaking Failure)",
+            "C. Hiện tượng nổ gradient (Exploding Gradient) xảy ra ngay ở bước huấn luyện đầu tiên",
+            "D. Mô hình hoạt động hoàn toàn bình thường vì hệ số bias sẽ tự động bù trừ sai lệch"
+          ],
+          "correctIndex": 1,
+          "hint": "Mọi nơ-ron cùng tầng nhận cùng đầu vào, cùng trọng số = 0 nên sẽ tính ra cùng kết quả và nhận cùng gradient sửa sai.",
+          "solution": [
+            "Bước 1: Phân tích cơ chế toán học khi W = 0: Tại bước Forward, z_j = ∑ 0 * x_i = 0, nên a_j = g(0) như nhau cho mọi nơ-ron trong cùng một tầng.",
+            "Bước 2: Tại bước Backward, tín hiệu sai số và gradient đạo hàm ∂L/∂W_j tính theo mọi nơ-ron trong tầng là hoàn toàn giống hệt nhau.",
+            "Bước 3: Sau mỗi bước cập nhật theo Gradient Descent, các trọng số này tiếp tục thay đổi một lượng giống nhau và duy trì giá trị bằng nhau chằn chặn qua mọi epoch.",
+            "Bước 4: Đây là hiện tượng Thất bại phá vỡ đối xứng (Symmetry Breaking Failure), khiến toàn bộ tầng ẩn suy biến thành duy nhất một nơ-ron đơn lẻ.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "10.5. Điều Chuẩn & Tối Ưu Mạng Sâu: Batch Normalization (Vị Trí Đặt Chuẩn Trước Activation - Câu 1 Đề Thi VAIO) & Kỹ Thuật Dropout",
+        "content": "Khắc phục hiện tượng dịch chuyển hiệp biến nội (Internal Covariate Shift). Trọng tâm Câu 1 đề thi VAIO 2025: Vị trí đặt Batch Normalization trước ReLU. Kỹ thuật Dropout chống đồng thích nghi (Co-adaptation) và Inverted Dropout lúc suy luận.",
+        "deepDive": "**1. Căn bệnh 'Internal Covariate Shift' của mạng sâu:**\nTrong quá trình huấn luyện mạng nơ-ron sâu nhiều tầng:\n- Khi các trọng số của Tầng 1 và Tầng 2 được cập nhật, phân phối đầu ra của chúng bị dịch chuyển và biến động liên tục.\n- Tầng 3 và Tầng 4 nằm ở phía sau phải liên tục thích ứng với một luồng dữ liệu đầu vào có phân phối thay đổi thất thường từng giây từng phút!\n- Hiện tượng này gọi là **Dịch chuyển hiệp biến nội (Internal Covariate Shift)**.\n- Nó giống như bạn đang cố gắng tập viết chữ nắn nót trên một chiếc xe buýt đang xóc nảy dữ dội: Bạn buộc phải di chuyển ngòi bút cực kỳ chậm chạp (phải dùng tốc độ học $\\eta$ rất bé), và mô hình mất rất nhiều ngày mới hội tụ được.\n\n---\n\n**2. Thuật toán Batch Normalization (Sergey Ioffe & Christian Szegedy, 2015):**\nĐể giải quyết triệt để vấn đề trên, hai kỹ sư Google đề xuất kỹ thuật **Chuẩn hóa theo Lô (Batch Normalization - BatchNorm)**:\nTại mỗi tầng, ta đo đạc trực tiếp các giá trị logit trong từng Mini-batch và chuẩn hóa chúng về phân phối chuẩn chuẩn tắc:\nXét một Mini-batch gồm $m$ mẫu: $\\mathcal{B} = \\{z^{(1)}, z^{(2)}, \\dots, z^{(m)}\\}$:\n1. **Tính trung bình của lô:**\n   $$\\mu_{\\mathcal{B}} = \\frac{1}{m} \\sum_{i=1}^m z^{(i)}$$\n2. **Tính phương sai của lô:**\n   $$\\sigma_{\\mathcal{B}}^2 = \\frac{1}{m} \\sum_{i=1}^m (z^{(i)} - \\mu_{\\mathcal{B}})^2$$\n3. **Chuẩn hóa về trung bình 0, phương sai 1:**\n   $$\\hat{z}^{(i)} = \\frac{z^{(i)} - \\mu_{\\mathcal{B}}}{\\sqrt{\\sigma_{\\mathcal{B}}^2 + \\epsilon}} \\quad (\\epsilon \\approx 10^{-5} \\text{ chống chia cho 0})$$\n4. **Tỷ lệ và Dịch chuyển (Scale and Shift với tham số học được $\\gamma, \\beta$):**\n   $$y^{(i)} = \\gamma \\hat{z}^{(i)} + \\beta$$\n   - $\\gamma$ (Scale) và $\\beta$ (Shift) là **hai tham số có thể học được** thông qua Gradient Descent.\n   - Tại sao cần $\\gamma$ và $\\beta$? Vì nếu việc ép dữ liệu về phân phối chuẩn vô tình làm mất tính đại diện của bài toán, mạng nơ-ron có thể tự động học $\\gamma = \\sqrt{\\sigma^2}$ và $\\beta = \\mu$ để khôi phục lại phân phối nguyên thủy ban đầu!\n\n---\n\n**3. TRỌNG TÂM CÂU 1 ĐỀ THI CHÍNH THỨC VAIO 2025: Vị trí vàng của Batch Normalization:**\nMột câu hỏi kinh điển luôn xuất hiện trong các kỳ thi Olympic AI quốc tế:\n> *'Trong một khối mạng nơ-ron tiêu chuẩn, Batch Normalization được đặt ở vị trí nào?'*\n\n**Thứ tự chuẩn mực theo bài báo gốc của tác giả Ioffe & Szegedy (2015):**\n$$\\text{Linear } (Wx) \\longrightarrow \\text{Batch Normalization} \\longrightarrow \\text{Activation } (\\text{ReLU})$$\n**TẠI SAO BẮT BUỘC PHẢI ĐẶT TRƯỚC ReLU VÀ SAU Linear?**\n1. **Lý do 1 (Đối xứng phân phối):** Đầu ra của phép nhân tuyến tính $z = Wx$ là một phân phối đối xứng hai phía quanh 0. Khi đưa qua BatchNorm, giá trị được căn chỉnh về trung bình 0 và phương sai 1 hoàn hảo. Sau đó mới đưa qua ReLU để kích hoạt nhánh dương và triệt tiêu nhánh âm.\n2. **Lý do 2 (Tránh làm hỏng phân phối nếu đặt sau ReLU):**\n   - Nếu bạn đặt BatchNorm **SAU ReLU**: Hàm ReLU đã biến toàn bộ các giá trị âm thành đúng số 0 tròn trĩnh, tạo ra một 'đỉnh nhọn' lệch phân phối khổng lồ ở mức 0.\n   - Khi BatchNorm cố ép phân phối bị bóp méo này về phân phối chuẩn Gauss, nó sẽ tạo ra **Gradient thưa thớt (Sparse Gradient)** và làm suy giảm nghiêm trọng hiệu năng huấn luyện!\n3. **Hệ quả thú vị:** Khi đặt BatchNorm ngay sau lớp tuyến tính, tham số bias $b$ trong tầng tuyến tính ($Wx + b$) trở nên **HOÀN TOÀN DƯ THỪA VÀ CÓ THỂ BỎ QUA** (cài đặt `bias=False` trong PyTorch), bởi vì phép trừ $\\mu_{\\mathcal{B}}$ trong BatchNorm đã triệt tiêu bias, còn tham số $\\beta$ của BatchNorm đảm nhận vai trò dịch chuyển!\n\n---\n\n**4. Batch Normalization khi suy luận (Inference / Test Time):**\nKhi mô hình đi vào thực tế để dự đoán cho duy nhất 1 bức ảnh mới, ta không có mini-batch để tính $\\mu_{\\mathcal{B}}$ và $\\sigma_{\\mathcal{B}}^2$!\n- **Giải pháp:** Trong suốt quá trình huấn luyện, mô hình âm thầm theo dõi và duy trì **Trung bình động lũy thừa (Exponential Moving Average - EMA)** của các $\\mu$ và $\\sigma^2$ (gọi là Running Mean và Running Variance).\n- Khi Test (Inference), mô hình dùng cố định hai giá trị thống kê tích lũy này, biến BatchNorm thành một phép biến đổi tuyến tính cố định siêu nhanh!\n\n---\n\n**5. Kỹ Thuật Dropout (Srivastava et al. 2014 - Câu 22 & 88 VAIO):**\n- **Trực giác:** Trong một đội bóng, nếu 10 cầu thủ quá ỷ lại vào tiền đạo siêu sao (Co-adaptation), khi siêu sao bị chấn thương, cả đội sẽ tê liệt. Huấn luyện viên quyết định: Trong mỗi buổi tập, ngẫu nhiên cho một số cầu thủ bất kỳ nghỉ tập. Từng cá nhân bắt buộc phải tự rèn luyện khả năng ghi bàn độc lập!\n- **Cơ chế hoạt động:**\n  - **Lúc Train:** Ở mỗi bước lặp, mỗi nơ-ron bị tắt (gán giá trị output bằng 0) với xác suất $p$ (thường chọn $p = 0.5$ ở tầng ẩn).\n  - **Kỹ thuật Inverted Dropout (chuẩn mực PyTorch):**\n    Ngay trong lúc train, các kích hoạt của nơ-ron còn sống được phóng đại bằng cách chia cho $(1 - p)$:\n    $$a = \\frac{a \\odot \\text{mask}}{1 - p}$$\n    Nhờ chia trước cho $(1 - p)$ lúc train, nên tại thời điểm **Test (Inference)**: Mạng nơ-ron chạy bình thường 100% với toàn bộ nơ-ron mà **KHÔNG CẦN PHẢI NHÂN CHỈNH LẠI BẤT KỲ HỆ SỐ NÀO**!\n  - **Cú pháp PyTorch (Câu 88):** `nn.Dropout(p=0.5)`. Cần gọi `model.train()` khi huấn luyện và `model.eval()` khi đánh giá.",
+        "formula": "\\hat{z} = \\frac{z - \\mu_{\\mathcal{B}}}{\\sqrt{\\sigma_{\\mathcal{B}}^2 + \\epsilon}}, \\quad y = \\gamma \\hat{z} + \\beta, \\quad \\text{Linear } (Wx) \\longrightarrow \\text{BatchNorm} \\longrightarrow \\text{ReLU} \\longrightarrow \\text{Dropout}",
+        "mathExplainer": [
+          {
+            "sym": "\\mu_{\\mathcal{B}}, \\sigma_{\\mathcal{B}}^2",
+            "name": "Thống kê Mini-batch",
+            "mean": "Giá trị trung bình và phương sai tính riêng trên từng lô dữ liệu nhỏ."
+          },
+          {
+            "sym": "\\gamma, \\beta",
+            "name": "Tham số Scale & Shift",
+            "mean": "Hai tham số học được của BatchNorm, cho phép mạng linh hoạt khôi phục phân phối gốc."
+          },
+          {
+            "sym": "\\text{Linear} \\to \\text{BN} \\to \\text{ReLU}",
+            "name": "Vị trí vàng (Câu 1)",
+            "mean": "Chuẩn mực bài báo gốc: BatchNorm đặt trước ReLU và sau Linear."
+          },
+          {
+            "sym": "\\text{Dropout } p",
+            "name": "Tỷ lệ bỏ rơi nơ-ron",
+            "mean": "Xác suất tắt ngẫu nhiên nơ-ron khi train để chống quá khớp (Overfitting)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(20, 20)\">\n                        <text x=\"310\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">CHUỖI KHỐI CHUẨN MỰC DEEP LEARNING (CÂU 1 ĐỀ THI VAIO 2025)</text>\n                        <!-- Block 1: Linear -->\n                        <g transform=\"translate(10, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"120\" height=\"70\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"60\" y=\"30\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. LINEAR</text>\n                          <text x=\"60\" y=\"48\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">z = Wx (bias=False)</text>\n                        </g>\n                        <!-- Arrow -->\n                        <line x1=\"130\" y1=\"70\" x2=\"160\" y2=\"70\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <!-- Block 2: BatchNorm (Highlighted) -->\n                        <g transform=\"translate(160, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"150\" height=\"70\" fill=\"#111\" rx=\"4\"/>\n                          <text x=\"75\" y=\"28\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">2. BATCH NORM</text>\n                          <text x=\"75\" y=\"45\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\" text-anchor=\"middle\">y = γ ẑ + β</text>\n                          <text x=\"75\" y=\"60\" font-family=\"Georgia\" font-size=\"8\" fill=\"#aaa\" text-anchor=\"middle\">★ TRƯỚC ReLU (CÂU 1)</text>\n                        </g>\n                        <!-- Arrow -->\n                        <line x1=\"310\" y1=\"70\" x2=\"340\" y2=\"70\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <!-- Block 3: ReLU -->\n                        <g transform=\"translate(340, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"130\" height=\"70\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"65\" y=\"30\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. ReLU</text>\n                          <text x=\"65\" y=\"48\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">a = max(0, y)</text>\n                        </g>\n                        <!-- Arrow -->\n                        <line x1=\"470\" y1=\"70\" x2=\"500\" y2=\"70\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <!-- Block 4: Dropout -->\n                        <g transform=\"translate(500, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"110\" height=\"70\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"55\" y=\"30\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">4. DROPOUT</text>\n                          <text x=\"55\" y=\"48\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" text-anchor=\"middle\">p = 0.5 (Train only)</text>\n                        </g>\n                        <!-- Explanatory footer -->\n                        <text x=\"310\" y=\"130\" font-family=\"Georgia\" font-size=\"9\" fill=\"#333\" text-anchor=\"middle\">Đặt BatchNorm trước ReLU giúp dữ liệu chuẩn hóa đối xứng quanh 0 trước khi bị ReLU cắt cụt phần âm.</text>\n                      </g>\n                    </svg>",
+          "caption": "Thứ tự tiêu chuẩn của khối mạng nơ-ron hiện đại: Tuyến tính (Linear) -> Chuẩn hóa theo lô (Batch Normalization - Câu 1 VAIO) -> Hàm kích hoạt (ReLU) -> Bỏ rơi ngẫu nhiên (Dropout)."
+        },
+        "commonPitfalls": "Nhầm lẫn vị trí đặt Batch Normalization: Đề thi VAIO thường gài bẫy hỏi xem BatchNorm đặt sau ReLU hay trước ReLU. Hãy luôn ghi nhớ: Bài báo gốc của Ioffe & Szegedy đặt BATCH NORM TRƯỚC KHI ĐƯA VÀO ACTIVATION (Linear -> BatchNorm -> ReLU) để tránh gradient thưa thớt do đỉnh nhọn tại số 0 của ReLU!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 1 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Trong mạng nơ-ron, kỹ thuật chuẩn hóa lô (Batch Normalization) thường được đặt ở vị trí nào theo kiến trúc chuẩn mực của bài báo gốc? (Câu 1 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. Trước hàm kích hoạt phi tuyến (như ReLU) và sau lớp tuyến tính (Linear)",
+            "B. Sau hàm kích hoạt ReLU và trước lớp tuyến tính tiếp theo",
+            "C. Sau lớp bỏ ngẫu nhiên (Dropout)",
+            "D. Trước lớp đầu vào (Input layer) của toàn bộ mạng"
+          ],
+          "correctIndex": 0,
+          "hint": "Cần chuẩn hóa phân phối đối xứng z = Wx trước khi hàm ReLU gập góc và biến toàn bộ nửa âm thành 0.",
+          "solution": [
+            "Bước 1: Theo bài báo gốc 'Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift' (Ioffe & Szegedy, 2015), tác giả áp dụng chuẩn hóa lô trực tiếp lên biến đổi tuyến tính z = Wx + b.",
+            "Bước 2: Thứ tự khối chuẩn mực là: Linear → BatchNorm → Activation (ReLU).",
+            "Bước 3: Việc đặt trước ReLU đảm bảo dữ liệu được chuẩn hóa đối xứng quanh 0, tránh hiện tượng lệch phân phối đỉnh 0 nếu đặt sau ReLU.",
+            "Đáp án chính xác: A."
+          ]
+        }
+      },
+      {
+        "heading": "10.6. Bài Toán Tính Tay Chuẩn Đề Thi VAIO (Câu 1, 49 & 70): Mạng MLP 2 Tầng (Lan Truyền Tiến, Cross-Entropy Loss, Gradient Từng Tầng và Cập Nhật Trọng Số W, b)",
+        "content": "Thực hành tính tay chi tiết từng phép toán của mạng MLP 2 tầng: Lan truyền tiến tính logit và activation, tính Binary Cross-Entropy Loss, lan truyền ngược sai số delta, tính đạo hàm ma trận và cập nhật trọng số; giải mã Câu 70 VAIO về Logits trong PyTorch CrossEntropyLoss.",
+        "deepDive": "**ĐỀ BÀI TOÁN TÍNH TAY MÔ PHỎNG CHUẨN ĐỀ THI OLYMPIC AI (VAIO 2025):**\nCho một mạng nơ-ron nhân tạo MLP gồm 2 tầng (1 tầng ẩn, 1 tầng ra) để phân loại nhị phân:\n- **Tầng đầu vào:** Vector đặc trưng $\\mathbf{x} = \\begin{bmatrix} x_1 \\\\ x_2 \\end{bmatrix} = \\begin{bmatrix} 1.0 \\\\ 0.5 \\end{bmatrix}$.\n- **Tầng ẩn ($l=1$):** Gồm 2 nơ-ron $h_1, h_2$ sử dụng hàm kích hoạt Sigmoid $\\sigma(z) = \\frac{1}{1 + e^{-z}}$.\n  - Ma trận trọng số: $W^{[1]} = \\begin{bmatrix} 0.2 & 0.4 \\\\ -0.3 & 0.5 \\end{bmatrix}$, Vector bias: $b^{[1]} = \\begin{bmatrix} 0.1 \\\\ -0.2 \\end{bmatrix}$.\n- **Tầng đầu ra ($l=2$):** Gồm 1 nơ-ron đầu ra sử dụng hàm kích hoạt Sigmoid.\n  - Vector trọng số: $W^{[2]} = \\begin{bmatrix} 0.6 & -0.4 \\end{bmatrix}$, Bias: $b^{[2]} = 0.3$.\n- **Mẫu dữ liệu huấn luyện:** Nhãn thực tế là $y = 1.0$. Tốc độ học $\\eta = 0.1$.\n- **Hàm mất mát:** Binary Cross-Entropy Loss: $\\mathcal{L} = - [y \\ln \\hat{y} + (1 - y) \\ln (1 - \\hat{y})]$.\n\nHãy thực hiện trọn vẹn 1 bước huấn luyện (Forward Pass $\\to$ Compute Loss $\\to$ Backward Pass $\\to$ Update Weights).\n\n---\n\n### BƯỚC 1: LAN TRUYỀN TIẾN (FORWARD PASS):\n**1.1. Tính toán tại Tầng ẩn ($l=1$):**\n- Tính Logits $z^{[1]} = W^{[1]} \\mathbf{x} + b^{[1]}$:\n  $$z_1^{[1]} = W_{11}^{[1]} x_1 + W_{12}^{[1]} x_2 + b_1^{[1]} = (0.2)(1.0) + (0.4)(0.5) + 0.1 = 0.2 + 0.2 + 0.1 = 0.50$$\n  $$z_2^{[1]} = W_{21}^{[1]} x_1 + W_{22}^{[1]} x_2 + b_2^{[1]} = (-0.3)(1.0) + (0.5)(0.5) + (-0.2) = -0.3 + 0.25 - 0.2 = -0.25$$\n- Đưa qua hàm kích hoạt Sigmoid:\n  $$a_1^{[1]} = \\sigma(0.50) = \\frac{1}{1 + e^{-0.5}} \\approx \\frac{1}{1 + 0.6065} \\approx 0.6225$$\n  $$a_2^{[1]} = \\sigma(-0.25) = \\frac{1}{1 + e^{0.25}} \\approx \\frac{1}{1 + 1.2840} \\approx 0.4378$$\n  Vậy vector kích hoạt tầng ẩn là: $a^{[1]} = \\begin{bmatrix} 0.6225 \\\\ 0.4378 \\end{bmatrix}$.\n\n**1.2. Tính toán tại Tầng đầu ra ($l=2$):**\n- Tính Logit $z^{[2]} = W^{[2]} a^{[1]} + b^{[2]}$:\n  $$z^{[2]} = (0.6)(0.6225) + (-0.4)(0.4378) + 0.3 = 0.3735 - 0.1751 + 0.3 = 0.4984$$\n- Tính xác suất dự đoán $\\hat{y} = a^{[2]} = \\sigma(z^{[2]})$:\n  $$\\hat{y} = \\sigma(0.4984) = \\frac{1}{1 + e^{-0.4984}} \\approx \\frac{1}{1 + 0.6075} \\approx 0.6221$$\n\n---\n\n### BƯỚC 2: TÍNH HÀM MẤT MÁT (COMPUTE LOSS):\nVới $y = 1.0$ và $\\hat{y} = 0.6221$:\n$$\\mathcal{L} = - [1.0 \\cdot \\ln(0.6221) + 0 \\cdot \\ln(1 - 0.6221)] = -\\ln(0.6221) \\approx -(-0.4746) = 0.4746$$\n\n---\n\n### BƯỚC 3: LAN TRUYỀN NGƯỢC TẠI TẦNG ĐẦU RA ($l=2$):\n- **Sai số tầng ra $\\delta^{[2]}$:**\n  Áp dụng công thức rút gọn của BCE kết hợp Sigmoid:\n  $$\\delta^{[2]} = \\hat{y} - y = 0.6221 - 1.0 = -0.3779$$\n- **Gradient theo trọng số $W^{[2]}$:**\n  $$\\frac{\\partial \\mathcal{L}}{\\partial W^{[2]}} = \\delta^{[2]} (a^{[1]})^T = -0.3779 \\times \\begin{bmatrix} 0.6225 & 0.4378 \\end{bmatrix} = \\begin{bmatrix} -0.2352 & -0.1654 \\end{bmatrix}$$\n- **Gradient theo bias $b^{[2]}$:**\n  $$\\frac{\\partial \\mathcal{L}}{\\partial b^{[2]}} = \\delta^{[2]} = -0.3779$$\n\n---\n\n### BƯỚC 4: LAN TRUYỀN NGƯỢC VỀ TẦNG ẨN ($l=1$):\n- **Đạo hàm hàm kích hoạt Sigmoid tại tầng ẩn:**\n  $$g'(z_1^{[1]}) = a_1^{[1]} (1 - a_1^{[1]}) = 0.6225 \\times (1 - 0.6225) = 0.6225 \\times 0.3775 \\approx 0.2350$$\n  $$g'(z_2^{[1]}) = a_2^{[1]} (1 - a_2^{[1]}) = 0.4378 \\times (1 - 0.4378) = 0.4378 \\times 0.5622 \\approx 0.2461$$\n- **Tính vector sai số tầng ẩn $\\delta^{[1]} = ((W^{[2]})^T \\delta^{[2]}) \\odot g'(z^{[1]})$:**\n  $$(W^{[2]})^T \\delta^{[2]} = \\begin{bmatrix} 0.6 \\\\ -0.4 \\end{bmatrix} \\times (-0.3779) = \\begin{bmatrix} -0.2267 \\\\ 0.1512 \\end{bmatrix}$$\n  Nhân từng phần tử với đạo hàm:\n  $$\\delta_1^{[1]} = (-0.2267) \\times 0.2350 \\approx -0.0533$$\n  $$\\delta_2^{[1]} = 0.1512 \\times 0.2461 \\approx +0.0372$$\n  Vậy: $\\delta^{[1]} = \\begin{bmatrix} -0.0533 \\\\ 0.0372 \\end{bmatrix}$.\n- **Gradient theo ma trận trọng số $W^{[1]}$:**\n  $$\\frac{\\partial \\mathcal{L}}{\\partial W^{[1]}} = \\delta^{[1]} \\mathbf{x}^T = \\begin{bmatrix} -0.0533 \\\\ 0.0372 \\end{bmatrix} \\begin{bmatrix} 1.0 & 0.5 \\end{bmatrix} = \\begin{bmatrix} -0.0533 & -0.0267 \\\\ 0.0372 & 0.0186 \\end{bmatrix}$$\n- **Gradient theo vector bias $b^{[1]}$:**\n  $$\\frac{\\partial \\mathcal{L}}{\\partial b^{[1]}} = \\delta^{[1]} = \\begin{bmatrix} -0.0533 \\\\ 0.0372 \\end{bmatrix}$$\n\n---\n\n### BƯỚC 5: CẬP NHẬT TRỌNG SỐ VỚI $\\eta = 0.1$:\n- **Cập nhật tầng ra ($l=2$):**\n  $$W^{[2]} \\leftarrow W^{[2]} - \\eta \\frac{\\partial \\mathcal{L}}{\\partial W^{[2]}} = \\begin{bmatrix} 0.6 & -0.4 \\end{bmatrix} - 0.1 \\times \\begin{bmatrix} -0.2352 & -0.1654 \\end{bmatrix} = \\begin{bmatrix} 0.6235 & -0.3835 \\end{bmatrix}$$\n  $$b^{[2]} \\leftarrow b^{[2]} - \\eta \\frac{\\partial \\mathcal{L}}{\\partial b^{[2]}} = 0.3 - 0.1 \\times (-0.3779) = 0.3378$$\n- **Cập nhật tầng ẩn ($l=1$):**\n  $$W^{[1]} \\leftarrow W^{[1]} - \\eta \\frac{\\partial \\mathcal{L}}{\\partial W^{[1]}} = \\begin{bmatrix} 0.2 & 0.4 \\\\ -0.3 & 0.5 \\end{bmatrix} - 0.1 \\times \\begin{bmatrix} -0.0533 & -0.0267 \\\\ 0.0372 & 0.0186 \\end{bmatrix} = \\begin{bmatrix} 0.2053 & 0.4027 \\\\ -0.3037 & 0.4981 \\end{bmatrix}$$\n  $$b^{[1]} \\leftarrow b^{[1]} - \\eta \\frac{\\partial \\mathcal{L}}{\\partial b^{[1]}} = \\begin{bmatrix} 0.1 \\\\ -0.2 \\end{bmatrix} - 0.1 \\times \\begin{bmatrix} -0.0533 \\\\ 0.0372 \\end{bmatrix} = \\begin{bmatrix} 0.1053 \\\\ -0.2037 \\end{bmatrix}$$\n*(Nhận xét: Vì nhãn thật $y=1$ cao hơn dự đoán $\\hat{y}=0.6221$, trọng số dương $W_1^{[2]}$ được tăng lên từ $0.6 \\to 0.6235$ để kéo dự đoán lần sau lên gần 1 hơn!).*\n\n---\n\n**CẠM BẪY CÂU 70 ĐỀ THI CHÍNH THỨC VAIO 2025: Logits trong `nn.CrossEntropyLoss` PyTorch:**\nMột câu hỏi lập trình cực kỳ phổ biến trong đề thi:\n> *'Khi sử dụng `nn.CrossEntropyLoss()` trong PyTorch, đầu vào của hàm mất mát này cần phải là gì?'*\n- **Sai lầm phổ biến của thí sinh:** Đưa đầu ra đã qua hàm `nn.Softmax()` vào `nn.CrossEntropyLoss()`.\n- **Sự thật chuẩn mực (Đáp án A - Câu 70 VAIO):**\n  Hàm `nn.CrossEntropyLoss()` trong PyTorch **NHẬN TRỰC TIẾP VECTOR LOGITS THÔ** (chưa qua Softmax)!\n- **Giải mã lý do toán học:**\n  Bên trong hàm `nn.CrossEntropyLoss()` của PyTorch đã tích hợp sẵn:\n  $$\\text{CrossEntropyLoss} = \\text{LogSoftmax} + \\text{NLLLoss (Negative Log Likelihood)}$$\n  Việc tính gộp `log(Softmax(z))` cho phép PyTorch áp dụng thuật toán **Log-Sum-Exp Trick**:\n  $$\\log \\left( \\sum_{i} e^{z_i} \\right) = c + \\log \\left( \\sum_{i} e^{z_i - c} \\right) \\quad \\text{với } c = \\max(z)$$\n  Bí quyết này giúp triệt tiêu hoàn toàn nguy cơ **Tràn số (Overflow)** khi $z$ quá lớn (ví dụ $e^{1000} \\to \\infty$) và **Mất số (Underflow)** khi $z$ quá nhỏ, đảm bảo tính ổn định số học tuyệt đối trên máy tính!",
+        "formula": "\\delta^{[2]} = \\hat{y} - y = -0.3779, \\quad \\delta^{[1]} = ((W^{[2]})^T \\delta^{[2]}) \\odot \\sigma'(z^{[1]}), \\quad W \\leftarrow W - \\eta \\frac{\\partial \\mathcal{L}}{\\partial W}",
+        "mathExplainer": [
+          {
+            "sym": "\\delta^{[2]} = -0.3779",
+            "name": "Sai số tầng ra",
+            "mean": "Chênh lệch giữa xác suất dự đoán (0.6221) và nhãn thật (1.0)."
+          },
+          {
+            "sym": "\\sigma'(z^{[1]})",
+            "name": "Đạo hàm Sigmoid tầng ẩn",
+            "mean": "Bằng a^[1] * (1 - a^[1]), giá trị lần lượt là 0.2350 và 0.2461."
+          },
+          {
+            "sym": "W^{[1]} \\leftarrow W^{[1]} - \\eta \\nabla W",
+            "name": "Cập nhật trọng số",
+            "mean": "Lấy trọng số cũ trừ đi tích của tốc độ học eta với gradient."
+          },
+          {
+            "sym": "\\text{Log-Sum-Exp}",
+            "name": "Kỹ thuật ổn định số",
+            "mean": "Tránh tràn số máy tính bằng cách trừ đi giá trị max(z) trước khi lấy hàm mũ."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 210\" width=\"100%\" height=\"210\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"210\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(20, 15)\">\n                        <text x=\"310\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">SƠ ĐỒ TÍNH TOÁN MẠNG MLP 2 TẦNG BẰNG SỐ CỤ THỂ</text>\n                        <!-- Inputs -->\n                        <g transform=\"translate(20, 35)\">\n                          <circle cx=\"30\" cy=\"40\" r=\"16\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/><text x=\"30\" y=\"44\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">x₁=1.0</text>\n                          <circle cx=\"30\" cy=\"110\" r=\"16\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/><text x=\"30\" y=\"114\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">x₂=0.5</text>\n                          <text x=\"30\" y=\"145\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Đầu vào</text>\n                        </g>\n                        <!-- Hidden Layer -->\n                        <g transform=\"translate(180, 35)\">\n                          <circle cx=\"40\" cy=\"40\" r=\"20\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"40\" y=\"38\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">z₁=0.50</text>\n                          <text x=\"40\" y=\"49\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">a₁=0.62</text>\n                          <circle cx=\"40\" cy=\"110\" r=\"20\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"40\" y=\"108\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">z₂=-0.25</text>\n                          <text x=\"40\" y=\"119\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">a₂=0.44</text>\n                          <text x=\"40\" y=\"145\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Tầng ẩn (Sigmoid)</text>\n                        </g>\n                        <!-- Output Layer -->\n                        <g transform=\"translate(370, 35)\">\n                          <circle cx=\"40\" cy=\"75\" r=\"22\" fill=\"#111\"/>\n                          <text x=\"40\" y=\"70\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">z^[2]=0.50</text>\n                          <text x=\"40\" y=\"83\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">ŷ = 0.622</text>\n                          <text x=\"40\" y=\"145\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Tầng ra (Sigmoid)</text>\n                        </g>\n                        <!-- Loss & Delta -->\n                        <g transform=\"translate(500, 50)\">\n                          <rect x=\"0\" y=\"0\" width=\"115\" height=\"100\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                          <text x=\"57\" y=\"20\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">Nhãn thật y = 1.0</text>\n                          <text x=\"57\" y=\"40\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Loss 𝓛 = 0.4746</text>\n                          <line x1=\"10\" y1=\"50\" x2=\"105\" y2=\"50\" stroke=\"#888\"/>\n                          <text x=\"57\" y=\"65\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" fill=\"#333\" text-anchor=\"middle\">Sai số truyền ngược:</text>\n                          <text x=\"57\" y=\"80\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">δ^[2] = ŷ - y = -0.378</text>\n                          <text x=\"57\" y=\"93\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">δ^[1] = [-0.05, 0.04]^T</text>\n                        </g>\n                        <!-- Connection Lines -->\n                        <line x1=\"66\" y1=\"75\" x2=\"200\" y2=\"75\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"66\" y1=\"75\" x2=\"200\" y2=\"145\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"66\" y1=\"145\" x2=\"200\" y2=\"75\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"66\" y1=\"145\" x2=\"200\" y2=\"145\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"240\" y1=\"75\" x2=\"388\" y2=\"110\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"240\" y1=\"145\" x2=\"388\" y2=\"110\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"432\" y1=\"110\" x2=\"500\" y2=\"110\" stroke=\"#111\" stroke-width=\"1.5\" stroke-dasharray=\"3,3\"/>\n                      </g>\n                    </svg>",
+          "caption": "Mô hình mạng nơ-ron 2 tầng với đầy đủ các giá trị số thực tính toán tại từng bước: Từ Logits, Kích hoạt, Sai số delta, đến cập nhật trọng số."
+        },
+        "commonPitfalls": "Nhầm lẫn khi truyền đầu vào cho nn.CrossEntropyLoss trong PyTorch (Câu 70 VAIO): Rất nhiều thí sinh thêm một lớp nn.Softmax() ở cuối mạng rồi mới truyền vào nn.CrossEntropyLoss. Điều này hoàn toàn SAI vì làm Softmax bị tính 2 lần! Hãy luôn nhớ: nn.CrossEntropyLoss nhận Logits thô chưa qua Softmax!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 70 Đề Thi VAIO 2025)",
+          "question": "Trong thư viện PyTorch, hàm mất mát `nn.CrossEntropyLoss()` yêu cầu tensor đầu vào dự đoán (predictions) phải ở dạng nào để đảm bảo tính toán chính xác và ổn định số học? (Câu 70 Đề thi VAIO 2025)",
+          "options": [
+            "A. Điểm số thô Logits (chưa qua hàm kích hoạt Softmax)",
+            "B. Phân phối xác suất đã chuẩn hóa qua hàm Softmax",
+            "C. Nhãn lớp dạng one-hot encoding",
+            "D. Các giá trị xác suất đã lấy logarit tự nhiên (ln)"
+          ],
+          "correctIndex": 0,
+          "hint": "PyTorch đã tích hợp sẵn LogSoftmax bên trong hàm mất mát này để sử dụng mẹo Log-Sum-Exp.",
+          "solution": [
+            "Bước 1: nn.CrossEntropyLoss() trong PyTorch kết hợp nn.LogSoftmax() và nn.NLLLoss() vào trong một lớp duy nhất.",
+            "Bước 2: Vì đã có LogSoftmax bên trong, nên tensor đầu vào bắt buộc phải là Logits thô chưa chuẩn hóa.",
+            "Bước 3: Việc gộp chung này giúp tính toán ổn định số học thông qua Log-Sum-Exp trick, tránh hiện tượng tràn số (Overflow/Underflow).",
+            "Đáp án chính xác: A."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-mlp-simulator",
+    "examConnection": {
+      "questionTitle": "Tổng Hợp Ma Trận Câu Hỏi Đề Thi Olympic AI (VAIO 2025)",
+      "items": [
+        {
+          "code": "Câu 1 VAIO",
+          "problem": "Vị trí đặt Batch Normalization: Trước hàm kích hoạt phi tuyến (ReLU) và sau lớp tuyến tính Linear: Linear → BatchNorm → ReLU (Đáp án A).",
+          "solution": [
+            "Tránh làm lệch phân phối đỉnh 0 và giảm gradient thưa thớt so với việc đặt sau ReLU."
+          ]
+        },
+        {
+          "code": "Câu 56 VAIO",
+          "problem": "Khởi tạo tất cả trọng số W = 0 dẫn đến Thất bại phá vỡ đối xứng (Symmetry Breaking Failure) (Đáp án B).",
+          "solution": [
+            "Mọi nơ-ron cùng tầng nhận cùng kích hoạt và cùng gradient, suy biến toàn bộ mạng thành 1 nơ-ron duy nhất."
+          ]
+        },
+        {
+          "code": "Câu 70 VAIO",
+          "problem": "Hàm mất mát nn.CrossEntropyLoss trong PyTorch nhận đầu vào là các Logits thô chưa qua Softmax (Đáp án A).",
+          "solution": [
+            "Áp dụng Log-Sum-Exp trick để đảm bảo ổn định số học, chống tràn số máy tính."
+          ]
+        },
+        {
+          "code": "Câu 22 & 88 VAIO",
+          "problem": "Dropout: Cú pháp nn.Dropout(p=0.5). Nếu thêm Dropout mà Validation Accuracy tụt mạnh thì giảm p xuống bé hơn (Câu 22). Luôn tắt Dropout khi Inference qua model.eval() (Câu 88).",
+          "solution": [
+            "Inverted Dropout chuẩn hóa sẵn bằng cách chia cho 1-p trong lúc train."
+          ]
+        },
+        {
+          "code": "Câu 49 VAIO",
+          "problem": "Tính toán lan truyền tiến và lan truyền ngược mạng MLP với sai số tầng cuối δ^[L] = ŷ - y khi dùng Cross-Entropy.",
+          "solution": [
+            "Quy tắc chuỗi rút gọn tuyệt đẹp giúp tính toán gradient nhanh chóng và chuẩn xác."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Mạng nơ-ron bắt buộc phải có hàm kích hoạt phi tuyến (ReLU, Sigmoid, Softmax) để tránh sụp đổ thành mô hình hồi quy tuyến tính đơn tầng.",
+      "Thuật toán Lan truyền ngược (Backpropagation) là sự kết hợp giữa Quy tắc chuỗi (Chain Rule) và Quy hoạch động (Dynamic Programming), lan truyền vector sai số delta ngược từ tầng cuối về đầu.",
+      "Tuyệt đối không khởi tạo ma trận trọng số W = 0 (phải dùng He Init cho ReLU hoặc Xavier Init cho Sigmoid/Tanh để phá vỡ đối xứng). Bias b có thể khởi tạo an toàn bằng 0.",
+      "Vị trí vàng của Batch Normalization (Câu 1 VAIO): Sau lớp tuyến tính Linear và TRƯỚC hàm kích hoạt ReLU (Linear → BatchNorm → ReLU).",
+      "Trong PyTorch, nn.CrossEntropyLoss nhận trực tiếp Logits thô chưa qua Softmax để đảm bảo ổn định số học chống tràn số qua kỹ thuật Log-Sum-Exp."
+    ]
+  },
+  {
+    "id": "lesson-11",
+    "title": "11. Thị Giác Máy Tính: CNN, ResNet & Nhận Diện Vật Thể",
+    "syllabusBadge": "BUỔI 9: THỊ GIÁC MÁY TÍNH (CV): CNN, RESNET & OBJECT DETECTION",
+    "summary": "Khám phá thế giới Thị Giác Máy Tính từ con số 0: Bản chất ma trận điểm ảnh, phép tích chập (Convolution 2D), bộ lọc (Kernel), bước nhảy (Stride), viền đệm (Padding) và công thức kích thước đầu ra; tính toán số lượng tham số học được (Câu 2 VAIO) và độ phức tạp FLOPs (Câu 43 VAIO); lớp gom cụm Pooling và trường tiếp nhận (Receptive Field); giải mã hiện tượng suy thoái mạng sâu và giải pháp đột phá Cầu vượt cao tốc ResNet (Câu 31 VAIO); cùng tác vụ nhận diện vật thể (Object Detection) với chỉ số IoU và thuật toán Triệt tiêu không cực đại NMS (Câu 10 VAIO).",
+    "intuition": {
+      "title": "Trực giác thực tế: Chiếc kính lúp rà soát hoa văn & Ban giám khảo lọc khung hình trùng lặp",
+      "content": "Để hiểu trọn vẹn Thị Giác Máy Tính và Mạng Tích Chập (CNN) mà không bị bỡ ngỡ, hãy quan sát hai hình ảnh đời sống sau:\n\n**1. Chiếc kính lúp rà soát hoa văn & Cầu vượt cao tốc ResNet:**\n- Hãy tưởng tượng bạn được giao một bức tranh tường khổng lồ kích thước $1,000 \\times 1,000$ pixel màu (chứa tới 3 triệu con số!). Nếu bạn dùng mạng nơ-ron kết nối đầy đủ (MLP), mỗi nơ-ron ở tầng sau sẽ cần nối 3 triệu sợi dây tới từng điểm ảnh. Một tầng ẩn 1,000 nơ-ron sẽ đòi hỏi tới **3 TỶ TRỌNG SỐ KẾT NỐI**! Máy tính sẽ ngay lập tức bốc khói vì quá tải bộ nhớ. Nguy hiểm hơn, nếu bạn duỗi thẳng bức tranh thành 1 hàng ngang, mối liên hệ trên-dưới-trái-phải của các nét vẽ bị đứt gãy hoàn toàn!\n- Thay vào đó, **CNN (Convolutional Neural Network)** hoạt động như một nhà thám tử cầm một chiếc kính lúp nhỏ $3 \\times 3$ pixel:\n  - Thám tử trượt chiếc kính lúp khắp bức tranh: từ trái sang phải, từ trên xuống dưới.\n  - Chiếc kính lúp này dùng **CHUNG DUY NHẤT MỘT BỘ QUY TẮC SOI NÉT** trên toàn bộ bức ảnh (**Chia sẻ trọng số - Weight Sharing**)!\n  - Dù chiếc tai mèo nằm ở góc trên bên trái hay chạy xuống góc dưới bên phải, chiếc kính lúp đều phát hiện ra đặc trưng đó một cách chính xác (**Bất biến dịch chuyển**)! Số lượng tham số giảm ngoạn mục từ 3 tỷ xuống chỉ còn vỏn vẹn vài chục con số!\n- Và khi ta xếp chồng 100 lớp kính lúp để phân tích các chi tiết siêu tinh xảo, tín hiệu gradient bị tiêu biến và nghẽn tắc giữa đường (Hiện tượng suy thoái mạng sâu). Kaiming He đã xây một chiếc **CẦU VƯỢT CAO TỐC (Skip Connection trong ResNet)** nhảy cóc qua hai tầng, cho phép tín hiệu gradient phóng thẳng từ đích về vạch xuất phát mà không bị suy hao!\n\n---\n\n**2. Ban giám khảo chọn hoa hậu & Thuật toán NMS trong Nhận diện vật thể:**\n- Trong tác vụ Nhận diện vật thể (Object Detection), khi phát hiện một chú chó trong bức ảnh, mô hình máy tính có thể vẽ ra 20 chiếc khung hộp chữ nhật chồng chéo lên nhau quanh cùng chú chó đó với các điểm tin cậy khác nhau ($0.95, 0.90, 0.85, \\dots$).\n- Ta không thể để 20 chiếc khung đè lên nhau như vậy được. Thuật toán **NMS (Non-Maximum Suppression - Triệt tiêu không cực đại)** đóng vai trò như ban giám khảo:\n  1. Chọn ra chiếc khung có điểm số cao nhất (Hạng nhất $0.95$).\n  2. Đo độ chồng lấn (**Chỉ số IoU**) giữa chiếc khung này với tất cả các khung còn lại.\n  3. Những chiếc khung nào trùng lặp quá nhiều ($\\text{IoU} > 0.40$) sẽ bị \"triệt tiêu\" và loại bỏ ngay lập tức!\n  4. Lặp lại cho đến khi chỉ còn lại đúng 1 chiếc khung duy nhất ôm khít lấy chú chó!"
+    },
+    "sections": [
+      {
+        "heading": "11.1. Khởi Đầu Từ Con Số 0: Máy Tính 'Nhìn' Ảnh Như Thế Nào? Tại Sao Mạng Nơ-ron Cổ Điển (MLP) Thất Bại & Phép Tích Chập Ra Đời",
+        "content": "Khám phá cách biểu diễn hình ảnh số dưới dạng ma trận và tensor đa chiều; phân tích 3 lý do chí mạng khiến mạng MLP thất bại trên dữ liệu ảnh; cơ chế toán học của phép tích chập (Convolution 2D) và hai siêu năng lực của CNN.",
+        "deepDive": "**1. Máy tính 'nhìn' một bức ảnh như thế nào?**\nCon người nhìn một bức ảnh và cảm nhận được màu sắc, ánh sáng, hình dáng chú mèo hay nụ cười của bạn bè. Nhưng máy tính không có mắt sinh học, nó hoàn toàn mù màu và chỉ nhìn thấy **CÁC MA TRẬN CON SỐ NGUYÊN (Pixel Grid)**:\n- **Ảnh đa mức xám (Grayscale Image):**\n  - Được biểu diễn bằng một ma trận 2 chiều kích thước $H \\times W$ (Chiều cao $\\times$ Chiều rộng).\n  - Mỗi phần tử (Pixel) là một số nguyên từ $0$ đến $255$:\n    - Giá trị $0$: Điểm ảnh đen tuyền hoàn toàn.\n    - Giá trị $255$: Điểm ảnh trắng tinh khiết.\n    - Giá trị nằm giữa $(1 \\dots 254)$: Các mức độ xám chuyển tiếp.\n- **Ảnh màu RGB (Red, Green, Blue):**\n  - Được biểu diễn bằng một **Tensor 3 chiều** kích thước $H \\times W \\times C$, trong đó $C = 3$ là số kênh màu:\n    - Kênh 0: Ma trận cường độ màu Đỏ (Red).\n    - Kênh 1: Ma trận cường độ màu Lục (Green).\n    - Kênh 2: Ma trận cường độ màu Lam (Blue).\n  - Một điểm ảnh màu là sự pha trộn của bộ 3 số $(R, G, B)$ tại cùng tọa độ $(y, x)$.\n\n---\n\n**2. Ba lý do chí mạng khiến Mạng nơ-ron cổ điển (MLP) thất bại hoàn toàn trên dữ liệu ảnh:**\nTrước khi CNN ra đời, các kỹ sư cố gắng dùng mạng MLP (kết nối đầy đủ - Fully Connected) để xử lý ảnh, nhưng đã vấp phải 3 bức tường thép không thể vượt qua:\n1. **Bùng nổ tham số (Parameter Explosion):**\n   - Xét một bức ảnh màu cỡ vừa $256 \\times 256 \\times 3 = 196,608$ điểm ảnh.\n   - Để đưa vào mạng MLP, ta phải duỗi thẳng thành một vector đầu vào có $196,608$ chiều.\n   - Nếu tầng ẩn đầu tiên chỉ có khiêm tốn $1,000$ nơ-ron, số trọng số kết nối sẽ là:\n     $$196,608 \\times 1,000 \\approx 196.6 \\text{ triệu trọng số!}$$\n   - Số lượng tham số quá khổng lồ làm tràn ngập bộ nhớ RAM/GPU và chắc chắn dẫn tới hiện tượng **Quá khớp (Overfitting)** trầm trọng (mạng chỉ học vẹt mà không hiểu tổng quát).\n2. **Phá hủy hoàn toàn cấu trúc không gian 2 chiều (Spatial Topology Destruction):**\n   - Thao tác \"duỗi thẳng\" (Flatten) biến lưới 2D thành một đường thẳng 1D.\n   - Hai điểm ảnh vốn nằm kề sát nhau theo phương dọc (như hàng 10 cột 5 và hàng 11 cột 5) sẽ bị đẩy xa nhau hàng trăm phần tử trong vector 1D! Mối tương quan không gian lân cận cực kỳ quý giá giữa các điểm ảnh bị xóa sổ hoàn toàn.\n3. **Mất tính bất biến dịch chuyển (Lack of Translation Invariance):**\n   - Trong MLP, mỗi nơ-ron gắn chặt với một vị trí tọa độ cố định. Nếu mô hình được học nhận diện mắt mèo ở góc trên bên trái, khi chú mèo dịch chuyển sang góc dưới bên phải, toàn bộ các pixel kích hoạt các nơ-ron hoàn toàn khác, và MLP sẽ thất bại thảm hại!\n\n---\n\n**3. Phép Tích Chập (Convolution) & Cảm hứng sinh học vỏ não thị giác:**\nVào năm 1959, hai nhà sinh lý học **David Hubel** và **Torsten Wiesel** đã tiến hành thí nghiệm lịch sử trên vỏ não thị giác của loài mèo (đoạt giải Nobel Y học năm 1981): Họ phát hiện các nơ-ron thị giác không nhìn toàn bộ tầm mắt cùng lúc, mà mỗi nơ-ron chỉ phản hồi với một vùng cục bộ nhỏ gọi là **Trường tiếp nhận (Receptive Field)**, và các tầng nơ-ron sơ cấp chỉ chuyên phát hiện các cạnh thẳng đơn giản (ngang, dọc, chéo).\n\nMô hình **CNN (Convolutional Neural Network)** ra đời dựa trên nguyên lý này:\n- Thay vì kết nối toàn bộ, ta dùng một ma trận nhỏ gọi là **Bộ lọc (Kernel / Filter)** (thường kích thước $3 \\times 3$ hoặc $5 \\times 5$).\n- **Quy trình tính toán Tích chập 2D:**\n  1. Đặt bộ lọc $K$ đè lên một góc của ảnh đầu vào $I$.\n  2. Nhân từng phần tử tương ứng của bộ lọc với pixel của ảnh (Element-wise Multiplication).\n  3. Cộng dồn toàn bộ các tích lại và cộng thêm 1 hệ số bias $b$:\n     $$S(i, j) = \\sum_{m} \\sum_{n} I(i + m, j + n) K(m, n) + b$$\n  4. Trượt bộ lọc sang vị trí tiếp theo và lặp lại phép tính.\n  5. Toàn bộ các giá trị thu được tạo thành một ma trận đầu ra mới gọi là **Bản đồ đặc trưng (Feature Map)**!\n\n---\n\n**4. Hai siêu năng lực đưa CNN thống trị thị giác máy tính:**\n1. **Vùng tiếp nhận cục bộ (Local Receptive Fields):** Mỗi nơ-ron chỉ quan sát một cụm pixel $3 \\times 3$ lân cận, bảo tồn nguyên vẹn tính chất hình học 2D của bức ảnh.\n2. **Chia sẻ trọng số (Weight Sharing):** Cùng một bộ lọc $3 \\times 3$ (chỉ gồm 9 con số) được quét đồng nhất trên toàn bộ bức ảnh!\n   - Giúp giảm số tham số từ 200 triệu xuống còn **9 tham số**!\n   - Đem lại tính **Bất biến dịch chuyển (Translation Equivariance)**: Dù bông hoa hay con chim xuất hiện ở bất kỳ góc nào trong khung hình, bộ lọc đều phát hiện ra đặc trưng đó!",
+        "formula": "S(i, j) = (I * K)(i, j) + b = \\sum_{m=0}^{K_h-1} \\sum_{n=0}^{K_w-1} I(i + m, j + n) K(m, n) + b",
+        "mathExplainer": [
+          {
+            "sym": "I(i, j)",
+            "name": "Điểm ảnh đầu vào",
+            "mean": "Giá trị pixel của bức ảnh tại tọa độ hàng i, cột j (thang đo 0 đến 255)."
+          },
+          {
+            "sym": "K(m, n)",
+            "name": "Trọng số bộ lọc (Kernel)",
+            "mean": "Ma trận nhỏ chứa các trọng số có thể học được (thường cỡ 3x3 hoặc 5x5)."
+          },
+          {
+            "sym": "S(i, j)",
+            "name": "Bản đồ đặc trưng (Feature Map)",
+            "mean": "Đầu ra sau phép tích chập, thể hiện mức độ xuất hiện của đặc trưng tại từng vị trí."
+          },
+          {
+            "sym": "*",
+            "name": "Toán tử Tích chập",
+            "mean": "Phép nhân từng phần tử rồi cộng dồn giữa cửa sổ trượt và bộ lọc."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Image 5x5 -->\n                      <g transform=\"translate(25, 20)\">\n                        <text x=\"60\" y=\"15\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Ảnh Đầu Vào 5×5</text>\n                        <rect x=\"0\" y=\"25\" width=\"120\" height=\"120\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <!-- Grid lines -->\n                        <line x1=\"24\" y1=\"25\" x2=\"24\" y2=\"145\" stroke=\"#ccc\"/><line x1=\"48\" y1=\"25\" x2=\"48\" y2=\"145\" stroke=\"#ccc\"/><line x1=\"72\" y1=\"25\" x2=\"72\" y2=\"145\" stroke=\"#ccc\"/><line x1=\"96\" y1=\"25\" x2=\"96\" y2=\"145\" stroke=\"#ccc\"/>\n                        <line x1=\"0\" y1=\"49\" x2=\"120\" y2=\"49\" stroke=\"#ccc\"/><line x1=\"0\" y1=\"73\" x2=\"120\" y2=\"73\" stroke=\"#ccc\"/><line x1=\"0\" y1=\"97\" x2=\"120\" y2=\"97\" stroke=\"#ccc\"/><line x1=\"0\" y1=\"121\" x2=\"120\" y2=\"121\" stroke=\"#ccc\"/>\n                        <!-- Highlighted 3x3 receptive window -->\n                        <rect x=\"0\" y=\"25\" width=\"72\" height=\"72\" fill=\"#e0e0e0\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"36\" y=\"65\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Vùng 3×3</text>\n                      </g>\n                      <!-- Operator * -->\n                      <text x=\"175\" y=\"95\" font-family=\"Georgia\" font-size=\"20\" font-weight=\"bold\" text-anchor=\"middle\">∗</text>\n                      <!-- Center: Kernel 3x3 -->\n                      <g transform=\"translate(205, 45)\">\n                        <text x=\"45\" y=\"-10\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Bộ Lọc 3×3</text>\n                        <rect x=\"0\" y=\"0\" width=\"90\" height=\"90\" fill=\"#111\" rx=\"3\"/>\n                        <line x1=\"30\" y1=\"0\" x2=\"30\" y2=\"90\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                        <line x1=\"60\" y1=\"0\" x2=\"60\" y2=\"90\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                        <line x1=\"0\" y1=\"30\" x2=\"90\" y2=\"30\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                        <line x1=\"0\" y1=\"60\" x2=\"90\" y2=\"60\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                        <text x=\"15\" y=\"20\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">w₁</text>\n                        <text x=\"45\" y=\"20\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">w₂</text>\n                        <text x=\"75\" y=\"20\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">w₃</text>\n                        <text x=\"45\" y=\"50\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">w₅</text>\n                        <text x=\"45\" y=\"80\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" text-anchor=\"middle\">w₈</text>\n                      </g>\n                      <!-- Operator = -->\n                      <text x=\"325\" y=\"95\" font-family=\"Georgia\" font-size=\"20\" font-weight=\"bold\" text-anchor=\"middle\">⇒</text>\n                      <!-- Right: Feature Map 3x3 -->\n                      <g transform=\"translate(355, 45)\">\n                        <text x=\"45\" y=\"-10\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Bản Đồ Đặc Trưng 3×3</text>\n                        <rect x=\"0\" y=\"0\" width=\"90\" height=\"90\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <line x1=\"30\" y1=\"0\" x2=\"30\" y2=\"90\" stroke=\"#ccc\"/>\n                        <line x1=\"60\" y1=\"0\" x2=\"60\" y2=\"90\" stroke=\"#ccc\"/>\n                        <line x1=\"0\" y1=\"30\" x2=\"90\" y2=\"30\" stroke=\"#ccc\"/>\n                        <line x1=\"0\" y1=\"60\" x2=\"90\" y2=\"60\" stroke=\"#ccc\"/>\n                        <!-- Highlighted single pixel output -->\n                        <rect x=\"0\" y=\"0\" width=\"30\" height=\"30\" fill=\"#111\"/>\n                        <text x=\"15\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">S₁₁</text>\n                      </g>\n                      <!-- Summary panel -->\n                      <g transform=\"translate(470, 35)\">\n                        <rect x=\"0\" y=\"0\" width=\"170\" height=\"110\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <text x=\"85\" y=\"20\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">Ưu Thế Vượt Trội CNN</text>\n                        <text x=\"10\" y=\"42\" font-family=\"Georgia\" font-size=\"9\">• Bảo toàn hình học 2D</text>\n                        <text x=\"10\" y=\"62\" font-family=\"Georgia\" font-size=\"9\">• Giảm 99.9% tham số</text>\n                        <text x=\"10\" y=\"82\" font-family=\"Georgia\" font-size=\"9\">• Bất biến dịch chuyển</text>\n                        <text x=\"10\" y=\"100\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\">(Weight Sharing)</text>\n                      </g>\n                    </svg>",
+          "caption": "Cơ chế toán học của phép Tích chập 2D: Bộ lọc 3x3 trượt trên vùng tiếp nhận cục bộ của ảnh 5x5, tính tích vô hướng và sinh ra từng điểm ảnh trên Bản đồ đặc trưng."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa Tích chập (Convolution) và Tương quan chéo (Cross-correlation): Trong toán học thuần túy, tích chập yêu cầu lật ngược bộ lọc 180 độ trước khi nhân. Tuy nhiên trong Deep Learning, vì các trọng số trong bộ lọc được học ngẫu nhiên từ đầu, việc lật ngược hay không hoàn toàn không làm thay đổi kết quả học tập! Mọi thư viện như PyTorch, TensorFlow thực chất đều cài đặt phép Tương quan chéo nhưng vẫn gọi tên là Convolution.",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Tại sao mạng nơ-ron tích chập (CNN) lại vượt trội hơn hoàn toàn so với mạng nơ-ron kết nối đầy đủ (MLP) khi xử lý dữ liệu hình ảnh 2 chiều?",
+          "options": [
+            "A. Vì CNN chuyển đổi mọi điểm ảnh thành chuỗi văn bản trước khi xử lý",
+            "B. Vì CNN áp dụng cơ chế chia sẻ trọng số (weight sharing) và vùng tiếp nhận cục bộ, giúp bảo tồn cấu trúc không gian 2D và giảm mạnh số lượng tham số",
+            "C. Vì CNN không cần sử dụng bất kỳ hàm kích hoạt phi tuyến nào",
+            "D. Vì CNN loại bỏ hoàn toàn quá trình tính toán lan truyền ngược"
+          ],
+          "correctIndex": 1,
+          "hint": "Cùng một bộ lọc trượt trên toàn bộ bức ảnh giúp tiết kiệm hàng triệu trọng số.",
+          "solution": [
+            "Bước 1: Mạng MLP duỗi thẳng ma trận ảnh 2D thành vector 1D làm phá vỡ hoàn toàn mối liên hệ không gian giữa các pixel lân cận.",
+            "Bước 2: MLP có quá nhiều trọng số (hàng trăm triệu) gây bùng nổ tham số và overfitting.",
+            "Bước 3: CNN giải quyết hoàn hảo 2 nhược điểm này bằng cách giữ nguyên ảnh 2D/3D, sử dụng vùng tiếp nhận cục bộ và chia sẻ trọng số (weight sharing) của bộ lọc.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "11.2. Bộ 4 Siêu Tham Số Cốt Lõi (Kernel, Stride, Padding, Channel) & Công Thức Kích Thước Đầu Ra (Câu 27, 35 VAIO)",
+        "content": "Làm chủ 4 thông số điều khiển lớp Conv2D: Kích thước bộ lọc, bước nhảy, các chế độ đệm viền (Valid vs Same Padding), và công thức vàng tính kích thước không gian đầu ra chuẩn đề thi Olympic AI.",
+        "deepDive": "**1. Chi tiết 4 Siêu tham số điều khiển lớp Conv2D:**\nMỗi lớp tích chập Conv2D được định hình bởi 4 siêu tham số do kỹ sư con người thiết lập:\n1. **Kích thước Kernel ($K$ - Kernel Size):**\n   - Chiều cao và chiều rộng của cửa sổ trượt (thường là hình vuông $K \\times K$).\n   - Quy chuẩn vàng: **Luôn chọn $K$ là số lẻ** ($1 \\times 1, 3 \\times 3, 5 \\times 5, 7 \\times 7$).\n   - *Lý do:* Số lẻ luôn có đúng **MỘT ĐIỂM TÂM ĐỐI XỨNG DUY NHẤT** tại tọa độ $(\\frac{K-1}{2}, \\frac{K-1}{2})$, giúp định vị pixel đầu ra trùng khớp chính xác với tâm của vùng tiếp nhận!\n2. **Bước nhảy ($S$ - Stride):**\n   - Số lượng pixel mà bộ lọc dịch chuyển sau mỗi lần tính toán:\n     - $S = 1$: Bộ lọc trượt từng pixel một, trích xuất đặc trưng dày đặc và chi tiết.\n     - $S = 2$: Bộ lọc nhảy cóc 2 pixel mỗi lần. Kết quả: Chiều rộng và chiều cao của bản đồ đặc trưng đầu ra **bị giảm đi một nửa**! (Thường dùng Stride $S=2$ để giảm kích thước không gian thay cho lớp Pooling).\n3. **Viền đệm ($P$ - Padding):**\n   - Thêm các hàng và cột chứa số $0$ (Zero-padding) bao quanh mép ngoài của bức ảnh.\n   - *Tại sao phải dùng Padding?*\n     - Nếu không dùng padding, sau mỗi lần trượt tích chập, ảnh sẽ bị co nhỏ lại liên tục. Qua 10 tầng, ảnh $32 \\times 32$ sẽ bị teo tóp về $0 \\times 0$!\n     - Các pixel nằm ở góc mép ảnh chỉ được bộ lọc quét qua 1 lần duy nhất, trong khi pixel ở giữa được quét tới 9 lần. Padding giúp các pixel ở mép ảnh được bảo toàn thông tin công bằng như pixel ở tâm.\n   - **Hai chế độ Padding kinh điển:**\n     - **Chế độ `valid` ($P = 0$):** Không thêm bất kỳ viền nào. Ảnh đầu ra bị co nhỏ kích thước.\n     - **Chế độ `same`:** Tự động đệm thêm số pixel $P$ sao cho **KÍCH THƯỚC ĐẦU RA BẰNG ĐÚNG KÍCH THƯỚC ĐẦU VÀO** (khi $S = 1$)!\n       Công thức tính số pixel đệm $P$ mỗi phía:\n       $$P = \\frac{K - 1}{2}$$\n       *(Ví dụ: Với Kernel $3 \\times 3$, cần đệm $P = \\frac{3-1}{2} = 1$ viền 0 quanh ảnh. Với Kernel $5 \\times 5$, cần đệm $P = \\frac{5-1}{2} = 2$).*\n4. **Số kênh vào và ra ($C_{\\text{in}}, C_{\\text{out}}$):**\n   - $C_{\\text{in}}$: Số kênh của ảnh đầu vào (ảnh xám $= 1$, ảnh màu $= 3$, hoặc số feature map của tầng trước).\n   - $C_{\\text{out}}$: Số lượng bộ lọc độc lập được sử dụng. Mỗi bộ lọc học một mẫu hình riêng, do đó đầu ra sẽ có đúng $C_{\\text{out}}$ bản đồ đặc trưng xếp chồng lên nhau.\n\n---\n\n**2. CÔNG THỨC VÀNG TÍNH KÍCH THƯỚC ĐẦU RA (Trọng tâm Câu 27, 35 Đề thi VAIO 2025):**\nCho ảnh đầu vào có kích thước chiều rộng $W_{\\text{in}}$ (hoặc chiều cao $H_{\\text{in}}$), kích thước bộ lọc $K$, viền đệm $P$ và bước nhảy $S$:\n$$W_{\\text{out}} = \\left\\lfloor \\frac{W_{\\text{in}} - K + 2P}{S} \\right\\rfloor + 1$$\n*(Trong đó ký hiệu $\\lfloor x \\rfloor$ là phép lấy phần nguyên / làm tròn xuống).*\n\n---\n\n**3. Mẹo tính nhẩm cực nhanh trong phòng thi Olympic AI:**\n- **Mẹo 1: Khi đề bài cho `padding='same'` và bước nhảy $S$ (Câu 27 VAIO):**\n  Bạn không cần tính $P$ phức tạp, kích thước đầu ra chỉ đơn giản là:\n  $$W_{\\text{out}} = \\left\\lceil \\frac{W_{\\text{in}}}{S} \\right\\rceil$$\n  *(Ví dụ: Ảnh $W = 224$, `padding='same'`, $S = 2 \\implies W_{\\text{out}} = \\lceil 224 / 2 \\rceil = 112$).*\n- **Mẹo 2: Khi đề bài cho `padding='valid'` ($P = 0$) và $S = 1$:**\n  $$W_{\\text{out}} = W_{\\text{in}} - K + 1$$\n  *(Ví dụ: Ảnh $W = 32$, Kernel $K = 5 \\implies W_{\\text{out}} = 32 - 5 + 1 = 28$).*\n\n---\n\n**4. Bài tập tính tay mẫu từng bước:**\n*Đề bài:* Cho một bức ảnh đầu vào kích thước $64 \\times 64$, đưa qua lớp Conv2D có bộ lọc kích thước $K = 7 \\times 7$, viền đệm $P = 2$, bước nhảy $S = 2$. Hỏi kích thước bản đồ đặc trưng đầu ra là bao nhiêu?\n- **Bước 1:** Xác định các thông số: $W_{\\text{in}} = 64, K = 7, P = 2, S = 2$.\n- **Bước 2:** Áp dụng công thức vàng:\n  $$W_{\\text{out}} = \\left\\lfloor \\frac{64 - 7 + 2(2)}{2} \\right\\rfloor + 1 = \\left\\lfloor \\frac{64 - 7 + 4}{2} \\right\\rfloor + 1 = \\left\\lfloor \\frac{61}{2} \\right\\rfloor + 1$$\n- **Bước 3:** Tính phần nguyên: $\\lfloor 30.5 \\rfloor = 30$.\n- **Bước 4:** Cộng thêm 1: $W_{\\text{out}} = 30 + 1 = 31$.\n- **Kết luận:** Bản đồ đặc trưng đầu ra có kích thước không gian là $31 \\times 31$!",
+        "formula": "W_{\\text{out}} = \\left\\lfloor \\frac{W_{\\text{in}} - K + 2P}{S} \\right\\rfloor + 1, \\quad P_{\\text{same}} = \\frac{K - 1}{2}, \\quad W_{\\text{out}}^{\\text{same}} = \\left\\lceil \\frac{W_{\\text{in}}}{S} \\right\\rceil",
+        "mathExplainer": [
+          {
+            "sym": "W_{\\text{in}}, W_{\\text{out}}",
+            "name": "Kích thước vào và ra",
+            "mean": "Chiều rộng (hoặc chiều cao) của ma trận đặc trưng trước và sau lớp tích chập."
+          },
+          {
+            "sym": "K",
+            "name": "Kích thước Kernel",
+            "mean": "Cạnh của cửa sổ bộ lọc trượt (luôn chọn số lẻ như 3, 5, 7 để có tâm đối xứng)."
+          },
+          {
+            "sym": "2P",
+            "name": "Tổng viền đệm",
+            "mean": "Nhân đôi vì đệm thêm P pixel ở cả 2 phía đối diện (trái + phải, trên + dưới)."
+          },
+          {
+            "sym": "S",
+            "name": "Bước nhảy (Stride)",
+            "mean": "Khoảng cách dịch chuyển của bộ lọc sau mỗi bước; S=2 làm giảm kích thước một nửa."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Valid Padding -->\n                      <g transform=\"translate(25, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"280\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"140\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Valid Padding (P = 0): Co Nhỏ</text>\n                        <!-- 4x4 input to 2x2 output with 3x3 kernel -->\n                        <rect x=\"25\" y=\"35\" width=\"80\" height=\"80\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <rect x=\"25\" y=\"35\" width=\"60\" height=\"60\" fill=\"#e0e0e0\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"55\" y=\"70\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">K=3×3</text>\n                        <text x=\"65\" y=\"130\" font-family=\"Georgia\" font-size=\"9\">Ảnh 4×4</text>\n                        <text x=\"135\" y=\"80\" font-family=\"Georgia\" font-size=\"14\" font-weight=\"bold\">⇒</text>\n                        <rect x=\"175\" y=\"55\" width=\"40\" height=\"40\" fill=\"#111\"/>\n                        <text x=\"195\" y=\"80\" font-family=\"Georgia\" font-size=\"10\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">2×2</text>\n                        <text x=\"195\" y=\"115\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">W_out = 4 - 3 + 1 = 2</text>\n                      </g>\n                      <!-- Right: Same Padding -->\n                      <g transform=\"translate(335, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"300\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"150\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Same Padding (P = 1): Giữ Nguyên Kích Thước</text>\n                        <!-- Padded 4x4 to 6x6 with dashed border -->\n                        <rect x=\"25\" y=\"35\" width=\"80\" height=\"80\" fill=\"none\" stroke=\"#888\" stroke-dasharray=\"3,3\" stroke-width=\"1.5\"/>\n                        <rect x=\"35\" y=\"45\" width=\"60\" height=\"60\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"65\" y=\"80\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">Ảnh 4×4</text>\n                        <text x=\"65\" y=\"130\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">+ Viền 0 xung quanh (P=1)</text>\n                        <text x=\"140\" y=\"80\" font-family=\"Georgia\" font-size=\"14\" font-weight=\"bold\">⇒</text>\n                        <rect x=\"180\" y=\"45\" width=\"60\" height=\"60\" fill=\"#111\"/>\n                        <text x=\"210\" y=\"80\" font-family=\"Georgia\" font-size=\"11\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">4×4</text>\n                        <text x=\"210\" y=\"125\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">W_out = W_in = 4 (khi S=1)</text>\n                      </g>\n                    </svg>",
+          "caption": "So sánh hai cơ chế Padding: Valid Padding (không đệm, kích thước co nhỏ) vs Same Padding (đệm viền 0 xung quanh, bảo toàn kích thước ảnh đầu ra)."
+        },
+        "commonPitfalls": "Quên nhân đôi 2P trong công thức: Rất nhiều học sinh viết công thức là (W - K + P) / S + 1. SAI! Vì viền đệm được thêm vào CẢ HAI PHÍA (bên trái và bên phải, hoặc phía trên và phía dưới), nên số pixel tăng thêm vào chiều rộng luôn là 2P!",
+        "practiceQuestion": {
+          "level": "Vận dụng (Câu 27 & 35 Đề Thi VAIO 2025)",
+          "question": "Cho một bản đồ đặc trưng đầu vào có kích thước 28×28 đưa qua một lớp Conv2D có bộ lọc kích thước 5×5, bước nhảy S = 2 và viền đệm P = 1. Kích thước không gian của bản đồ đặc trưng đầu ra là bao nhiêu?",
+          "options": [
+            "A. 14×14",
+            "B. 13×13",
+            "C. 12×12",
+            "D. 15×15"
+          ],
+          "correctIndex": 1,
+          "hint": "Áp dụng công thức: floor((28 - 5 + 2*1) / 2) + 1.",
+          "solution": [
+            "Bước 1: Xác định các đại lượng: W_in = 28, K = 5, P = 1, S = 2.",
+            "Bước 2: Thay vào công thức: W_out = floor((28 - 5 + 2*1) / 2) + 1 = floor(25 / 2) + 1.",
+            "Bước 3: floor(12.5) = 12.",
+            "Bước 4: W_out = 12 + 1 = 13.",
+            "Kết quả: Bản đồ đặc trưng đầu ra có kích thước 13×13. Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "11.3. Đếm Tham Số Học Được (Learnable Parameters - Câu 2 VAIO) & Độ Phức Tạp Tính Toán FLOPs (Câu 43 VAIO)",
+        "content": "Phân biệt tuyệt đối giữa tham số học được và siêu tham số; thiết lập công thức tổng quát đếm tham số 1 lớp tích chập Conv2D; tính toán số phép tính dấu phẩy động FLOPs và MACs trong bài thi Olympic AI.",
+        "deepDive": "**1. Phân biệt cốt tử: Tham số học được vs Siêu tham số (Câu 2 Đề thi VAIO 2025):**\nMột trong những câu hỏi lý thuyết bẫy kinh điển nhất của đề thi VAIO:\n> *'Thành phần nào là tham số có thể học (Learnable Parameter) trong lớp Conv2D?'*\n\n- **Tham số có thể học (Learnable Parameters):**\n  - Là những con số nằm BÊN TRONG BỘ LỌC: **Các trọng số của Filter (Weights)** và **Hệ số lệch (Bias)**!\n  - Ban đầu được khởi tạo ngẫu nhiên, sau đó mô hình TỰ ĐỘNG CẬP NHẬT giá trị tối ưu thông qua quá trình lan truyền ngược Backpropagation.\n- **Siêu tham số (Hyperparameters):**\n  - Kích thước ảnh, Kích thước bộ lọc $K$, Bước nhảy $S$, Viền đệm $P$, Số lượng bộ lọc $C_{\\text{out}}$ do KỸ SƯ CON NGƯỜI THIẾT LẬP CỐ ĐỊNH từ trước, mô hình không thể tự học được các số này!\n\n---\n\n**2. CÔNG THỨC ĐẾM THAM SỐ 1 LỚP CONV2D:**\nXét một lớp tích chập nhận đầu vào có $C_{\\text{in}}$ kênh, sử dụng $C_{\\text{out}}$ bộ lọc kích thước $K \\times K$:\n$$\\text{Params} = (K \\times K \\times C_{\\text{in}} + 1) \\times C_{\\text{out}} = K^2 \\cdot C_{\\text{in}} \\cdot C_{\\text{out}} + C_{\\text{out}}$$\n\n**Giải mã tường minh cấu trúc công thức:**\n1. **Một bộ lọc đơn lẻ thực chất là một khối hộp 3D:**\n   - Để trượt trên dữ liệu có $C_{\\text{in}}$ kênh, bộ lọc bắt buộc phải có độ sâu bằng đúng $C_{\\text{in}}$!\n   - Kích thước của 1 bộ lọc là: $K \\times K \\times C_{\\text{in}}$ trọng số.\n2. **Mỗi bộ lọc có đúng 1 hệ số lệch Bias:**\n   - Sau khi nhân tích chập trên toàn bộ $C_{\\text{in}}$ kênh và cộng dồn lại, ta cộng thêm đúng $1$ hằng số bias. Do đó trong ngoặc có số $+1$!\n3. **Có $C_{\\text{out}}$ bộ lọc độc lập:**\n   - Nhân toàn bộ với $C_{\\text{out}}$ để ra tổng số lượng tham số cần học.\n\n**LƯU Ý VÀNG PHÒNG THI:**\nSố lượng tham số của lớp Conv2D **HOÀN TOÀN KHÔNG PHỤ THUỘC VÀO KÍCH THƯỚC ẢNH ĐẦU VÀO ($W_{\\text{in}}, H_{\\text{in}}$)**! Dù ảnh to $1024 \\times 1024$ hay ảnh nhỏ $28 \\times 28$, số tham số của lớp Conv vẫn bằng nhau chằn chặn nhờ cơ chế chia sẻ trọng số (Weight Sharing)!\n\n---\n\n**3. Độ phức tạp tính toán FLOPs & MACs (Câu 43 Đề thi VAIO 2025):**\nKhi triển khai mô hình AI trên các thiết bị nhúng (điện thoại, drone, xe tự hành), ta phải đo lường năng lực tính toán thông qua:\n- **MACs (Multiply-Accumulate Operations - Số phép Nhân và Cộng):**\n  - Để tính ra 1 pixel trên 1 bản đồ đặc trưng đầu ra, ta cần thực hiện: $K \\times K \\times C_{\\text{in}}$ phép nhân-cộng.\n  - Tổng số pixel trên toàn bộ $C_{\\text{out}}$ bản đồ đặc trưng đầu ra là: $H_{\\text{out}} \\times W_{\\text{out}} \\times C_{\\text{out}}$.\n  - Công thức tính MACs:\n    $$\\text{MACs} = H_{\\text{out}} \\times W_{\\text{out}} \\times C_{\\text{out}} \\times (K \\times K \\times C_{\\text{in}})$$\n- **FLOPs (Floating-Point Operations - Số phép tính dấu phẩy động):**\n  - Vì 1 phép MAC gồm 1 phép nhân và 1 phép cộng dồn (2 phép toán số học), nên:\n    $$\\text{FLOPs} \\approx 2 \\times \\text{MACs}$$\n\n---\n\n**4. Bài toán thực tế tính toán chuẩn đề thi:**\n*Đề bài:* Cho lớp Conv2D nhận đầu vào $224 \\times 224 \\times 3$ (ảnh RGB), sử dụng 64 bộ lọc kích thước $3 \\times 3$, `padding='same'`, Stride $S = 1$. Hãy tính:\n1. Số tham số có thể học (Params)?\n2. Kích thước đầu ra và số phép tính MACs?\n\n*Lời giải:*\n1. **Số tham số:**\n   $$\\text{Params} = (3 \\times 3 \\times 3 + 1) \\times 64 = (27 + 1) \\times 64 = 28 \\times 64 = 1,792 \\text{ tham số}.$$\n2. **Kích thước đầu ra:**\n   Vì `same` và $S = 1$ nên $H_{\\text{out}} = W_{\\text{out}} = 224$. Đầu ra là tensor $(224, 224, 64)$.\n3. **Số phép tính MACs:**\n   $$\\text{MACs} = 224 \\times 224 \\times 64 \\times (3 \\times 3 \\times 3) = 3,211,264 \\times 27 \\approx 86,704,128 \\text{ MACs} \\approx 86.7 \\text{ MMACs}.$$\n   $$\\text{FLOPs} \\approx 2 \\times 86.7 \\approx 173.4 \\text{ MFLOPs}.$$",
+        "formula": "\\text{Params} = (K^2 \\cdot C_{\\text{in}} + 1) \\cdot C_{\\text{out}}, \\quad \\text{MACs} = H_{\\text{out}} W_{\\text{out}} C_{\\text{out}} (K^2 C_{\\text{in}}), \\quad \\text{FLOPs} \\approx 2 \\times \\text{MACs}",
+        "mathExplainer": [
+          {
+            "sym": "K^2 \\cdot C_{\\text{in}}",
+            "name": "Kích thước 1 bộ lọc 3D",
+            "mean": "Số lượng trọng số trong 1 bộ lọc tích chập trải trên toàn bộ các kênh đầu vào."
+          },
+          {
+            "sym": "+ 1",
+            "name": "Hệ số Bias",
+            "mean": "Mỗi bộ lọc đầu ra có đúng 1 tham số độ lệch bias độc lập."
+          },
+          {
+            "sym": "C_{\\text{out}}",
+            "name": "Số lượng bộ lọc",
+            "mean": "Mỗi bộ lọc sinh ra 1 bản đồ đặc trưng (Feature Map) ở đầu ra."
+          },
+          {
+            "sym": "\\text{FLOPs}",
+            "name": "Số phép tính dấu phẩy động",
+            "mean": "Thước đo độ nặng tính toán của mô hình, xấp xỉ bằng 2 lần số phép tính MACs."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- 3D Filter decomposition -->\n                      <g transform=\"translate(30, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"300\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"150\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Cấu Trúc 1 Bộ Lọc 3D: K × K × C_in</text>\n                        <!-- 3 slices representing channels -->\n                        <g transform=\"translate(40, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"50\" height=\"50\" fill=\"#eee\" stroke=\"#111\" stroke-width=\"1\"/>\n                          <text x=\"25\" y=\"28\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Kênh R</text>\n                          <rect x=\"15\" y=\"15\" width=\"50\" height=\"50\" fill=\"#ddd\" stroke=\"#111\" stroke-width=\"1\"/>\n                          <text x=\"40\" y=\"43\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Kênh G</text>\n                          <rect x=\"30\" y=\"30\" width=\"50\" height=\"50\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <text x=\"55\" y=\"58\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">Kênh B</text>\n                        </g>\n                        <text x=\"175\" y=\"65\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">Trọng số 1 Filter:</text>\n                        <text x=\"175\" y=\"85\" font-family=\"Georgia\" font-size=\"9\">= K × K × C_in</text>\n                        <text x=\"175\" y=\"105\" font-family=\"Georgia\" font-size=\"9\">+ 1 Bias</text>\n                      </g>\n                      <!-- Total params formula -->\n                      <g transform=\"translate(350, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"280\" height=\"140\" fill=\"#111\" rx=\"4\"/>\n                        <text x=\"140\" y=\"25\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Tổng Số Tham Số (Câu 2 VAIO)</text>\n                        <text x=\"140\" y=\"60\" font-family=\"Georgia\" font-size=\"12\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">Params = (K² · C_in + 1) × C_out</text>\n                        <line x1=\"20\" y1=\"78\" x2=\"260\" y2=\"78\" stroke=\"#555\"/>\n                        <text x=\"25\" y=\"98\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\">• Trọng số Filter &amp; Bias là tham số học được!</text>\n                        <text x=\"25\" y=\"118\" font-family=\"Georgia\" font-size=\"9\" fill=\"#ccc\">• Không phụ thuộc vào kích thước ảnh đầu vào!</text>\n                      </g>\n                    </svg>",
+          "caption": "Bóc tách cấu trúc tham số: Mỗi bộ lọc thực chất là một khối hộp 3D có độ sâu bằng đúng C_in. Tổng số tham số gồm toàn bộ trọng số 3D của C_out bộ lọc cộng thêm C_out hệ số bias."
+        },
+        "commonPitfalls": "Quên số kênh đầu vào C_in khi đếm tham số: Rất nhiều thí sinh chỉ tính K × K + 1 rồi nhân C_out. SAI! Nếu ảnh có 3 kênh (RGB), mỗi bộ lọc phải có 3 lát cắt 2D, do đó bắt buộc phải nhân với C_in (K × K × C_in + 1) × C_out!",
+        "practiceQuestion": {
+          "level": "Thông hiểu (Câu 2 Đề Thi VAIO 2025)",
+          "question": "Thành phần nào sau đây là một tham số có thể học (learnable parameter) được tối ưu hóa trong quá trình huấn luyện của một lớp tích chập Conv2D? (Câu 2 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. Kích thước chiều cao và chiều rộng của bức ảnh đầu vào",
+            "B. Các giá trị trọng số trong bộ lọc (Filter weights) và hệ số chệch (Bias)",
+            "C. Kích thước bước nhảy (Stride)",
+            "D. Kích thước viền đệm (Padding)"
+          ],
+          "correctIndex": 1,
+          "hint": "Cái gì được khởi tạo ngẫu nhiên và liên tục cập nhật đạo hàm bằng Gradient Descent?",
+          "solution": [
+            "Bước 1: Phân biệt siêu tham số (Hyperparameters): Input size, Kernel size K, Stride S, Padding P do con người thiết lập cố định.",
+            "Bước 2: Tham số học được (Learnable parameters): Trọng số của các bộ lọc (Filter weights) và Biases được cập nhật tự động bằng thuật toán lan truyền ngược Backpropagation.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "11.4. Lớp Gom Cụm Pooling, Trường Tiếp Nhận Receptive Field & Sự Tiến Hóa Kiến Trúc CNN",
+        "content": "Tìm hiểu cơ chế hoạt động của Max Pooling và Average Pooling; giải mã bản chất 0 tham số học được; khám phá khái niệm Trường tiếp nhận (Receptive Field) và triết lý sử dụng bộ lọc 3x3 của VGG-16.",
+        "deepDive": "**1. Lớp Gom Cụm (Pooling Layer) & Ý nghĩa thực tiễn:**\nSau khi trích xuất đặc trưng bằng lớp tích chập Conv2D, ta thường đưa qua một lớp **Gom cụm (Pooling)**:\n- **Max Pooling (Gom cụm cực đại):**\n  - Trượt một cửa sổ nhỏ (thường $2 \\times 2$, Stride $S = 2$) qua bản đồ đặc trưng.\n  - Tại mỗi vị trí, **CHỈ GIỮ LẠI GIÁ TRỊ LỚN NHẤT** trong 4 ô và vứt bỏ 3 ô còn lại!\n  - *Ý nghĩa:* Giá trị lớn nhất đại diện cho sự hiện diện mạnh nhất của đặc trưng trong vùng đó. Bằng cách giữ lại giá trị cực đại, mô hình loại bỏ được các nhiễu nền xung quanh.\n- **Average Pooling / Global Average Pooling (GAP):**\n  - Lấy giá trị trung bình cộng của các ô trong cửa sổ.\n  - **Global Average Pooling (GAP):** Lấy trung bình cộng của toàn bộ bản đồ đặc trưng $H \\times W$ thành đúng **1 CON SỐ DUY NHẤT**! Kỹ thuật này thường được dùng ở cuối các mạng hiện đại (như ResNet) để thay thế hoàn toàn các tầng kết nối đầy đủ (Dense) cồng kềnh, giúp giảm hàng chục triệu tham số.\n\n**ĐIỂM SỐNG CÒN TRONG KỲ THI OLYMPIC AI:**\n- **Lớp Pooling HOÀN TOÀN KHÔNG CÓ BẤT KỲ THAM SỐ HỌC ĐƯỢC NÀO ($\\text{Params} = 0$)!**\n  Nó chỉ là một phép toán thống kê cố định (lấy Max hoặc lấy Mean).\n- Lớp Max Pooling với cỡ $2 \\times 2, S=2$ làm giảm chiều cao và chiều rộng đi một nửa ($H/2, W/2$), làm giảm diện tích và khối lượng tính toán của tầng sau tới **75%**!\n- Cung cấp tính **Bất biến dịch chuyển cục bộ (Local Translation Invariance)**: Một nét vẽ hơi xê dịch 1 pixel thì giá trị Max trong ô $2 \\times 2$ vẫn không hề thay đổi.\n\n---\n\n**2. Khái niệm Trường Tiếp Nhận (Receptive Field):**\n- **Trường tiếp nhận (Receptive Field - RF)** là diện tích vùng pixel trên ảnh gốc ban đầu mà một nơ-ron ở tầng thứ $l$ có thể \"nhìn thấy\" và chịu ảnh hưởng.\n- Tầng đầu tiên với Kernel $3 \\times 3$ có $RF = 3 \\times 3$.\n- Tầng thứ hai với Kernel $3 \\times 3$ trượt trên tầng thứ nhất: Mỗi nơ-ron tầng 2 nhìn thấy một vùng $3 \\times 3$ của tầng 1, mà mỗi nơ-ron tầng 1 lại nhìn thấy $3 \\times 3$ của ảnh gốc $\\implies$ Nơ-ron tầng 2 nhìn thấy một vùng **$5 \\times 5$ TRÊN ẢNH GỐC**!\n\n---\n\n**3. Bí mật thiết kế thiên tài của VGG-16 (Simonyan & Zisserman, 2014):**\nTại sao từ năm 2014 đến nay, các kiến trúc Deep Learning hầu như chỉ dùng các bộ lọc $3 \\times 3$ mà không dùng $5 \\times 5$ hay $7 \\times 7$?\n- VGG nhận ra rằng: **XẾP CHỒNG 2 LỚP CONV $3 \\times 3$ HOÀN TOÀN TƯƠNG ĐƯƠNG VỀ TRƯỜNG TIẾP NHẬN VỚI 1 LỚP CONV $5 \\times 5$**!\n- **Nhưng hãy so sánh chi phí tham số giữa hai cách:**\n  - Giả sử số kênh đầu vào và ra đều là $C$:\n  - Dùng 1 lớp Conv $5 \\times 5$:\n    $$\\text{Params} = 5 \\times 5 \\times C \\times C = 25 C^2$$\n  - Dùng 2 lớp Conv $3 \\times 3$ liên tiếp:\n    $$\\text{Params} = 2 \\times (3 \\times 3 \\times C \\times C) = 18 C^2$$\n  - **Tiết kiệm tới $28\\%$ số lượng tham số!** (Nếu so 3 lớp $3 \\times 3$ với 1 lớp $7 \\times 7$, ta tiết kiệm tới $45\\%$ tham số: $27 C^2$ so với $49 C^2$).\n  - Hơn nữa, việc xếp chồng 2 lớp $3 \\times 3$ mang lại **2 hàm kích hoạt phi tuyến ReLU** thay vì chỉ 1, giúp mạng học được các hàm toán học phức tạp và biểu diễn trừu tượng hơn rất nhiều!\n\n---\n\n**4. Dòng thời gian tiến hóa của các kiến trúc CNN:**\n1. **LeNet-5 (1998 - Yann LeCun):** Kiến trúc CNN đầu tiên, gồm các lớp Conv xen kẽ Subsampling (Average Pooling) để nhận dạng chữ số viết tay trên séc ngân hàng.\n2. **AlexNet (2012 - Alex Krizhevsky & Geoffrey Hinton):** Giành chiến thắng áp đảo tại ImageNet 2012, châm ngòi cho cuộc cách mạng Deep Learning. Sử dụng GPU, hàm kích hoạt ReLU và kỹ thuật Dropout.\n3. **VGG-16 (2014):** Chuẩn hóa việc sử dụng đồng nhất các bộ lọc nhỏ $3 \\times 3$ và Max Pooling $2 \\times 2$.\n4. **ResNet (2015):** Đột phá kết nối tắt Skip Connection, giải quyết triệt để bài toán suy thoái mạng sâu.",
+        "formula": "\\text{Max Pooling: } y = \\max_{i,j \\in \\text{window}} x_{i,j}, \\quad \\text{Pooling Params} = 0, \\quad 2 \\times \\text{Conv}(3\\times3) \\equiv \\text{Conv}(5\\times5)",
+        "mathExplainer": [
+          {
+            "sym": "\\text{Max Pooling}",
+            "name": "Gom cụm cực đại",
+            "mean": "Lấy giá trị lớn nhất trong cửa sổ 2x2, giữ lại tín hiệu nổi bật nhất."
+          },
+          {
+            "sym": "\\text{Params} = 0",
+            "name": "Không có tham số",
+            "mean": "Lớp Pooling hoàn toàn không có trọng số hay bias cần học, chỉ là phép toán cố định."
+          },
+          {
+            "sym": "\\text{Receptive Field}",
+            "name": "Trường tiếp nhận",
+            "mean": "Vùng diện tích trên ảnh gốc mà một nơ-ron tầng sâu có thể bao quát."
+          },
+          {
+            "sym": "18C^2 \\text{ vs } 25C^2",
+            "name": "Tiết kiệm tham số VGG",
+            "mean": "Dùng hai lớp 3x3 tiết kiệm 28% tham số so với một lớp 5x5 mà cùng trường tiếp nhận."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Max Pooling 2x2 Operation -->\n                      <g transform=\"translate(30, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"280\" height=\"130\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"140\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Max Pooling 2×2 (Stride = 2)</text>\n                        <!-- 4x4 matrix with 4 colored zones -->\n                        <g transform=\"translate(25, 35)\">\n                          <rect x=\"0\" y=\"0\" width=\"40\" height=\"40\" fill=\"#eee\" stroke=\"#111\"/>\n                          <text x=\"20\" y=\"25\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">8</text>\n                          <rect x=\"40\" y=\"0\" width=\"40\" height=\"40\" fill=\"#fafafa\" stroke=\"#111\"/>\n                          <text x=\"60\" y=\"25\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">3</text>\n                          <rect x=\"0\" y=\"40\" width=\"40\" height=\"40\" fill=\"#fafafa\" stroke=\"#111\"/>\n                          <text x=\"20\" y=\"65\" font-family=\"Georgia\" font-size=\"11\" text-anchor=\"middle\">1</text>\n                          <rect x=\"40\" y=\"40\" width=\"40\" height=\"40\" fill=\"#eee\" stroke=\"#111\"/>\n                          <text x=\"60\" y=\"65\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">9</text>\n                        </g>\n                        <text x=\"140\" y=\"75\" font-family=\"Georgia\" font-size=\"14\" font-weight=\"bold\">⇒</text>\n                        <g transform=\"translate(180, 50)\">\n                          <rect x=\"0\" y=\"0\" width=\"25\" height=\"25\" fill=\"#111\"/>\n                          <text x=\"12\" y=\"17\" font-family=\"Georgia\" font-size=\"11\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">8</text>\n                          <rect x=\"25\" y=\"0\" width=\"25\" height=\"25\" fill=\"#111\"/>\n                          <text x=\"37\" y=\"17\" font-family=\"Georgia\" font-size=\"11\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">9</text>\n                          <text x=\"25\" y=\"45\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">Params = 0</text>\n                        </g>\n                      </g>\n                      <!-- Right: 2 Conv 3x3 equals 1 Conv 5x5 -->\n                      <g transform=\"translate(340, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"290\" height=\"130\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"145\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Triết Lý 2 Lớp 3×3 Trong VGG-16</text>\n                        <text x=\"20\" y=\"45\" font-family=\"Georgia\" font-size=\"9\">• 1 lớp Conv 5×5: Tốn 25·C² tham số</text>\n                        <text x=\"20\" y=\"68\" font-family=\"Georgia\" font-size=\"9\">• 2 lớp Conv 3×3: Tốn 18·C² tham số</text>\n                        <text x=\"20\" y=\"90\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">⇒ TIẾT KIỆM 28% SỐ LƯỢNG THAM SỐ!</text>\n                        <text x=\"20\" y=\"112\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\">• Có 2 tầng ReLU tăng cường tính phi tuyến</text>\n                      </g>\n                    </svg>",
+          "caption": "Trái: Cơ chế Max Pooling 2x2 (giữ lại giá trị lớn nhất, Params = 0). Phải: Triết lý VGG-16 thay thế 1 lớp 5x5 bằng 2 lớp 3x3 để tiết kiệm 28% tham số và tăng tính phi tuyến."
+        },
+        "commonPitfalls": "Nhầm lẫn rằng lớp Pooling có tham số học được: Đề thi thường gài bẫy tính tổng số tham số của một khối Conv + MaxPool. Hãy luôn nhớ: Lớp Pooling KHÔNG CÓ BẤT KỲ THAM SỐ NÀO (Params = 0)!",
+        "practiceQuestion": {
+          "level": "Cơ bản",
+          "question": "Trong mạng nơ-ron tích chập, một lớp Max Pooling kích thước 2×2 với bước nhảy Stride S = 2 có bao nhiêu tham số học được (learnable parameters)?",
+          "options": [
+            "A. 4 tham số",
+            "B. 0 tham số",
+            "C. 1 tham số bias",
+            "D. Phụ thuộc vào số kênh của bản đồ đặc trưng"
+          ],
+          "correctIndex": 1,
+          "hint": "Phép toán lấy giá trị lớn nhất max() có cần trọng số kết nối không?",
+          "solution": [
+            "Lớp Max Pooling thực hiện phép toán thống kê cố định: chọn giá trị lớn nhất trong mỗi cửa sổ 2×2.",
+            "Nó hoàn toàn không chứa bất kỳ trọng số (weight) hay hệ số lệch (bias) nào.",
+            "Do đó số lượng tham số học được luôn bằng đúng 0.",
+            "Đáp án chính xác: B."
+          ]
+        }
+      },
+      {
+        "heading": "11.5. Cầu Vượt Cao Tốc ResNet (He et al., 2015 - Câu 31 VAIO) & Đối Đầu ResNet vs U-Net",
+        "content": "Giải mã hiện tượng suy thoái mạng sâu (Degradation Problem); cơ chế toán học của Khối phần dư Residual Block và đường tắt Skip Connection; chứng minh toán học sự bảo toàn gradient và phân biệt đối đầu ResNet vs U-Net.",
+        "deepDive": "**1. Nghịch lý 'Suy thoái mạng sâu' (The Degradation Problem):**\nVào khoảng năm 2014, các nhà nghiên cứu tin rằng: *'Cứ xếp chồng mạng nơ-ron càng sâu thì độ chính xác sẽ càng cao'*.\nTuy nhiên, khi thử nghiệm thực tế, họ đã vấp phải một nghịch lý chấn động:\n- Khi tăng độ sâu của mạng thuần túy (Plain Network) từ 20 tầng lên 56 tầng: **ĐỘ CHÍNH XÁC BỊ TỤT GIẢM NGHIÊM TRỌNG!**\n- **Đây KHÔNG PHẢI là hiện tượng Quá khớp (Overfitting)!**\n  Bởi vì sai số trên chính tập huấn luyện (Training Error) của mạng 56 tầng cũng cao hơn hẳn mạng 20 tầng!\n- **Nguyên nhân cốt lõi:**\n  Khi mạng quá sâu, gradient khi lan truyền ngược qua hàng chục tầng phi tuyến bị nhân dồn liên tục, dẫn tới **Tiêu biến Gradient (Vanishing Gradient)** hoặc làm biến dạng bề mặt hàm mất mát, khiến các thuật toán tối ưu hóa (SGD, Adam) hoàn toàn bị tắc nghẽn và không thể tìm được đường dốc xuống!\n\n---\n\n**2. Đột phá ResNet & Khối phần dư (Residual Block - Kaiming He et al., 2015 - Câu 31 VAIO):**\nVào năm 2015, nhóm nghiên cứu của Kaiming He (Microsoft Research) đã đề xuất kiến trúc **ResNet (Residual Network)** đoạt giải Best Paper tại CVPR 2016.\nÝ tưởng cốt lõi cực kỳ thanh lịch:\n- Thay vì bắt các tầng tích chập phải học trực tiếp một hàm ánh xạ phức tạp $H(x)$, ta hãy để nó học **PHẦN DƯ SAI LỆCH (Residual Mapping)**:\n  $$F(x) = H(x) - x$$\n- Khi đó, hàm mục tiêu ban đầu trở thành:\n  $$H(x) = F(x) + x$$\n- **Cơ chế Cầu vượt cao tốc (Skip Connection / Identity Shortcut):**\n  Ta tạo một \"đường tắt\" mang thẳng tín hiệu đầu vào gốc $x$ nhảy cóc qua 2 hoặc 3 tầng Conv, rồi dùng **PHÉP CỘNG TỪNG PHẦN TỬ (Element-wise Addition)** cộng trực tiếp vào đầu ra $F(x)$ của khối:\n  $$y = F(x) + x$$\n\n---\n\n**3. Chứng minh toán học: Số 1 kỳ diệu bảo toàn Gradient vĩnh viễn:**\nTại sao phép cộng $F(x) + x$ lại giúp huấn luyện được mạng sâu tới 152 tầng và thậm chí 1,000 tầng mà không bị tiêu biến gradient?\nHãy lấy đạo hàm của hàm mất mát $\\mathcal{E}$ theo đầu vào $x$ bằng Quy tắc chuỗi (Chain Rule):\n$$\\frac{\\partial \\mathcal{E}}{\\partial x} = \\frac{\\partial \\mathcal{E}}{\\partial y} \\cdot \\frac{\\partial y}{\\partial x} = \\frac{\\partial \\mathcal{E}}{\\partial y} \\cdot \\frac{\\partial (F(x) + x)}{\\partial x} = \\frac{\\partial \\mathcal{E}}{\\partial y} \\cdot \\left( \\frac{\\partial F(x)}{\\partial x} + 1 \\right)$$\nNhân phá ngoặc ra:\n$$\\frac{\\partial \\mathcal{E}}{\\partial x} = \\frac{\\partial \\mathcal{E}}{\\partial y} \\cdot \\frac{\\partial F(x)}{\\partial x} + \\frac{\\partial \\mathcal{E}}{\\partial y}$$\n\n**HÃY NHÌN VÀO SỐ HẠNG THỨ HAI $\\frac{\\partial \\mathcal{E}}{\\partial y}$:**\n- Dù cho các tầng tích chập sâu có bị tiêu biến gradient khiến $\\frac{\\partial F(x)}{\\partial x} \\approx 0$, thì nhờ có số $+1$, tín hiệu gradient $\\frac{\\partial \\mathcal{E}}{\\partial y}$ vẫn được **PHÓNG TRỰC TIẾP $100\\%$ VỀ CÁC TẦNG ĐẦU TIÊN** qua chiếc cầu vượt mà không hề bị cản trở hay suy giảm!\n- Cầu vượt Skip Connection đóng vai trò như một **Đại lộ cao tốc Gradient (Gradient Superhighway)**, phá vỡ hoàn toàn bức tường tiêu biến gradient trong mạng nơ-ron siêu sâu!\n\n---\n\n**4. TRỌNG TÂM PHÒNG THI: ĐỐI ĐẦU KINH ĐIỂN RESNET VS U-NET:**\nTrong các đề thi AI, giám khảo rất thích so sánh cơ chế kết nối tắt giữa **ResNet** và **U-Net**:\n\n| Đặc điểm so sánh | ResNet (Residual Network) | U-Net (Segmentation Network) |\n| :--- | :--- | :--- |\n| **Bản chất phép toán** | **PHÉP CỘNG TỪNG PHẦN TỬ** (Element-wise Addition: $F(x) + x$) | **PHÉP NỐI THEO CHIỀU KÊNH** (Channel Concatenation: $[F(x), x]$) |\n| **Kích thước kênh đầu ra** | **GIỮ NGUYÊN** số lượng kênh ($C$) | **TĂNG GẤP ĐÔI** số lượng kênh ($2C$) |\n| **Yêu cầu không gian** | $x$ và $F(x)$ bắt buộc cùng kích thước $(H, W)$ | Nhánh Encoder và Decoder ghép nối cùng $(H, W)$ |\n| **Mục đích chính** | Chống tiêu biến gradient để mạng sâu hơn | Truyền chi tiết biên sắc nét từ Encoder sang Decoder |",
+        "formula": "\\text{ResNet: } y = F(x) + x, \\quad \\frac{\\partial \\mathcal{E}}{\\partial x} = \\frac{\\partial \\mathcal{E}}{\\partial y} \\left( \\frac{\\partial F(x)}{\\partial x} + 1 \\right), \\quad \\text{U-Net: } y = [F(x), x]",
+        "mathExplainer": [
+          {
+            "sym": "F(x) + x",
+            "name": "Khối phần dư ResNet",
+            "mean": "Phép cộng từng phần tử giữa đầu vào gốc x và đầu ra của các lớp tích chập F(x)."
+          },
+          {
+            "sym": "+ 1",
+            "name": "Số 1 kỳ diệu trong đạo hàm",
+            "mean": "Bảo đảm gradient luôn có đường truyền trực tiếp về các tầng đầu mà không bị triệt tiêu về 0."
+          },
+          {
+            "sym": "\\text{Addition}",
+            "name": "Phép cộng trong ResNet",
+            "mean": "Cộng từng ô giá trị, số kênh đầu ra giữ nguyên không thay đổi."
+          },
+          {
+            "sym": "\\text{Concatenation}",
+            "name": "Phép nối kênh trong U-Net",
+            "mean": "Ghép các kênh lại với nhau, làm tăng gấp đôi số lượng kênh đặc trưng."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 180\" width=\"100%\" height=\"180\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"180\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: ResNet Residual Block -->\n                      <g transform=\"translate(30, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"280\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"140\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">ResNet: Phép Cộng F(x) + x (Câu 31 VAIO)</text>\n                        <circle cx=\"90\" cy=\"40\" r=\"10\" fill=\"#111\"/><text x=\"70\" y=\"44\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">x</text>\n                        <!-- Main branch -->\n                        <line x1=\"90\" y1=\"50\" x2=\"90\" y2=\"65\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <rect x=\"55\" y=\"65\" width=\"70\" height=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"90\" y=\"79\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Weight + ReLU</text>\n                        <line x1=\"90\" y1=\"87\" x2=\"90\" y2=\"105\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <!-- Addition node -->\n                        <circle cx=\"90\" cy=\"115\" r=\"10\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"90\" y=\"120\" font-family=\"Georgia\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\">+</text>\n                        <!-- Skip shortcut -->\n                        <path d=\"M 100 40 C 160 40 160 115 102 115\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <polygon points=\"102,112 98,115 102,118\" fill=\"#111\"/>\n                        <text x=\"175\" y=\"78\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Cầu vượt (Skip)</text>\n                        <text x=\"140\" y=\"132\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">Số kênh giữ nguyên: C</text>\n                      </g>\n                      <!-- Right: U-Net Skip Connection -->\n                      <g transform=\"translate(340, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"290\" height=\"140\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"145\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">U-Net: Phép Nối Kênh [F(x), x]</text>\n                        <rect x=\"30\" y=\"40\" width=\"50\" height=\"30\" fill=\"#eee\" stroke=\"#111\"/>\n                        <text x=\"55\" y=\"58\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Encoder: C</text>\n                        <text x=\"105\" y=\"58\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\">⊕</text>\n                        <rect x=\"130\" y=\"40\" width=\"50\" height=\"30\" fill=\"#ddd\" stroke=\"#111\"/>\n                        <text x=\"155\" y=\"58\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Decoder: C</text>\n                        <text x=\"195\" y=\"58\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\">⇒</text>\n                        <rect x=\"220\" y=\"35\" width=\"50\" height=\"40\" fill=\"#111\"/>\n                        <text x=\"245\" y=\"58\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">2C Kênh</text>\n                        <line x1=\"20\" y1=\"90\" x2=\"270\" y2=\"90\" stroke=\"#ccc\"/>\n                        <text x=\"145\" y=\"112\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">Phép ghép nối (Concatenation)</text>\n                        <text x=\"145\" y=\"128\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">Số kênh đầu ra tăng gấp đôi!</text>\n                      </g>\n                    </svg>",
+          "caption": "Đối đầu kiến trúc kinh điển: Khối phần dư ResNet sử dụng Phép cộng từng phần tử (Addition, giữ nguyên kênh) vs Khối U-Net sử dụng Phép ghép nối theo chiều kênh (Concatenation, tăng gấp đôi số kênh)."
+        },
+        "commonPitfalls": "Nhầm lẫn giữa phép toán của ResNet và U-Net: Rất nhiều học sinh nhầm lẫn rằng ResNet ghép kênh (concat). SAI HOÀN TOÀN! ResNet dùng PHÉP CỘNG ĐẠI SỐ TỪNG PHẦN TỬ F(x) + x. U-Net mới là mô hình dùng phép ghép nối kênh (Concatenation)!",
+        "practiceQuestion": {
+          "level": "Thông hiểu (Câu 31 Đề Thi VAIO 2025)",
+          "question": "Trong kiến trúc mạng ResNet, cơ chế kết nối tắt (Skip connection / Residual connection) thực hiện phép toán nào sau đây giữa tín hiệu đầu vào x và đầu ra của các tầng tích chập F(x)? (Câu 31 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. Phép nhân ma trận (Matrix Multiplication: F(x) * x)",
+            "B. Phép nối theo chiều kênh (Channel Concatenation: [F(x), x])",
+            "C. Phép cộng từng phần tử (Element-wise Addition: F(x) + x)",
+            "D. Phép tích chập giữa F(x) và x"
+          ],
+          "correctIndex": 2,
+          "hint": "Chính phép toán cộng này đã tạo ra số +1 trong đạo hàm để bảo toàn gradient.",
+          "solution": [
+            "Bước 1: Khối phần dư ResNet học hàm phần dư F(x) = H(x) - x.",
+            "Bước 2: Để khôi phục lại hàm H(x), đầu ra được tính bằng: y = F(x) + x.",
+            "Bước 3: Đây là phép cộng từng phần tử (Element-wise Addition), yêu cầu F(x) và x phải có cùng kích thước không gian và số kênh.",
+            "Đáp án chính xác: C."
+          ]
+        }
+      },
+      {
+        "heading": "11.6. Nhận Diện Vật Thể (Object Detection): Chỉ Số IoU, Thuật Toán NMS (Câu 10 VAIO) & Bài Toán Tính Tay Chuẩn Đề Thi",
+        "content": "Phân biệt 4 tác vụ thị giác máy tính cốt lõi; thiết lập công thức tính diện tích giao và hợp IoU; thực hành giải chi tiết từng bước bài toán tính tay thuật toán Triệt tiêu không cực đại NMS mô phỏng chuẩn xác Câu 10 Đề thi Olympic AI.",
+        "deepDive": "**1. Bốn cấp độ của Thị giác máy tính:**\nTrước khi nhận diện vật thể, học sinh cần phân biệt rạch ròi 4 bài toán:\n1. **Phân loại ảnh (Image Classification):** Trả lời câu hỏi: *'Bức ảnh này chứa cái gì?'* $\\implies$ Đầu ra: 1 nhãn lớp duy nhất (ví dụ: Chó).\n2. **Định vị vật thể (Classification + Localization):** Trả lời: *'Vật thể đó nằm ở đâu?'* $\\implies$ Đầu ra: Nhãn lớp + 1 hộp bao chữ nhật (Bounding Box) duy nhất.\n3. **Nhận diện vật thể (Object Detection):** Trả lời: *'Có những vật thể nào và chúng nằm ở đâu?'* $\\implies$ Đầu ra: Tìm và vẽ hộp bao quanh **TẤT CẢ** các vật thể thuộc nhiều lớp khác nhau (ví dụ: 2 con mèo, 1 người, 3 xe hơi).\n4. **Phân đoạn ảnh (Semantic / Instance Segmentation):** Gán nhãn lớp cho **TỪNG PIXEL RIÊNG BIỆT** của bức ảnh.\n\n---\n\n**2. Tọa độ Hộp bao & Chỉ số IoU (Intersection over Union):**\nMỗi hộp bao chữ nhật $B$ được xác định bởi tọa độ 2 đỉnh đối diện:\n$$B = (x_1, y_1, x_2, y_2)$$\n*(Trong đó $(x_1, y_1)$ là góc trên-trái, $(x_2, y_2)$ là góc dưới-phải).*\n- Diện tích của hộp bao:\n  $$\\text{Area}(B) = (x_2 - x_1) \\times (y_2 - y_1)$$\n\n**Chỉ số IoU (Intersection over Union - Tỷ lệ Giao trên Hợp):**\n$$\\text{IoU}(A, B) = \\frac{\\text{Area}(A \\cap B)}{\\text{Area}(A \\cup B)} = \\frac{\\text{Area}(A \\cap B)}{\\text{Area}(A) + \\text{Area}(B) - \\text{Area}(A \\cap B)}$$\n- **Cách tính diện tích vùng giao $A \\cap B$:**\n  - Tọa độ góc trên-trái vùng giao: $x_{\\text{inter1}} = \\max(x_{1A}, x_{1B}), \\quad y_{\\text{inter1}} = \\max(y_{1A}, y_{1B})$.\n  - Tọa độ góc dưới-phải vùng giao: $x_{\\text{inter2}} = \\min(x_{2A}, x_{2B}), \\quad y_{\\text{inter2}} = \\min(y_{2A}, y_{2B})$.\n  - Chiều rộng và chiều cao vùng giao:\n    $$w_{\\text{inter}} = \\max(0, x_{\\text{inter2}} - x_{\\text{inter1}}), \\quad h_{\\text{inter}} = \\max(0, y_{\\text{inter2}} - y_{\\text{inter1}})$$\n  - $\\text{Area}(A \\cap B) = w_{\\text{inter}} \\times h_{\\text{inter}}$.\n- **Miền giá trị của IoU:** $\\text{IoU} \\in [0, 1]$.\n  - $\\text{IoU} = 0$: Hai hộp hoàn toàn không chạm nhau.\n  - $\\text{IoU} = 1$: Hai hộp trùng khít hoàn hảo từng pixel.\n  - Ngưỡng đánh giá chuẩn: Thường coi dự đoán là đúng nếu $\\text{IoU} \\ge 0.50$.\n\n---\n\n**3. THUẬT TOÁN TRIỆT TIÊU KHÔNG CỰC ĐẠI (NMS - NON-MAXIMUM SUPPRESSION - CÂU 10 VAIO 2025):**\nKhi chạy các bộ nhận diện hiện đại như YOLO hay SSD, mạng thường sinh ra hàng trăm hộp bao ứng viên quanh cùng một vật thể. Thuật toán NMS là bước hậu xử lý bắt buộc để dọn sạch các hộp thừa:\n\n**Quy trình 5 bước kinh điển của NMS:**\n1. **Bước 1:** Loại bỏ toàn bộ các hộp có điểm tin cậy (Confidence Score) nhỏ hơn ngưỡng phát hiện (ví dụ $< 0.50$).\n2. **Bước 2:** Sắp xếp tất cả các hộp còn lại theo điểm tin cậy giảm dần.\n3. **Bước 3:** Chọn hộp có điểm tin cậy cao nhất $M$ trong danh sách, đưa vào tập **KẾT QUẢ ĐƯỢC GIỮ LẠI (Kept List)**, và xóa $M$ khỏi danh sách ứng viên.\n4. **Bước 4:** Lần lượt tính $\\text{IoU}(M, B_i)$ giữa hộp $M$ với tất cả các hộp còn lại $B_i$.\n   - Nếu $\\text{IoU}(M, B_i) > \\text{IoU\\_threshold}$ (hai hộp trùng lặp quá nhiều vào cùng 1 vật thể): **LẬP TỨC LOẠI BỎ (Triệt tiêu)** hộp $B_i$!\n5. **Bước 5:** Lặp lại Bước 3 và 4 cho các hộp chưa bị loại cho đến khi danh sách ứng viên rỗng.\n\n---\n\n**4. BÀI TOÁN TÍNH TAY MÔ PHỎNG CHUẨN XÁC CÂU 10 ĐỀ THI VAIO 2025:**\n*Đề bài:* Áp dụng thuật toán Non-Maximum Suppression (NMS) với ngưỡng $\\text{IoU\\_threshold} = 0.40$ cho 3 hộp bao ứng viên sau:\n- Hộp $B_1$: Tọa độ $(0, 0, 100, 100)$, điểm tin cậy $c_1 = 0.95$.\n- Hộp $B_2$: Tọa độ $(10, 10, 90, 90)$, điểm tin cậy $c_2 = 0.90$.\n- Hộp $B_3$: Tọa độ $(105, 105, 200, 200)$, điểm tin cậy $c_3 = 0.85$.\nHỏi: Những hộp bao nào sẽ được giữ lại cuối cùng?\n\n*Lời giải chi tiết từng bước:*\n- **Bước 1: Sắp xếp theo điểm tin cậy giảm dần:**\n  Thứ tự ưu tiên: $B_1 (0.95) \\longrightarrow B_2 (0.90) \\longrightarrow B_3 (0.85)$.\n- **Bước 2: Xét vòng lặp 1:**\n  - Hộp $B_1$ có điểm cao nhất ($0.95$) $\\implies$ **GIỮ $B_1$** vào danh sách kết quả!\n  - Tính diện tích $B_1$: $\\text{Area}(B_1) = (100 - 0) \\times (100 - 0) = 100 \\times 100 = 10,000$.\n- **Bước 3: So sánh $B_2$ với $B_1$:**\n  - Diện tích $B_2$: $\\text{Area}(B_2) = (90 - 10) \\times (90 - 10) = 80 \\times 80 = 6,400$.\n  - Tọa độ vùng giao:\n    $x \\in [\\max(0, 10), \\min(100, 90)] = [10, 90] \\implies \\text{chiều rộng} = 80$.\n    $y \\in [\\max(0, 10), \\min(100, 90)] = [10, 90] \\implies \\text{chiều cao} = 80$.\n  - Diện tích giao: $\\text{Area}(B_1 \\cap B_2) = 80 \\times 80 = 6,400$. (Toàn bộ hộp $B_2$ nằm trọn vẹn bên trong $B_1$!).\n  - Diện tích hợp: $\\text{Area}(B_1 \\cup B_2) = 10,000 + 6,400 - 6,400 = 10,000$.\n  - Tính IoU:\n    $$\\text{IoU}(B_1, B_2) = \\frac{6,400}{10,000} = 0.64$$\n  - So sánh với ngưỡng: Vì $0.64 > 0.40$ (ngưỡng đề bài), hộp $B_2$ bị trùng lặp quá mức với $B_1$ $\\implies$ **LOẠI BỎ $B_2$**!\n- **Bước 4: So sánh $B_3$ với $B_1$:**\n  - Tọa độ $B_1$: $x \\in [0, 100], y \\in [0, 100]$.\n  - Tọa độ $B_3$: $x \\in [105, 200], y \\in [105, 200]$.\n  - Vì $100 < 105$, hai hộp hoàn toàn cách biệt và không chạm nhau! Vùng giao $= 0$.\n  - $\\text{IoU}(B_1, B_3) = 0$.\n  - So sánh với ngưỡng: Vì $0 \\le 0.40$, hộp $B_3$ không bị trùng lặp với $B_1$ $\\implies$ **GIỮ $B_3$**!\n- **Kết quả cuối cùng:** Tập hợp các hộp được giữ lại là **$B_1$ và $B_3$** (Đáp án C - Câu 10 Đề thi chính thức VAIO 2025)!",
+        "formula": "\\text{IoU}(A, B) = \\frac{\\text{Area}(A \\cap B)}{\\text{Area}(A) + \\text{Area}(B) - \\text{Area}(A \\cap B)}, \\quad \\text{NMS: Loại } B_i \\text{ nếu } \\text{IoU}(M, B_i) > \\tau",
+        "mathExplainer": [
+          {
+            "sym": "\\text{Area}(A \\cap B)",
+            "name": "Diện tích vùng giao",
+            "mean": "Phần diện tích chung mà cả hai hộp bao cùng bao phủ."
+          },
+          {
+            "sym": "\\text{Area}(A \\cup B)",
+            "name": "Diện tích vùng hợp",
+            "mean": "Tổng diện tích của cả hai hộp trừ đi phần giao trùng nhau để tránh tính 2 lần."
+          },
+          {
+            "sym": "\\text{IoU} \\in [0, 1]",
+            "name": "Chỉ số trùng khít",
+            "mean": "Thước đo mức độ đè lên nhau giữa hai khung hình chữ nhật."
+          },
+          {
+            "sym": "\\tau = 0.40",
+            "name": "Ngưỡng NMS",
+            "mean": "Ngưỡng quyết định: Nếu độ trùng lặp lớn hơn 0.40 thì hộp điểm thấp hơn sẽ bị xóa."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 190\" width=\"100%\" height=\"190\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"190\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Before NMS -->\n                      <g transform=\"translate(30, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"280\" height=\"150\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"140\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Trước NMS: 3 Hộp Ban Đầu</text>\n                        <!-- B1 -->\n                        <rect x=\"25\" y=\"35\" width=\"80\" height=\"80\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"30\" y=\"50\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">B₁ (0.95)</text>\n                        <!-- B2 inside B1 -->\n                        <rect x=\"33\" y=\"43\" width=\"64\" height=\"64\" fill=\"none\" stroke=\"#888\" stroke-dasharray=\"3,3\" stroke-width=\"1.5\"/>\n                        <text x=\"38\" y=\"65\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\">B₂ (0.90)</text>\n                        <!-- B3 separated -->\n                        <rect x=\"145\" y=\"45\" width=\"76\" height=\"76\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <text x=\"150\" y=\"60\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">B₃ (0.85)</text>\n                        <text x=\"140\" y=\"135\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">B₂ nằm trong B₁ ⇒ IoU = 0.64 &gt; 0.40</text>\n                      </g>\n                      <!-- Arrow -->\n                      <text x=\"325\" y=\"95\" font-family=\"Georgia\" font-size=\"20\" font-weight=\"bold\" text-anchor=\"middle\">⇒</text>\n                      <!-- Right: After NMS -->\n                      <g transform=\"translate(350, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"280\" height=\"150\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"140\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Sau NMS: Kết Quả (Câu 10 VAIO)</text>\n                        <!-- B1 kept -->\n                        <rect x=\"25\" y=\"35\" width=\"80\" height=\"80\" fill=\"#eee\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"30\" y=\"50\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">GIỮ B₁ (0.95)</text>\n                        <text x=\"30\" y=\"70\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\">Hộp tối ưu vật thể 1</text>\n                        <!-- B2 crossed out -->\n                        <text x=\"30\" y=\"100\" font-family=\"Georgia\" font-size=\"8\" fill=\"#888\">✗ Loại B₂ (IoU=0.64)</text>\n                        <!-- B3 kept -->\n                        <rect x=\"145\" y=\"45\" width=\"76\" height=\"76\" fill=\"#eee\" stroke=\"#111\" stroke-width=\"2.5\"/>\n                        <text x=\"150\" y=\"60\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\">GIỮ B₃ (0.85)</text>\n                        <text x=\"150\" y=\"80\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\">Vật thể 2 riêng biệt</text>\n                        <text x=\"140\" y=\"138\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">KẾT QUẢ: GIỮ B₁ VÀ B₃!</text>\n                      </g>\n                    </svg>",
+          "caption": "Mô phỏng trực quan bài toán Câu 10 Đề thi VAIO 2025: B2 nằm lọt trong B1 có IoU = 0.64 > 0.40 nên bị loại; B3 tách rời độc lập (IoU = 0) nên được giữ lại cùng B1."
+        },
+        "commonPitfalls": "Bẫy tính diện tích hợp trong IoU: Khi tính mẫu số Area(A ∪ B), rất nhiều học sinh chỉ lấy Area(A) + Area(B). SAI! Bắt buộc phải TRỪ ĐI diện tích phần giao Area(A ∩ B) để tránh việc phần diện tích chung bị cộng lặp 2 lần!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 10 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Áp dụng thuật toán Non-Maximum Suppression (NMS) với ngưỡng IoU_threshold = 0.40 cho 3 hộp bao: B1 (0, 0, 100, 100, conf=0.95); B2 (10, 10, 90, 90, conf=0.90); B3 (105, 105, 200, 200, conf=0.85). Những hộp nào sẽ được giữ lại? (Câu 10 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. B1 và B2",
+            "B. Chỉ duy nhất B1",
+            "C. B1 và B3",
+            "D. B2 và B3"
+          ],
+          "correctIndex": 2,
+          "hint": "B1 có conf cao nhất được giữ. B2 nằm trong B1 có IoU = 0.64 > 0.40 nên bị triệt tiêu. B3 không chạm B1 nên được giữ.",
+          "solution": [
+            "Bước 1: B1 có confidence = 0.95 cao nhất trong danh sách => Giữ lại B1.",
+            "Bước 2: Tính IoU giữa B2 và B1: Diện tích B1 = 10000, Diện tích B2 = 6400. Toàn bộ B2 nằm trong B1 nên Giao = 6400, Hợp = 10000. IoU = 6400 / 10000 = 0.64.",
+            "Bước 3: Vì IoU = 0.64 > 0.40 (ngưỡng NMS) => Loại bỏ B2.",
+            "Bước 4: So sánh B3 và B1: B3 bắt đầu từ tọa độ x=105, hoàn toàn không giao với B1 (kết thúc tại x=100). IoU = 0 <= 0.40 => Giữ lại B3.",
+            "Kết quả cuối cùng: Giữ lại B1 và B3. Đáp án chính xác: C."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-cnn-calculator",
+    "examConnection": {
+      "questionTitle": "Tổng Hợp Ma Trận Câu Hỏi Thị Giác Máy Tính Đề Thi Olympic AI (VAIO 2025)",
+      "items": [
+        {
+          "code": "Câu 2 VAIO",
+          "problem": "Thành phần nào là tham số có thể học (learnable parameter) trong Conv2D? (Đáp án B: Trọng số bộ lọc Filter weights và Biases).",
+          "solution": [
+            "Kích thước ảnh, Kernel, Stride, Padding là siêu tham số do con người đặt trước."
+          ]
+        },
+        {
+          "code": "Câu 10 VAIO",
+          "problem": "Thuật toán NMS với ngưỡng IoU = 0.40 loại bỏ hộp bao B2 và giữ lại B1, B3 (Đáp án C).",
+          "solution": [
+            "B2 có IoU = 0.64 > 0.40 so với B1 nên bị loại; B3 tách rời hoàn toàn nên được giữ lại."
+          ]
+        },
+        {
+          "code": "Câu 27 & 35 VAIO",
+          "problem": "Công thức kích thước đầu ra Conv2D: W_out = floor((W_in - K + 2P)/S) + 1. Khi padding='same', W_out = ceil(W_in / S).",
+          "solution": [
+            "Áp dụng tính nhẩm nhanh chính xác trong phòng thi."
+          ]
+        },
+        {
+          "code": "Câu 31 VAIO",
+          "problem": "Cơ chế Skip Connection trong ResNet sử dụng phép cộng từng phần tử F(x) + x (Đáp án C).",
+          "solution": [
+            "Khác với U-Net dùng phép nối theo chiều kênh (Concatenation)."
+          ]
+        },
+        {
+          "code": "Câu 43 VAIO",
+          "problem": "Tính toán số tham số Params = (K^2 * C_in + 1) * C_out và số phép tính MACs = H_out * W_out * C_out * (K^2 * C_in).",
+          "solution": [
+            "Mỗi bộ lọc 3D có độ sâu C_in và 1 bias riêng."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "CNN khắc phục triệt để bùng nổ tham số và mất cấu trúc không gian của MLP nhờ cơ chế Chia sẻ trọng số (Weight Sharing) và Vùng tiếp nhận cục bộ.",
+      "Công thức kích thước đầu ra Conv2D: W_out = floor((W_in - K + 2P) / S) + 1. Với padding='same': W_out = ceil(W_in / S).",
+      "Tổng số tham số học được của 1 lớp Conv2D: Params = (K^2 * C_in + 1) * C_out. Lớp Pooling HOÀN TOÀN KHÔNG CÓ THAM SỐ (Params = 0).",
+      "ResNet giải quyết hiện tượng suy thoái mạng sâu bằng Cầu vượt Skip Connection với PHÉP CỘNG TỪNG PHẦN TỬ F(x) + x, tạo ra số +1 trong đạo hàm bảo toàn gradient.",
+      "Trong Nhận diện vật thể, thuật toán NMS sắp xếp theo Confidence Score, giữ hộp cao nhất và loại bỏ các hộp có IoU > threshold."
+    ]
+  },
+  {
+    "id": "lesson-12",
+    "title": "12. Xử Lý Ngôn Ngữ Tự Nhiên (NLP), Attention & LLMs",
+    "syllabusBadge": "BUỔI 10 & 11: NLP, ATTENTION & LARGE LANGUAGE MODELS (LLMs)",
+    "summary": "Chinh phục thế giới Xử Lý Ngôn Ngữ Tự Nhiên (NLP) và Trí Tuệ Nhân Tạo Tạo Sinh từ con số 0: Nắm vững thứ tự 4 bước tiền xử lý văn bản chuẩn mực và quy luật từ dừng Zipf (Câu 14 VAIO); giải mã không gian nhúng từ ngữ nghĩa Word2Vec (CBOW vs Skip-gram) và GloVe từ ma trận đồng xuất hiện toàn cục (Câu 19 & 91 VAIO); phân tích mạng nơ-ron chuỗi hồi quy RNN, LSTM và công thức đếm tham số mô hình (Câu 4 VAIO); thấu suốt cơ chế Tự Chú Ý (Self-Attention), bộ ba Query-Key-Value và lý do chia căn bậc hai d_k (Câu 74 VAIO); so sánh toàn diện kiến trúc Transformer Encoder-only (BERT - Câu 20 & 65) vs Decoder-only (GPT); cùng kỹ thuật Prompt Engineering và chuỗi suy luận Chain-of-Thought (CoT - Câu 16 VAIO).",
+    "intuition": {
+      "title": "Trực giác thực tế: Bữa tiệc ồn ào Cocktail Party & Chiếc kính lúp ngữ cảnh soi thấu từ ngữ",
+      "content": "Để thấu hiểu tại sao ngành Trí Tuệ Nhân Tạo lại tạo nên cơn địa chấn toàn cầu với ChatGPT, Claude hay Gemini, hãy cùng xuất phát từ hai câu chuyện đời sống mộc mạc sau:\n\n**1. Hiệu ứng tiệc Cocktail (Cocktail Party Effect) & Cơ chế Tự Chú Ý (Self-Attention):**\n- Hãy tưởng tượng bạn đang đứng giữa một hội trường dạ tiệc với 500 người đang nâng ly và trò chuyện ầm ĩ. Màng nhĩ của bạn tiếp nhận một mớ âm thanh hỗn độn, nếu bạn cố gắng lắng nghe tất cả cùng lúc một cách cào bằng, bạn sẽ không hiểu được bất kỳ ai nói gì.\n- Thế nhưng, khi một người bạn ở góc xa khẽ cất tiếng gọi tên bạn: *\"Bảo ơi!\"*, ngay lập tức bộ não của bạn kích hoạt một cơ chế kỳ diệu: **Sự chú ý có chọn lọc (Selective Attention)**! Bạn dồn 90% thính giác về hướng người bạn đó, trong khi toàn bộ tiếng ồn của 499 người còn lại tự động bị đẩy xuống làm nền mờ nhạt.\n- Trong ngôn ngữ học máy tính cũng y hệt như vậy! Hãy đọc câu sau:\n  $$\\text{\"Con gấu không thể trèo qua hàng rào gỗ vì NÓ quá nặng.\"}$$\n  Làm sao máy tính biết từ **\"NÓ\"** đang ám chỉ **\"con gấu\"** hay **\"hàng rào\"**?\n  - Các mô hình nơ-ron thế hệ cũ đọc từng từ một theo thứ tự thời gian, đến cuối câu chúng thường \"quên mất\" đầu câu và nhầm lẫn tai hại.\n  - Cơ chế **Self-Attention (Tự Chú Ý)** của kiến trúc Transformer cho phép từ **\"NÓ\"** phóng ánh nhìn tới TẤT CẢ các từ khác trong câu cùng một lúc, phát hiện ra sự liên kết mạnh mẽ với cụm từ *\"quá nặng\"* và gán trọng số chú ý lên tới **85% vào \"con gấu\"**! Máy tính hiểu trọn vẹn ngữ cảnh tự nhiên như một con người thông thái.\n\n---\n\n**2. Người thợ gốm và nhà văn tạo sinh: Từ chiếc bình tĩnh Word2Vec đến dòng chảy biến ảo Transformer:**\n- Trước kỷ nguyên Transformer, các nhà khoa học biểu diễn từ ngữ bằng **Word2Vec**: mỗi từ vựng được gán cho một vector cố định trong không gian. Từ *\"ngân hàng\"* trong *\"ngân hàng thương mại\"* hay *\"ngân hàng máu\"* đều bị ép dùng chung một vector bất biến, giống như một chiếc bình gốm đã nung cứng không thể biến đổi hình dạng.\n- Transformer và các Mô Hình Ngôn Ngữ Lớn (LLMs) ngày nay hoạt động như dòng nước linh hoạt: vector biểu diễn của một từ được **nhào nặn liên tục theo các từ đứng xung quanh nó**. Cùng một từ *\"sao\"*, khi đứng cạnh *\"bầu trời\"* nó biến thành ngôi sao thiên văn, khi đứng cạnh *\"tại\"* nó biến thành từ để hỏi nghi vấn!"
+    },
+    "sections": [
+      {
+        "heading": "12.1. Khởi Đầu Từ Con Số 0: Máy Tính 'Đọc' Chữ Như Thế Nào? Thứ Tự 4 Bước Tiền Xử Lý Chuẩn (Câu 14 VAIO) & Bài Toán Từ Dừng",
+        "content": "Khám phá cách thức máy tính tiếp nhận chuỗi ký tự thô; quy trình 4 bước tiền xử lý văn bản chuẩn mực trong đề thi Olympic AI; thách thức tách từ tiếng Việt và định luật Zipf giải thích bản chất của việc loại bỏ từ dừng.",
+        "deepDive": "**1. Máy tính 'nhìn' văn bản như thế nào?**\nCon người chúng ta nhìn thấy câu chữ và lập tức liên tưởng đến hình ảnh, cảm xúc và ý niệm trong đời thực. Nhưng bộ vi xử lý máy tính (CPU/GPU) bản chất chỉ là những mạch bán dẫn số học, nó **HOÀN TOÀN MÙ CHỮ**. Máy tính không hề biết *\"mèo\"*, *\"chó\"*, *\"yêu\"* hay *\"ghét\"* nghĩa là gì, nó chỉ thao tác được trên các con số nguyên (integers) và số thực (floats).\n\nVăn bản thô (Raw text) thu thập từ Internet, báo chí, mạng xã hội luôn là mớ hỗn độn phi cấu trúc: lẫn lộn chữ hoa chữ thường, dấu câu sai quy chuẩn, mã HTML, đường dẫn link, biểu tượng cảm xúc (emojis) và các lỗi chính tả. Nếu đưa trực tiếp đống rác dữ liệu này vào mô hình học máy, mô hình sẽ hoàn toàn sụp đổ. Do đó, bước đi đầu tiên bắt buộc của mọi bài toán NLP là **Quy Trình Tiền Xử Lý Văn Bản (Text Preprocessing Pipeline)**.\n\n---\n\n**2. Quy trình 4 bước tiền xử lý văn bản chuẩn mực (CÂU 14 ĐỀ THI CHÍNH THỨC VAIO 2025):**\nTrong đề thi Olympic AI, thứ tự thực hiện các bước là một câu hỏi lý thuyết then chốt. Quy trình chuẩn mực quốc tế diễn ra tuần tự theo đúng 4 bước logic sau:\n\n```\n[Văn bản thô] \n     │\n     ▼ (Bước 1)\n[Chuẩn Hóa Văn Bản (Normalization)] \n     │   • Hạ chữ thường (Lowercasing)\n     │   • Xóa dấu câu, HTML, ký tự đặc biệt, chuẩn hóa Unicode\n     ▼ (Bước 2)\n[Tách Từ (Tokenization)]\n     │   • Cắt chuỗi thành danh sách token rời rạc: [t₁, t₂, ..., tₙ]\n     ▼ (Bước 3)\n[Rút Gọn Từ (Stemming & Lemmatization)]\n     │   • Đưa các biến thể từ về dạng gốc cốt lõi\n     ▼ (Bước 4)\n[Gán Nhãn Từ Loại (POS Tagging)]\n         • Xác định vai trò ngữ pháp (Danh từ, Động từ, Tính từ, ...)\n```\n\nHãy cùng mổ xẻ chi tiết từng bước:\n\n- **Bước 1: Chuẩn hóa văn bản (Text Normalization):**\n  - **Hạ chữ thường (Lowercasing):** Máy tính phân biệt ký tự theo mã ASCII/Unicode. Nếu không chuẩn hóa, chữ `'Học'` (mã 72) và `'học'` (mã 104) sẽ bị coi là hai từ vựng hoàn toàn xa lạ nhau! Việc hạ toàn bộ về chữ thường giúp gom chúng về cùng một biểu diễn duy nhất.\n  - **Làm sạch ký tự (Cleaning):** Loại bỏ dấu câu (`. , ! ? : ;`), thẻ HTML (`<br>`, `<p>`), đường dẫn web (`http://...`) và khoảng trắng thừa.\n  - **Chuẩn hóa Unicode tiếng Việt:** Tiếng Việt có hai kiểu gõ dấu thanh: **Unicode tổ hợp (NFD)** (ký tự gốc ghép với ký tự dấu) và **Unicode dựng sẵn (NFC)** (ký tự có sẵn dấu). Cùng chữ `'á'`, dựng sẵn là 1 ký tự (`\\u00E1`), tổ hợp là 2 ký tự (`a` + `\\u0301`). Chuẩn hóa về NFC là bắt buộc để tránh phân mảnh từ điển!\n\n- **Bước 2: Tách từ (Tokenization):**\n  - Là thao tác bẻ gãy chuỗi ký tự dài thành các đơn vị ngữ nghĩa nhỏ nhất gọi là **Token** (có thể là từ, từ con subword hoặc ký tự).\n  - *Thách thức đặc thù của Tiếng Việt:* Tiếng Anh là ngôn ngữ phân tích tách rời bằng dấu cách (Space-delimited: *\"Machine learning\"* có 2 từ rõ ràng). Tiếng Việt là ngôn ngữ đơn lập đa âm tiết, ranh giới từ không trùng với dấu cách!\n    - Ví dụ: Cụm từ *\"học sinh học sinh học\"*. Nếu chỉ cắt theo dấu cách, ta được các tiếng rời rạc: `['học', 'sinh', 'học', 'sinh', 'học']` $\\to$ mất sạch ngữ nghĩa!\n    - Công cụ tách từ tiếng Việt (như `pyvi`, `underthesea`, `VnCoreNLP`) phải nhận diện được từ ghép:\n      $$\\text{\"Học sinh (học sinh) học (học) sinh học (sinh học)\"} \\implies \\text{['học_sinh', 'học', 'sinh_học']}$$\n  - *Kỷ nguyên Subword Tokenization (BPE, WordPiece):* Các mô hình hiện đại (như BERT, GPT) sử dụng kỹ thuật tách từ con để xử lý triệt để bài toán **Từ ngoài từ điển (OOV - Out of Vocabulary)**. Từ hiếm *\"unhappiness\"* được tách thành `['un', '##happi', '##ness']`.\n\n- **Bước 3: Rút gọn từ (Stemming & Lemmatization):**\n  - Trong ngôn ngữ biến hình (như tiếng Anh), một từ có rất nhiều biến thể chia thì hay số nhiều: *\"study\", \"studying\", \"studies\", \"studied\"*. Rút gọn từ giúp đưa chúng về cùng một gốc để giảm độ phình to của từ điển.\n  - **Stemming (Cắt gốc từ kinh nghiệm):** Dùng thuật toán luật thô sơ (như Porter Stemmer, Snowball) chặt bỏ đuôi từ (`-ing`, `-ed`, `-es`). Ưu điểm: Rất nhanh. Nhược điểm: Có thể tạo ra chuỗi vô nghĩa trong từ điển (Ví dụ: *\"troubled\"* $\\to$ *\"troubl\"*, *\"crying\"* $\\to$ *\"cri\"*).\n  - **Lemmatization (Đưa về từ nguyên mẫu từ điển):** Dựa trên phân tích hình thái học chuyên sâu và từ điển ngữ pháp để đưa từ về dạng nguyên mẫu hợp lệ (Lemma). Ví dụ: *\"better\"* $\\to$ *\"good\"*, *\"was\"* $\\to$ *\"be\"*, *\"mice\"* $\\to$ *\"mouse\"*. Chính xác tuyệt đối nhưng tốn thời gian tính toán hơn.\n\n- **Bước 4: Gán nhãn từ loại (POS Tagging - Part-of-Speech Tagging):**\n  - Gán nhãn ngữ pháp cho từng token trong câu: Danh từ (NOUN), Động từ (VERB), Tính từ (ADJ), Đại từ (PRON), v.v.\n  - Đóng vai trò then chốt để giải nghĩa các từ đồng âm khác nghĩa (Ví dụ trong tiếng Anh: *\"I can (AUX) buy a can (NOUN) of soda\"*).\n\n---\n\n**3. Khái niệm Từ Dừng (Stopwords) & Định Luật Zipf (Câu 99):**\n- **Từ dừng (Stopwords):** Là những từ ngữ xuất hiện với mật độ cực kỳ dày đặc trong mọi văn bản nhưng hầu như không mang giá trị ngữ nghĩa phân loại chuyên biệt (Ví dụ trong tiếng Việt: *\"và\", \"của\", \"thì\", \"là\", \"những\", \"các\", \"ở\"*; trong tiếng Anh: *\"the\", \"is\", \"at\", \"which\", \"on\"*).\n- **Định luật Zipf (Zipf's Law):** Trong bất kỳ kho ngữ liệu ngôn ngữ tự nhiên nào, tần suất xuất hiện $f(r)$ của một từ tỉ lệ nghịch với thứ hạng tần suất $r$ của nó:\n  $$f(r) \\propto \\frac{1}{r}$$\n  Từ đứng hạng 1 (`\"the\"`) xuất hiện nhiều gấp đôi từ đứng hạng 2 (`\"of\"`), gấp 10 lần từ đứng hạng 10! Một nhóm nhỏ vài chục từ dừng chiếm tới hơn 30% - 50% tổng số lượng từ của toàn bộ kho văn bản.\n- **Tại sao cần loại bỏ từ dừng trong NLP truyền thống?**\n  - Thu nhỏ kích thước ma trận và không gian đặc trưng (giảm chiều vector từ).\n  - Giảm thiểu tài nguyên bộ nhớ RAM và thời gian huấn luyện.\n  - Tránh để các từ đệm vô thưởng vô phạt lấn át tín hiệu của các từ khóa đặc trưng (keywords) trong các bài toán phân loại văn bản (như Naive Bayes, TF-IDF).\n- *Lưu ý quan trọng trong kỷ nguyên Deep Learning & LLM:* Với Transformer và LLMs hiện đại, người ta **KHÔNG CÒN LOẠI BỎ TỪ DỪNG** nữa, vì các từ nối như *\"not\", \"never\", \"and\", \"but\"* mang ý nghĩa cú pháp và đảo ngược logic sống còn đối với sự hiểu của mô hình!",
+        "formula": "\\text{Pipeline: Normalization} \\xrightarrow{} \\text{Tokenization} \\xrightarrow{} \\text{Stemming} \\xrightarrow{} \\text{POS Tagging}, \\quad f(r) \\propto \\frac{1}{r}",
+        "mathExplainer": [
+          {
+            "sym": "\\text{Normalization}",
+            "name": "Chuẩn hóa văn bản",
+            "mean": "Đưa văn bản về dạng thống nhất: hạ chữ thường, xóa dấu câu và ký tự rác."
+          },
+          {
+            "sym": "\\text{Tokenization}",
+            "name": "Tách từ",
+            "mean": "Bẻ gãy chuỗi văn bản thành danh sách các token rời rạc để máy tính xử lý."
+          },
+          {
+            "sym": "\\text{Stemming vs Lemmatization}",
+            "name": "Rút gọn gốc từ",
+            "mean": "Stemming cắt đuôi từ bằng luật kinh nghiệm; Lemmatization đưa về nguyên mẫu từ điển."
+          },
+          {
+            "sym": "\\text{POS Tagging}",
+            "name": "Gán nhãn từ loại",
+            "mean": "Xác định vai trò cú pháp ngữ pháp của token (Danh từ, Động từ, Tính từ,...)."
+          },
+          {
+            "sym": "f(r) \\propto 1/r",
+            "name": "Định luật Zipf",
+            "mean": "Tần suất xuất hiện của từ tỉ lệ nghịch với thứ hạng tần suất; cơ sở lọc từ dừng (stopwords)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(15, 18)\">\n                        <text x=\"315\" y=\"14\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\" text-anchor=\"middle\">Quy Trình 4 Bước Tiền Xử Lý Văn Bản Chuẩn Mực (Câu 14 VAIO)</text>\n                        <!-- Step 1 -->\n                        <rect x=\"0\" y=\"35\" width=\"135\" height=\"52\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"3\"/>\n                        <text x=\"67\" y=\"55\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">1. Chuẩn Hóa</text>\n                        <text x=\"67\" y=\"69\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">(Normalization)</text>\n                        <text x=\"67\" y=\"80\" font-family=\"Georgia\" font-size=\"7.5\" fill=\"#555\" text-anchor=\"middle\">Hạ thường, xóa dấu câu</text>\n                        <!-- Arrow 1-2 -->\n                        <line x1=\"135\" y1=\"61\" x2=\"160\" y2=\"61\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <polygon points=\"160,61 154,58 154,64\" fill=\"#111\"/>\n                        <!-- Step 2 -->\n                        <rect x=\"160\" y=\"35\" width=\"135\" height=\"52\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"3\"/>\n                        <text x=\"227\" y=\"55\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">2. Tách Từ</text>\n                        <text x=\"227\" y=\"69\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">(Tokenization)</text>\n                        <text x=\"227\" y=\"80\" font-family=\"Georgia\" font-size=\"7.5\" fill=\"#555\" text-anchor=\"middle\">Cắt thành mảng token</text>\n                        <!-- Arrow 2-3 -->\n                        <line x1=\"295\" y1=\"61\" x2=\"320\" y2=\"61\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <polygon points=\"320,61 314,58 314,64\" fill=\"#111\"/>\n                        <!-- Step 3 -->\n                        <rect x=\"320\" y=\"35\" width=\"140\" height=\"52\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"3\"/>\n                        <text x=\"390\" y=\"55\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" text-anchor=\"middle\">3. Rút Gọn Từ</text>\n                        <text x=\"390\" y=\"69\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">(Stemming/Lemma)</text>\n                        <text x=\"390\" y=\"80\" font-family=\"Georgia\" font-size=\"7.5\" fill=\"#555\" text-anchor=\"middle\">Đưa về gốc từ cốt lõi</text>\n                        <!-- Arrow 3-4 -->\n                        <line x1=\"460\" y1=\"61\" x2=\"485\" y2=\"61\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <polygon points=\"485,61 479,58 479,64\" fill=\"#111\"/>\n                        <!-- Step 4 -->\n                        <rect x=\"485\" y=\"35\" width=\"145\" height=\"52\" fill=\"#111\" rx=\"3\"/>\n                        <text x=\"557\" y=\"55\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">4. Gán Nhãn Từ Loại</text>\n                        <text x=\"557\" y=\"69\" font-family=\"Georgia\" font-size=\"8\" fill=\"#ddd\" text-anchor=\"middle\">(POS Tagging)</text>\n                        <text x=\"557\" y=\"80\" font-family=\"Georgia\" font-size=\"7.5\" fill=\"#bbb\" text-anchor=\"middle\">Gán nhãn NOUN, VERB...</text>\n                        <!-- Bottom illustrative box -->\n                        <rect x=\"0\" y=\"102\" width=\"630\" height=\"42\" fill=\"#f0f0f0\" stroke=\"#ccc\" stroke-dasharray=\"3,3\" rx=\"2\"/>\n                        <text x=\"15\" y=\"118\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Ví dụ minh họa:</text>\n                        <text x=\"95\" y=\"118\" font-family=\"Georgia\" font-size=\"8.5\">\"Học sinh đang học AI!\"  →  [Hạ thường, bỏ !] \"học sinh đang học ai\"</text>\n                        <text x=\"95\" y=\"132\" font-family=\"Georgia\" font-size=\"8.5\">→  [Tokenize &amp; Lọc từ dừng &quot;đang&quot;] ['học_sinh', 'học', 'ai']  →  [POS] ['học_sinh'/N, 'học'/V, 'ai'/N]</text>\n                      </g>\n                    </svg>",
+          "caption": "Sơ đồ dòng chảy 4 bước chuẩn mực tiền xử lý văn bản NLP: Chuẩn hóa -> Tách từ -> Rút gọn từ -> Gán nhãn từ loại."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 14 Đề thi chính thức VAIO 2025:\n1. **Lỗi đảo lộn thứ tự Tách từ và Chuẩn hóa:** Rất nhiều thí sinh chọn Tách từ trước Chuẩn hóa. SAI! Nếu chưa chuẩn hóa (chưa xóa dấu chấm, phẩy, chưa hạ chữ thường), thao tác tách từ sẽ bị nhiễu loạn nặng nề (Ví dụ từ `'cuối.'` bị dính liền dấu chấm thành một token lạ).\n2. **Lỗi xóa từ dừng trước khi tách từ:** Muốn so khớp một từ với danh sách từ dừng (Stopwords list), văn bản bắt buộc phải được cắt thành từng token độc lập ở Bước 2!\n3. **Ghi nhớ thứ tự chuẩn mực Câu 14:** 2 (Chuẩn hóa) → 1 (Tách từ) → 3 (Rút gọn từ) → 4 (Gán nhãn từ loại).",
+        "practiceQuestion": {
+          "level": "Cơ bản (Câu 14 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Trong xử lý ngôn ngữ tự nhiên (NLP), đâu là thứ tự đúng của các bước xử lý cơ bản? (1. Tách từ; 2. Chuẩn hóa; 3. Rút gọn từ; 4. Gán nhãn từ loại)",
+          "options": [
+            "A. 2 (Chuẩn hóa) → 1 (Tách từ) → 4 (Gán nhãn từ loại) → 3 (Rút gọn từ)",
+            "B. 2 (Chuẩn hóa) → 1 (Tách từ) → 3 (Rút gọn từ) → 4 (Gán nhãn từ loại)",
+            "C. 1 (Tách từ) → 3 (Rút gọn từ) → 2 (Chuẩn hóa) → 4 (Gán nhãn từ loại)",
+            "D. 1 (Tách từ) → 2 (Chuẩn hóa) → 4 (Gán nhãn từ loại) → 3 (Rút gọn từ)"
+          ],
+          "correctIndex": 1,
+          "hint": "Phải chuẩn hóa văn bản trước tiên (hạ thường, bỏ ký tự lạ), sau đó tách thành từng từ, rồi mới rút gọn gốc từ và cuối cùng gán nhãn ngữ pháp.",
+          "solution": [
+            "Bước 1: Chuẩn hóa văn bản (Normalization - bước số 2 trong đề bài) nhằm đồng nhất định dạng ký tự, hạ chữ thường, làm sạch dấu câu.",
+            "Bước 2: Tách từ (Tokenization - bước số 1 trong đề bài) để chia nhỏ chuỗi thành danh sách các token rời rạc.",
+            "Bước 3: Rút gọn từ (Stemming/Lemmatization - bước số 3 trong đề bài) để đưa các từ biến thể về dạng gốc.",
+            "Bước 4: Gán nhãn từ loại (POS Tagging - bước số 4 trong đề bài) để xác định vai trò cú pháp ngữ pháp của token trong câu.",
+            "Trình tự logic chuẩn xác là: 2 → 1 → 3 → 4. Đáp án chính xác là B."
+          ]
+        }
+      },
+      {
+        "heading": "12.2. Không Gian Ngữ Nghĩa (Word Embeddings): Từ Thất Bại Của One-Hot Đến Word2Vec (CBOW vs Skip-gram) & GloVe (Câu 19, 91 VAIO)",
+        "content": "Khám phá nguyên nhân thất bại chí mạng của mã hóa One-Hot; giả thuyết phân bố ngôn ngữ học; kiến trúc Word2Vec (CBOW đoán từ trung tâm, Skip-gram đoán ngữ cảnh); kỹ thuật Negative Sampling và mô hình GloVe huấn luyện từ ma trận đồng xuất hiện toàn cục.",
+        "deepDive": "**1. Thất bại chí mạng của Mã Hóa One-Hot (One-Hot Encoding):**\nCách trực giác đơn giản nhất để biến một từ thành con số là đánh số thứ tự từ điển: từ điển có $|V|$ từ vựng (ví dụ $|V| = 50,000$), từ thứ $i$ sẽ được biểu diễn bằng một vector kích thước $50,000$ chiều với duy nhất số $1$ tại vị trí $i$ và $49,999$ số $0$ ở các vị trí còn lại.\n\nPhương pháp ngây thơ này vấp phải hai bức tường bế tắc:\n- **Bùng nổ số chiều và lãng phí bộ nhớ (Curse of Dimensionality & Extreme Sparsity):** Vector kích thước 50,000 phần tử mà có tới 99.998% là số 0 vô dụng. Lưu trữ một văn bản ngắn tốn hàng chục Megabytes ma trận thưa.\n- **Tính trực giao triệt tiêu ngữ nghĩa (Complete Orthogonality):**\n  - Tích vô hướng giữa hai vector one-hot bất kỳ $\\mathbf{w}_i$ và $\\mathbf{w}_j$ ($i \\neq j$) luôn luôn bằng 0:\n    $$\\mathbf{w}_i^T \\mathbf{w}_j = 0$$\n  - Khoảng cách Euclid giữa hai từ bất kỳ luôn luôn bằng hằng số cố định:\n    $$d(\\mathbf{w}_i, \\mathbf{w}_j) = \\sqrt{(1 - 0)^2 + (0 - 1)^2} = \\sqrt{2} \\approx 1.414$$\n  - *Hậu quả tai hại:* Máy tính coi từ *\"chó\"* và từ *\"mèo\"* xa lạ nhau y hệt như từ *\"chó\"* và *\"tàu ngầm\"*! Mọi mối quan hệ tương đồng ngữ nghĩa, đồng nghĩa hay trái nghĩa bị xóa sổ hoàn toàn.\n\n---\n\n**2. Giả thuyết phân bố (Distributional Hypothesis) & Ý niệm Không Gian Nhúng (Word Embeddings):**\nNăm 1957, nhà ngôn ngữ học lừng danh J.R. Firth đã đưa ra một châm ngôn kinh điển làm thay đổi lịch sử AI:\n$$\\text{\"You shall know a word by the company it keeps\" (Bạn sẽ hiểu nghĩa của một từ thông qua những người bạn đi cùng nó!)}$$\nNếu từ *\"cam\"*, *\"táo\"*, *\"xoài\"* đều thường xuyên xuất hiện cạnh các từ *\"ngọt\"*, *\"chua\"*, *\"ăn\"*, *\"nước ép\"*, thì bộ não và máy tính hoàn toàn có thể suy luận rằng chúng thuộc cùng nhóm \"trái cây\"!\n\n**Word Embedding (Nhúng từ ngữ nghĩa):**\nThay vì dùng vector thưa 50,000 chiều, ta chiếu mỗi từ vào một **vector đậm đặc (Dense Vector)** số thực trong không gian $d$ chiều khiêm tốn ($d \\in [100, 300]$). Trong không gian này:\n- Các từ có ngữ nghĩa tương đồng sẽ nằm gần nhau (khoảng cách Euclid nhỏ, Cosine Similarity gần $1.0$).\n- Các trục tọa độ tự động học được các khái niệm trừu tượng như: Giới tính, Giống loài, Thì thời gian, Địa vị xã hội.\n\n---\n\n**3. Mô hình Word2Vec (Tomas Mikolov et al., Google 2013):**\nWord2Vec là một mạng nơ-ron nông 2 tầng (không có phi tuyến tính ẩn) huấn luyện tự giám sát (self-supervised) trên hàng tỷ câu văn bản. Có hai kiến trúc đối trọng nhau:\n\n- **Kiến trúc CBOW (Continuous Bag-of-Words - CÂU 91 ĐỀ THI VAIO 2025):**\n  - **Mục tiêu:** Sử dụng **các từ ngữ cảnh xung quanh (Context words)** để dự đoán **từ trung tâm (Target word $w_t$)**!\n  - Cho cửa sổ ngữ cảnh kích thước $C$: $\\{w_{t-c}, \\dots, w_{t-1}, w_{t+1}, \\dots, w_{t+c}\\}$.\n  - Mô hình lấy trung bình cộng các vector của các từ ngữ cảnh:\n    $$\\mathbf{h} = \\frac{1}{2c} \\sum_{-c \\le j \\le c, j \\neq 0} \\mathbf{v}_{w_{t+j}}$$\n  - Sau đó nhân với ma trận chiếu đầu ra $W'$ để tính điểm số logits và qua hàm Softmax để tối đa hóa xác suất có điều kiện $P(w_t \\mid \\text{Context})$.\n  - *Ưu điểm:* Tốc độ huấn luyện cực nhanh, biểu diễn rất mượt mà và chính xác cho các từ thông dụng có tần suất cao.\n\n- **Kiến trúc Skip-gram:**\n  - **Mục tiêu:** Sử dụng **DUY NHẤT 1 từ trung tâm ($w_t$)** để dự đoán **tất cả các từ ngữ cảnh xung quanh** trong cửa sổ trượt!\n  - *Ưu điểm:* Do mỗi từ đơn lẻ buộc phải dự đoán nhiều từ ngữ cảnh, Skip-gram học cực kỳ xuất sắc biểu diễn cho các **từ hiếm gặp (Rare words)**.\n\n- **Kỹ thuật Lấy Mẫu Âm (Negative Sampling - Câu 28, 41):**\n  - Hàm Softmax truyền thống có mẫu số tính tổng qua toàn bộ từ điển: $\\sum_{w=1}^{|V|} \\exp(\\mathbf{v}'_w \\cdot \\mathbf{h})$. Với $|V| = 100,000$, việc tính mẫu số này ở mỗi bước cập nhật trọng số là thảm họa tính toán.\n  - Negative Sampling biến bài toán phân loại đa lớp $|V|$ nhãn thành bài toán phân loại nhị phân (Logistic Regression):\n    - Với cặp từ thật $(w_t, c)$, mô hình tối đa hóa xác suất nhãn $1$: $\\log \\sigma(\\mathbf{v}'_c \\cdot \\mathbf{v}_{w_t})$.\n    - Đồng thời, mô hình bốc ngẫu nhiên $K$ từ giả (negative words, $K \\approx 5 - 20$) từ từ điển và tối thiểu hóa xác suất của chúng: $\\sum_{k=1}^K \\log \\sigma(-\\mathbf{v}'_{w_{\\text{neg}}} \\cdot \\mathbf{v}_{w_t})$.\n    - Phân phối bốc từ âm: Sử dụng phân phối Unigram lũy thừa $\\alpha = 0.75$: $P_n(w) \\propto U(w)^{0.75}$ để giúp các từ hiếm cũng có cơ hội được chọn làm mẫu âm.\n    - Giảm chi phí tính toán từ $O(|V|)$ xuống $O(K)$, tăng tốc độ huấn luyện lên hàng trăm lần!\n\n- **Phép toán đại số vector kỳ diệu của Word2Vec:**\n  $$\\mathbf{v}_{\\text{King}} - \\mathbf{v}_{\\text{Man}} + \\mathbf{v}_{\\text{Woman}} \\approx \\mathbf{v}_{\\text{Queen}}$$\n  $$\\mathbf{v}_{\\text{Hà Nội}} - \\mathbf{v}_{\\text{Việt Nam}} + \\mathbf{v}_{\\text{Pháp}} \\approx \\mathbf{v}_{\\text{Paris}}$$\n  Vector khoảng cách giữa hai từ mã hóa chính xác mối quan hệ ngữ nghĩa (Quan hệ Giới tính, Quan hệ Thủ đô - Quốc gia)!\n\n---\n\n**4. Mô hình GloVe (Global Vectors for Word Representation - Pennington et al., Stanford 2014 - CÂU 19 ĐỀ THI VAIO 2025):**\n- Điểm yếu của Word2Vec: Chỉ nhìn cục bộ trong từng cửa sổ trượt hẹp $C$ từ, hoàn toàn lãng phí thông tin thống kê vĩ mô của toàn bộ kho ngữ liệu.\n- **Bản chất của GloVe (Câu 19 VAIO):** Được huấn luyện từ **Ma trận đồng xuất hiện toàn cục (Global Co-occurrence Matrix) $X$** của toàn bộ kho ngữ liệu!\n  - Phần tử $X_{ij}$ là tổng số lần từ $i$ và từ $j$ xuất hiện cùng nhau trong toàn bộ kho văn bản khổng lồ.\n  - Tỉ số xác suất đồng xuất hiện giải mã ngữ nghĩa: Xét từ $i = \\text{\"ice\"}$ (băng) và $j = \\text{\"steam\"}$ (hơi nước). Với từ thăm dò $k = \\text{\"solid\"}$ (rắn), tỉ số $\\frac{P(k \\mid \\text{ice})}{P(k \\mid \\text{steam})}$ sẽ rất lớn ($\\gg 1$); với $k = \\text{\"gas\"}$ (khí), tỉ số sẽ rất nhỏ ($\\ll 1$).\n- **Hàm mất mát hồi quy bình phương tối thiểu có trọng số (Weighted Least Squares):**\n  $$J = \\sum_{i,j=1}^{|V|} f(X_{ij}) \\left( \\mathbf{w}_i^T \\mathbf{\\tilde{w}}_j + b_i + \\tilde{b}_j - \\log X_{ij} \\right)^2$$\n  trong đó $f(X_{ij}) = \\min\\left(1, \\left(\\frac{X_{ij}}{x_{\\max}}\\right)^\\alpha\\right)$ (thường chọn $\\alpha = 0.75, x_{\\max} = 100$) là hàm trọng số làm mềm để tránh việc các từ quá phổ biến (như từ dừng) lấn át hoàn toàn hàm mất mát.",
+        "formula": "\\text{CBOW: } P(w_t \\mid w_{\\text{context}}), \\quad \\text{GloVe: } J = \\sum_{i,j=1}^{|V|} f(X_{ij}) \\left( \\mathbf{w}_i^T \\mathbf{\\tilde{w}}_j + b_i + \\tilde{b}_j - \\log X_{ij} \\right)^2",
+        "mathExplainer": [
+          {
+            "sym": "\\text{CBOW}",
+            "name": "Continuous Bag-of-Words",
+            "mean": "Kiến trúc dùng trung bình cộng các từ ngữ cảnh xung quanh để dự đoán từ trung tâm."
+          },
+          {
+            "sym": "\\text{Skip-gram}",
+            "name": "Skip-gram",
+            "mean": "Kiến trúc dùng 1 từ trung tâm để dự đoán các từ ngữ cảnh xung quanh; học tốt từ hiếm."
+          },
+          {
+            "sym": "X_{ij}",
+            "name": "Ma trận đồng xuất hiện toàn cục",
+            "mean": "Số lần từ i và từ j cùng xuất hiện trong toàn bộ kho ngữ liệu (Corpus)."
+          },
+          {
+            "sym": "f(X_{ij})",
+            "name": "Hàm trọng số cắt",
+            "mean": "Hàm làm mềm ngăn các cặp từ xuất hiện quá nhiều làm méo mó hàm mất mát GloVe."
+          },
+          {
+            "sym": "\\mathbf{w}_i, \\mathbf{\\tilde{w}}_j",
+            "name": "Vector nhúng từ và ngữ cảnh",
+            "mean": "Hai vector biểu diễn của từ i và từ j trong không gian d chiều liên tục."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: CBOW -->\n                      <g transform=\"translate(20, 20)\">\n                        <text x=\"80\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">CBOW (Câu 91 VAIO)</text>\n                        <!-- Context boxes -->\n                        <rect x=\"0\" y=\"30\" width=\"55\" height=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"27\" y=\"44\" font-family=\"Georgia\" font-size=\"8.5\" text-anchor=\"middle\">w(t-1)</text>\n                        <rect x=\"0\" y=\"60\" width=\"55\" height=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"27\" y=\"74\" font-family=\"Georgia\" font-size=\"8.5\" text-anchor=\"middle\">w(t+1)</text>\n                        <!-- Projection / Sum -->\n                        <line x1=\"55\" y1=\"41\" x2=\"80\" y2=\"56\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"55\" y1=\"71\" x2=\"80\" y2=\"56\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <circle cx=\"90\" cy=\"56\" r=\"12\" fill=\"#e0e0e0\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"90\" y=\"60\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">∑</text>\n                        <!-- Target output -->\n                        <line x1=\"102\" y1=\"56\" x2=\"125\" y2=\"56\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"125\" y=\"45\" width=\"50\" height=\"22\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"150\" y=\"59\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">w(t)</text>\n                        <text x=\"80\" y=\"105\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Ngữ cảnh → Đoán từ giữa</text>\n                      </g>\n                      <!-- Divider -->\n                      <line x1=\"210\" y1=\"20\" x2=\"210\" y2=\"150\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                      <!-- Center: Skip-Gram -->\n                      <g transform=\"translate(230, 20)\">\n                        <text x=\"80\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Skip-gram (Word2Vec)</text>\n                        <!-- Input Target -->\n                        <rect x=\"0\" y=\"45\" width=\"50\" height=\"22\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"25\" y=\"59\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">w(t)</text>\n                        <!-- Projection line -->\n                        <line x1=\"50\" y1=\"56\" x2=\"80\" y2=\"56\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <circle cx=\"85\" cy=\"56\" r=\"6\" fill=\"#111\"/>\n                        <line x1=\"85\" y1=\"56\" x2=\"115\" y2=\"41\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"85\" y1=\"56\" x2=\"115\" y2=\"71\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <!-- Output context -->\n                        <rect x=\"115\" y=\"30\" width=\"55\" height=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"142\" y=\"44\" font-family=\"Georgia\" font-size=\"8.5\" text-anchor=\"middle\">w(t-1)</text>\n                        <rect x=\"115\" y=\"60\" width=\"55\" height=\"22\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"142\" y=\"74\" font-family=\"Georgia\" font-size=\"8.5\" text-anchor=\"middle\">w(t+1)</text>\n                        <text x=\"85\" y=\"105\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Từ giữa → Đoán ngữ cảnh</text>\n                      </g>\n                      <!-- Divider -->\n                      <line x1=\"430\" y1=\"20\" x2=\"430\" y2=\"150\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                      <!-- Right: GloVe -->\n                      <g transform=\"translate(450, 20)\">\n                        <text x=\"90\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">GloVe (Câu 19 VAIO)</text>\n                        <rect x=\"15\" y=\"30\" width=\"55\" height=\"55\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <!-- matrix grid -->\n                        <line x1=\"33\" y1=\"30\" x2=\"33\" y2=\"85\" stroke=\"#ccc\"/>\n                        <line x1=\"51\" y1=\"30\" x2=\"51\" y2=\"85\" stroke=\"#ccc\"/>\n                        <line x1=\"15\" y1=\"48\" x2=\"70\" y2=\"48\" stroke=\"#ccc\"/>\n                        <line x1=\"15\" y1=\"66\" x2=\"70\" y2=\"66\" stroke=\"#ccc\"/>\n                        <text x=\"42\" y=\"60\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">X_ij</text>\n                        <text x=\"85\" y=\"60\" font-family=\"Georgia\" font-size=\"12\" font-weight=\"bold\">→</text>\n                        <rect x=\"105\" y=\"42\" width=\"70\" height=\"30\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"140\" y=\"55\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">W·Wᵀ ≈ log X</text>\n                        <text x=\"140\" y=\"66\" font-family=\"Georgia\" font-size=\"7\" fill=\"#555\" text-anchor=\"middle\">Bình phương TT</text>\n                        <text x=\"90\" y=\"105\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Ma trận đồng xuất hiện</text>\n                      </g>\n                      <!-- Bottom text equation -->\n                      <g transform=\"translate(0, 130)\">\n                        <rect x=\"20\" y=\"0\" width=\"620\" height=\"28\" fill=\"#f0f0f0\" stroke=\"#ddd\" rx=\"3\"/>\n                        <text x=\"330\" y=\"18\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">Đại số ngữ nghĩa Word2Vec: Vector(\"King\") - Vector(\"Man\") + Vector(\"Woman\") ≈ Vector(\"Queen\")</text>\n                      </g>\n                    </svg>",
+          "caption": "So sánh 3 trụ cột biểu diễn từ ngữ: CBOW (dự đoán từ giữa), Skip-gram (dự đoán từ xung quanh) và GloVe (ma trận đồng xuất hiện toàn cục)."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 19 & 91 Đề thi chính thức VAIO 2025:\n1. **Nhầm lẫn mục tiêu của CBOW và Skip-gram (Câu 91):**\n   - CBOW: Dùng ngữ cảnh xung quanh để suy luận từ ở giữa ($P(w_t \\mid \\text{context})$).\n   - Skip-gram: Dùng từ ở giữa để suy luận ngữ cảnh xung quanh ($P(\\text{context} \\mid w_t)$).\n2. **Nguồn gốc dữ liệu của GloVe (Câu 19):** Đề thi hỏi mô hình GloVe được xây dựng từ đâu? Luôn chọn ngay: **Ma trận đồng xuất hiện toàn cục (Co-occurrence matrix)** của toàn bộ ngữ liệu bằng phương pháp hồi quy bình phương tối thiểu có trọng số!\n3. **Hiểu lầm về One-Hot vector:** Nhớ rằng tích vô hướng giữa hai vector One-Hot khác nhau luôn bằng $0$ (trực giao) và khoảng cách Euclid luôn bằng $\\sqrt{2}$.",
+        "practiceQuestion": {
+          "level": "Vận dụng (Câu 19 & 91 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Mục tiêu huấn luyện của mô hình CBOW (Continuous Bag-of-Words) và mô hình GloVe được xây dựng như thế nào? (Câu 19 & 91 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. CBOW dùng từ trung tâm để đoán các từ xung quanh; GloVe dùng ma trận chú ý Self-Attention",
+            "B. CBOW dùng các từ ngữ cảnh xung quanh để dự đoán từ trung tâm; GloVe được huấn luyện từ ma trận đồng xuất hiện toàn cục (Co-occurrence matrix)",
+            "C. CBOW dùng ma trận đồng xuất hiện; GloVe dùng bộ mã hóa tự hồi quy 1 chiều",
+            "D. Cả hai mô hình đều là các vector One-Hot có số chiều bằng kích thước từ điển"
+          ],
+          "correctIndex": 1,
+          "hint": "CBOW là 'Túi từ liên tục' lấy trung bình ngữ cảnh để đoán từ ở giữa; GloVe viết tắt của Global Vectors dựa trên thống kê đồng xuất hiện toàn bộ văn bản.",
+          "solution": [
+            "Phân tích CBOW (Câu 91 VAIO): CBOW lấy tổng hợp các từ ngữ cảnh xung quanh trong một cửa sổ trượt để tối đa hóa xác suất dự đoán từ đích ở giữa.",
+            "Phân tích GloVe (Câu 19 VAIO): GloVe (Global Vectors) của Stanford kết hợp ưu điểm của đếm tần suất toàn cục và học máy, bằng cách khớp tích vô hướng vector với logarit của ma trận đồng xuất hiện toàn cục (co-occurrence matrix).",
+            "Do đó, phát biểu chuẩn xác nhất là phương án B."
+          ]
+        }
+      },
+      {
+        "heading": "12.3. Mô Hình Chuỗi Tuần Tự: RNN, LSTM & Công Thức Đếm Tham Số Mô Hình (Câu 4 VAIO)",
+        "content": "Khám phá bản chất dữ liệu tuần tự có thứ tự thời gian; cấu trúc mạng nơ-ron hồi quy RNN; nguyên nhân tiêu biến gradient qua thời gian (BPTT); giải pháp 4 cổng của tế bào LSTM và công thức đếm số lượng tham số kinh điển trong phòng thi Olympic AI.",
+        "deepDive": "**1. Tại sao ngôn ngữ cần Mô Hình Tuần Tự (Sequential Models)?**\nMột câu văn không chỉ là tập hợp các từ rời rạc. Thứ tự sắp xếp trước - sau của các từ mang tính sống còn quyết định toàn bộ ngữ nghĩa:\n$$\\text{\"Anh ta yêu cô ấy\"} \\quad \\neq \\quad \\text{\"Cô ấy yêu anh ta\"}$$\n$$\\text{\"Không phải tôi không thích môn Toán\"} \\quad (\\text{nghĩa là: Tôi thích môn Toán!})$$\nNếu dùng mạng nơ-ron kết nối đầy đủ (MLP), ta phải ép câu văn thành một vector có chiều dài cố định, làm mất sạch thông tin thứ tự và không thể xử lý những câu có độ dài tùy biến linh hoạt. Đó là lý do **Mạng nơ-ron Hồi Quy (RNN - Recurrent Neural Network)** ra đời.\n\n---\n\n**2. Mạng nơ-ron hồi quy RNN & Hiện tượng Tiêu biến Gradient (Vanishing Gradient):**\n- **Cơ chế hoạt động:** RNN duyệt qua chuỗi văn bản từng bước thời gian $t = 1, 2, \\dots, T$.\n- Tại mỗi bước thời gian $t$, nơ-ron tiếp nhận vector từ hiện tại $x_t$ và kết hợp với **Trạng thái ẩn trước đó $h_{t-1}$** (đóng vai trò như ký ức của quá khứ) để tạo ra trạng thái ẩn mới $h_t$:\n  $$h_t = \\tanh(W_{xh} x_t + W_{hh} h_{t-1} + b_h)$$\n  $$y_t = \\text{Softmax}(W_{hy} h_t + b_y)$$\n- **Chia sẻ trọng số (Weight Sharing):** Cùng một bộ ma trận $W_{xh}, W_{hh}, b_h$ được tái sử dụng ở TẤT CẢ các bước thời gian từ đầu đến cuối câu!\n- **Tử huyệt của RNN:**\n  1. *Nghẽn tuần tự (Sequential Bottleneck):* Muốn tính bước $t$, bắt buộc phải chờ bước $t-1$ tính xong. Không thể tận dụng hàng nghìn nhân tính toán song song của GPU!\n  2. *Tiêu biến Gradient khi lan truyền ngược qua thời gian (BPTT):* Khi chuỗi dài hơn 15 - 20 từ, gradient truyền ngược từ cuối câu về đầu câu phải nhân liên tiếp qua chuỗi đạo hàm của hàm $\\tanh$ (có giá trị tối đa là $1.0$) và ma trận $W_{hh}$. Đạo hàm giảm theo cấp số nhân về $0$. RNN mắc chứng \"não cá vàng\": đọc đến cuối câu là quên sạch chủ ngữ ở đầu câu!\n\n---\n\n**3. Mạng LSTM (Long Short-Term Memory - Hochreiter & Schmidhuber, 1997):**\nLSTM giải quyết triệt để vấn đề tiêu biến gradient bằng cách tách bộ nhớ thành 2 luồng:\n- **Trạng thái tế bào $C_t$ (Cell State - Băng chuyền ký ức dài hạn):** Chạy xuyên suốt qua thời gian bằng các phép tính cộng tuyến tính, cho phép gradient phóng thẳng về quá khứ mà không bị suy hao!\n- **Trạng thái ẩn $h_t$ (Hidden State - Ký ức ngắn hạn):** Xuất ra thông tin cần dùng tại bước hiện tại.\n\nLuồng thông tin được điều tiết bởi **4 cổng van thông minh (Gates)** sử dụng hàm kích hoạt Sigmoid $\\sigma \\in [0, 1]$ (0: khóa van hoàn toàn, 1: mở van tối đa):\n1. **Cổng quên (Forget Gate $f_t$):** Quyết định bao nhiêu % ký ức cũ trong $C_{t-1}$ sẽ bị xóa bỏ:\n   $$f_t = \\sigma(W_f [h_{t-1}, x_t] + b_f)$$\n2. **Cổng nạp (Input Gate $i_t$):** Quyết định bao nhiêu % thông tin mới sẽ được nạp vào bộ nhớ:\n   $$i_t = \\sigma(W_i [h_{t-1}, x_t] + b_i)$$\n3. **Ứng viên cập nhật ($\\tilde{C}_t$):** Nội dung thông tin mới được đề xuất:\n   $$\\tilde{C}_t = \\tanh(W_c [h_{t-1}, x_t] + b_c)$$\n   *Cập nhật Cell State tuyến tính (Phép cộng giải phóng gradient!):*\n   $$C_t = f_t \\odot C_{t-1} + i_t \\odot \\tilde{C}_t$$\n4. **Cổng xuất (Output Gate $o_t$):** Quyết định bao nhiêu % ký ức dài hạn được xuất ra trạng thái ẩn $h_t$:\n   $$o_t = \\sigma(W_o [h_{t-1}, x_t] + b_o)$$\n   $$h_t = o_t \\odot \\tanh(C_t)$$\n\n---\n\n**4. Kỹ thuật Đếm Số Lượng Tham Số Mô Hình (CÂU 4 ĐỀ THI VAIO 2025):**\nDạng bài tính số lượng tham số có thể học (Weights và Biases) của các tầng nơ-ron chuỗi là câu hỏi tính toán cốt lõi trong đề thi.\n\nQuy ước ký hiệu chuẩn:\n- $D = d_x$: Số chiều của vector đầu vào $x_t$ (Input dimension).\n- $H = d_h$: Số chiều của vector trạng thái ẩn $h_t$ (Hidden dimension).\n\n- **1. Công thức tham số của một tầng RNN cơ bản:**\n  - Ma trận trọng số kết nối đầu vào với trạng thái ẩn $W_{xh}$: kích thước $H \\times D \\implies H \\times D$ tham số.\n  - Ma trận trọng số kết nối trạng thái ẩn trước với hiện tại $W_{hh}$: kích thước $H \\times H \\implies H \\times H$ tham số.\n  - Vector độ lệch bias $b_h$: kích thước $H \\times 1 \\implies H$ tham số.\n  $$\\text{Params}_{\\text{RNN}} = H \\times D + H \\times H + H = H(D + H + 1)$$\n\n- **2. Công thức tham số của một tầng LSTM (CỰC KỲ QUAN TRỌNG - NHỚ NHÂN 4!):**\n  - Một tế bào LSTM bao gồm đúng **4 bộ tính toán tuyến tính độc lập** ứng với 4 cổng:\n    1. Cổng quên $f_t$\n    2. Cổng nạp $i_t$\n    3. Trạng thái ứng viên $\\tilde{C}_t$\n    4. Cổng xuất $o_t$\n  - Mỗi cổng đều sở hữu một ma trận trọng số kích thước $H \\times (D + H)$ và một vector bias kích thước $H$!\n  - Do đó, số tham số của một tầng LSTM gấp đúng **4 LẦN** một tầng RNN:\n    $$\\text{Params}_{\\text{LSTM}} = 4 \\times [H \\times D + H \\times H + H] = 4 \\times H(D + H + 1)$$\n\n- **3. Công thức tham số của một tầng GRU (Gated Recurrent Unit):**\n  - GRU tối giản tế bào chỉ còn **3 cổng** (Reset gate $r_t$, Update gate $z_t$, Candidate state $\\tilde{h}_t$):\n    $$\\text{Params}_{\\text{GRU}} = 3 \\times H(D + H + 1)$$\n\n---\n\n**Ví dụ tính toán số học từng bước trong phòng thi:**\n*Đề bài:* Cho một tầng LSTM đơn với chiều vector đầu vào $D = 100$ và số nơ-ron trạng thái ẩn $H = 128$. Hãy tính tổng số lượng tham số có thể huấn luyện của tầng này.\n- *Bước 1:* Tính số tham số của một cổng đơn lẻ:\n  $$\\text{Params}_{\\text{cổng}} = H \\times D + H \\times H + H = (128 \\times 100) + (128 \\times 128) + 128 = 12,800 + 16,384 + 128 = 29,312$$\n- *Bước 2:* Nhân 4 cho toàn bộ tế bào LSTM:\n  $$\\text{Params}_{\\text{LSTM}} = 4 \\times 29,312 = 117,248 \\text{ tham số!}$$\n(Nếu đề bài hỏi tầng RNN đơn giản thì đáp án sẽ là đúng $29,312$).",
+        "formula": "\\text{Params}_{\\text{RNN}} = H(D + H + 1), \\quad \\text{Params}_{\\text{LSTM}} = 4 \\times H(D + H + 1), \\quad \\text{Params}_{\\text{GRU}} = 3 \\times H(D + H + 1)",
+        "mathExplainer": [
+          {
+            "sym": "D",
+            "name": "Input Dimension",
+            "mean": "Số chiều của vector đặc trưng đầu vào x_t tại mỗi bước thời gian."
+          },
+          {
+            "sym": "H",
+            "name": "Hidden Dimension",
+            "mean": "Số chiều của vector trạng thái ẩn h_t (số nơ-ron của tầng hồi quy)."
+          },
+          {
+            "sym": "W_{xh}, W_{hh}",
+            "name": "Ma trận trọng số",
+            "mean": "W_xh nối đầu vào với trạng thái ẩn; W_hh nối trạng thái ẩn trước với hiện tại."
+          },
+          {
+            "sym": "C_t, h_t",
+            "name": "Cell State & Hidden State",
+            "mean": "C_t là băng chuyền ký ức dài hạn của LSTM; h_t là ký ức làm việc ngắn hạn."
+          },
+          {
+            "sym": "\\text{Params}_{\\text{LSTM}}",
+            "name": "Số tham số LSTM",
+            "mean": "Bằng 4 lần số tham số RNN do có 4 cổng độc lập (Forget, Input, Candidate, Output)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: LSTM Cell Diagram -->\n                      <g transform=\"translate(20, 20)\">\n                        <text x=\"140\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Kiến Trúc Tế Bào LSTM (4 Cổng Van)</text>\n                        <rect x=\"0\" y=\"25\" width=\"280\" height=\"110\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"4\"/>\n                        <!-- Top conveyor Cell state C_t-1 to C_t -->\n                        <line x1=\"15\" y1=\"45\" x2=\"265\" y2=\"45\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <circle cx=\"75\" cy=\"45\" r=\"9\" fill=\"#e0e0e0\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"75\" y=\"48.5\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">∗</text>\n                        <circle cx=\"160\" cy=\"45\" r=\"9\" fill=\"#e0e0e0\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"160\" y=\"48.5\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">+</text>\n                        <text x=\"15\" y=\"38\" font-family=\"Georgia\" font-size=\"8.5\">C_{t-1}</text>\n                        <text x=\"260\" y=\"38\" font-family=\"Georgia\" font-size=\"8.5\">C_t</text>\n                        <!-- 4 Gates -->\n                        <!-- Forget gate f_t -->\n                        <rect x=\"65\" y=\"75\" width=\"20\" height=\"20\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"75\" y=\"89\" font-family=\"Georgia\" font-size=\"8\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">σ</text>\n                        <line x1=\"75\" y1=\"75\" x2=\"75\" y2=\"54\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"75\" y=\"106\" font-family=\"Georgia\" font-size=\"7\" text-anchor=\"middle\">Forget</text>\n                        <!-- Input gate i_t -->\n                        <rect x=\"125\" y=\"75\" width=\"20\" height=\"20\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"135\" y=\"89\" font-family=\"Georgia\" font-size=\"8\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">σ</text>\n                        <text x=\"135\" y=\"106\" font-family=\"Georgia\" font-size=\"7\" text-anchor=\"middle\">Input</text>\n                        <!-- Candidate gate ~C_t -->\n                        <rect x=\"165\" y=\"75\" width=\"22\" height=\"20\" fill=\"#e0e0e0\" stroke=\"#111\" rx=\"2\"/>\n                        <text x=\"176\" y=\"89\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">tanh</text>\n                        <text x=\"176\" y=\"106\" font-family=\"Georgia\" font-size=\"7\" text-anchor=\"middle\">Cand</text>\n                        <!-- Merge input * candidate -->\n                        <line x1=\"135\" y1=\"75\" x2=\"155\" y2=\"60\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"176\" y1=\"75\" x2=\"160\" y2=\"54\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <!-- Output gate o_t -->\n                        <rect x=\"220\" y=\"75\" width=\"20\" height=\"20\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"230\" y=\"89\" font-family=\"Georgia\" font-size=\"8\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">σ</text>\n                        <text x=\"230\" y=\"106\" font-family=\"Georgia\" font-size=\"7\" text-anchor=\"middle\">Output</text>\n                        <!-- Input bottom -->\n                        <line x1=\"40\" y1=\"120\" x2=\"230\" y2=\"120\" stroke=\"#ccc\"/>\n                        <text x=\"35\" y=\"132\" font-family=\"Georgia\" font-size=\"8\" fill=\"#333\">[h_{t-1}, x_t]</text>\n                      </g>\n                      <!-- Right: Parameter counting panel -->\n                      <g transform=\"translate(330, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"310\" height=\"135\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1\" rx=\"3\"/>\n                        <text x=\"155\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Bảng Đếm Tham Số (Câu 4 VAIO)</text>\n                        <!-- Table header -->\n                        <rect x=\"10\" y=\"32\" width=\"290\" height=\"20\" fill=\"#f0f0f0\"/>\n                        <text x=\"20\" y=\"46\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Mô hình</text>\n                        <text x=\"100\" y=\"46\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Công thức tham số</text>\n                        <text x=\"225\" y=\"46\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Số cổng</text>\n                        <!-- Row 1: RNN -->\n                        <text x=\"20\" y=\"70\" font-family=\"Georgia\" font-size=\"9\">RNN Đơn</text>\n                        <text x=\"100\" y=\"70\" font-family=\"monospace\" font-size=\"9\">H × (D + H + 1)</text>\n                        <text x=\"235\" y=\"70\" font-family=\"Georgia\" font-size=\"9\">1</text>\n                        <line x1=\"10\" y1=\"78\" x2=\"300\" y2=\"78\" stroke=\"#eee\"/>\n                        <!-- Row 2: LSTM -->\n                        <text x=\"20\" y=\"96\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">LSTM</text>\n                        <text x=\"100\" y=\"96\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">4 × H × (D + H + 1)</text>\n                        <text x=\"235\" y=\"96\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">4 cổng</text>\n                        <line x1=\"10\" y1=\"104\" x2=\"300\" y2=\"104\" stroke=\"#eee\"/>\n                        <!-- Row 3: GRU -->\n                        <text x=\"20\" y=\"122\" font-family=\"Georgia\" font-size=\"9\">GRU</text>\n                        <text x=\"100\" y=\"122\" font-family=\"monospace\" font-size=\"9\">3 × H × (D + H + 1)</text>\n                        <text x=\"235\" y=\"122\" font-family=\"Georgia\" font-size=\"9\">3 cổng</text>\n                      </g>\n                    </svg>",
+          "caption": "Sơ đồ tế bào LSTM với băng chuyền Cell State và bảng công thức đếm số lượng tham số học được của RNN, LSTM, GRU."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 4 Đề thi chính thức VAIO 2025:\n1. **Quên vector Bias ($+1$):** Nhiều thí sinh chỉ tính $H \\times D + H \\times H$ mà quên mất vector bias $b$ có $H$ tham số! Công thức chuẩn là $H(D + H + 1)$.\n2. **Quên hệ số 4 đối với LSTM:** Tế bào LSTM có 4 cổng hoạt động song song độc lập. Đề thi hỏi số tham số của tầng LSTM thì BẮT BUỘC phải nhân $4$ vào kết quả của tầng RNN!\n3. **Nhầm lẫn giữa GRU và LSTM:** GRU chỉ có 3 cổng (nhân 3), LSTM có 4 cổng (nhân 4).",
+        "practiceQuestion": {
+          "level": "Vận dụng (Câu 4 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Một tầng nơ-ron hồi quy RNN đơn giản có kích thước vector đầu vào D = 100 và kích thước trạng thái ẩn H = 128. Tổng số lượng tham số có thể huấn luyện (Weights và Biases) của tầng này là bao nhiêu?",
+          "options": [
+            "A. 12,800",
+            "B. 29,312",
+            "C. 16,384",
+            "D. 117,248"
+          ],
+          "correctIndex": 1,
+          "hint": "Tổng tham số = Ma trận trọng số đầu vào W_xh (H × D) + Ma trận trọng số hồi quy W_hh (H × H) + Vector bias (H).",
+          "solution": [
+            "Bước 1: Tính số tham số của ma trận trọng số đầu vào: W_xh có kích thước H × D = 128 × 100 = 12,800 tham số.",
+            "Bước 2: Tính số tham số của ma trận trọng số hồi quy: W_hh có kích thước H × H = 128 × 128 = 16,384 tham số.",
+            "Bước 3: Tính số tham số của vector độ lệch bias: b có kích thước H = 128 tham số.",
+            "Bước 4: Tổng số tham số = 12,800 + 16,384 + 128 = 29,312 tham số.",
+            "(Lưu ý: Nếu đây là tầng LSTM thì đáp án sẽ là 4 × 29,312 = 117,248 ở phương án D). Đáp án chính xác cho RNN là B (29,312)."
+          ]
+        }
+      },
+      {
+        "heading": "12.4. Trái Tim Của Cuộc Cách Mạng AI: Cơ Chế Tự Chú Ý (Self-Attention) & Bộ Ba Kỳ Diệu Query, Key, Value (Câu 23 & 74 VAIO)",
+        "content": "Giải mã bài báo lịch sử 'Attention Is All You Need'; trực giác tra cứu video YouTube với bộ ba Query-Key-Value; công thức Scaled Dot-Product Attention và chứng minh toán học tại sao bắt buộc phải chia cho căn bậc hai d_k (Câu 74 VAIO); cùng cơ chế Multi-Head Attention.",
+        "deepDive": "**1. Bước ngoặt lịch sử năm 2017: 'Attention Is All You Need':**\nNăm 2017, nhóm nghiên cứu Google Brain đã công bố bài báo mang tính biểu tượng làm thay đổi hoàn toàn cục diện Trí Tuệ Nhân Tạo. Họ mạnh dạn đưa ra một tuyên bố chấn động: **VỨT BỎ HOÀN TOÀN RNN VÀ LSTM!** Không cần duyệt tuần tự từng bước thời gian nữa!\n\nThay vào đó, kiến trúc **Transformer** ra đời dựa trên cơ chế duy nhất: **Self-Attention (Tự Chú Ý)**:\n- Mọi từ trong câu được nạp đồng thời vào GPU và có thể nhìn thấy, giao tiếp với MỌI TỪ KHÁC cùng một lúc.\n- Khoảng cách đường truyền thông tin giữa hai từ cách xa nhau 1,000 từ được rút ngắn từ $O(N)$ xuống đúng **$O(1)$**!\n- Cho phép tính toán song song 100% trên phần cứng ma trận GEMM hiện đại, mở đường cho việc mở rộng quy mô dữ liệu khổng lồ.\n\n---\n\n**2. Trực giác đời sống: Bộ ba Query, Key, Value & Hệ thống tra cứu YouTube:**\nĐể hiểu sâu sắc cơ chế Attention mà không bị choáng ngợp bởi ma trận, hãy liên tưởng đến thao tác tìm kiếm video trên YouTube:\n1. **Query ($Q$ - Câu hỏi truy vấn):** Bạn gõ vào thanh tìm kiếm dòng chữ: *\"hướng dẫn làm bánh mì Việt Nam\"*. Đây chính là vector $Q$ thể hiện nhu cầu thông tin bạn đang tìm kiếm.\n2. **Key ($K$ - Từ khóa so khớp):** YouTube có hàng triệu video, mỗi video có tiêu đề và nhãn thẻ (tags): *\"cách nướng bánh mì\"*, *\"làm sushi Nhật Bản\"*, *\"review xe hơi\"*. Đây chính là vector $K$ của các đối tượng trong cơ sở dữ liệu.\n3. **Độ tương đồng (Attention Weight):** Hệ thống lấy tích vô hướng giữa $Q$ của bạn với $K$ của từng video. Video *\"cách nướng bánh mì\"* có độ tương đồng cực cao ($0.92$), video *\"sushi\"* thấp ($0.05$), video *\"xe hơi\"* gần bằng $0$.\n4. **Value ($V$ - Nội dung giá trị thực tế):** Khi bạn bấm vào video, bạn nhận được hình ảnh, âm thanh hướng dẫn chi tiết. Đây chính là vector $V$.\n5. **Kết quả bạn nhận được:** Một bức tranh tổng hợp các thông tin hữu ích được lấy từ các video ($V$), trong đó video nào có điểm tương đồng giữa $Q$ và $K$ cao nhất sẽ đóng góp nhiều phần trăm nội dung nhất!\n\n---\n\n**3. Bản chất toán học của Scaled Dot-Product Attention (CÂU 74 ĐỀ THI VAIO 2025):**\nCho một câu văn bản gồm $N$ từ, mỗi từ đã được nhúng thành vector kích thước $d_{\\text{model}}$ tạo thành ma trận đầu vào $X \\in \\mathbb{R}^{N \\times d_{\\text{model}}}$.\n\n- **Bước 1: Chiếu tuyến tính tạo $Q, K, V$:**\n  Ta nhân ma trận đầu vào $X$ với 3 ma trận trọng số có thể học được $W_Q, W_K, W_V \\in \\mathbb{R}^{d_{\\text{model}} \\times d_k}$:\n  $$Q = X W_Q, \\quad K = X W_K, \\quad V = X W_V$$\n- **Bước 2: Tính ma trận điểm số thô (Raw Attention Scores):**\n  Lấy tích vô hướng giữa Query và Key của mọi cặp từ:\n  $$S = Q K^T \\in \\mathbb{R}^{N \\times N}$$\n  Phần tử $S_{ij} = q_i \\cdot k_j$ thể hiện mức độ tương quan liên kết giữa từ thứ $i$ và từ thứ $j$.\n- **Bước 3: Thu nhỏ tỉ lệ (Scaling) và chuẩn hóa xác suất bằng Softmax:**\n  Chia cho căn bậc hai của số chiều $\\sqrt{d_k}$ và đưa qua hàm Softmax trên từng hàng:\n  $$A = \\text{Softmax}\\left(\\frac{Q K^T}{\\sqrt{d_k}}\\right) \\in \\mathbb{R}^{N \\times N}$$\n  Mỗi hàng của ma trận $A$ là một phân phối xác suất có tổng bằng $1.0$ thể hiện phần trăm sự chú ý của từ $i$ tới từng từ khác.\n- **Bước 4: Tổng hợp thông tin đầu ra:**\n  Nhân ma trận trọng số chú ý $A$ với ma trận nội dung Value $V$:\n  $$\\text{Attention}(Q, K, V) = \\text{Softmax}\\left(\\frac{Q K^T}{\\sqrt{d_k}}\\right) V$$\n\n---\n\n**4. CHỨNG MINH TOÁN HỌC: Tại sao bắt buộc phải chia cho $\\sqrt{d_k}$? (CÂU HỎI KINH ĐIỂN CỦA ĐỀ THI VAIO & CÁC KỲ THI AI):**\nTại sao các tác giả không dùng công thức đơn giản $\\text{Softmax}(Q K^T) V$ mà bắt buộc phải thêm mẫu số $\\sqrt{d_k}$?\n\n*Chứng minh xác suất:*\n- Giả sử các phần tử của vector truy vấn $q$ và khóa $k$ là các biến ngẫu nhiên độc lập có kỳ vọng $\\mathbb{E}[q_i] = \\mathbb{E}[k_i] = 0$ và phương sai chuẩn hóa $\\text{Var}(q_i) = \\text{Var}(k_i) = 1$.\n- Tích vô hướng của chúng là tổng của $d_k$ tích thành phần:\n  $$q \\cdot k = \\sum_{i=1}^{d_k} q_i k_i$$\n- Kỳ vọng của tích vô hướng: $\\mathbb{E}[q \\cdot k] = \\sum_{i=1}^{d_k} \\mathbb{E}[q_i] \\mathbb{E}[k_i] = 0$.\n- Do các thành phần độc lập, phương sai của tổng bằng tổng các phương sai:\n  $$\\text{Var}(q \\cdot k) = \\sum_{i=1}^{d_k} \\text{Var}(q_i k_i) = \\sum_{i=1}^{d_k} \\left( \\mathbb{E}[q_i^2 k_i^2] - (\\mathbb{E}[q_i k_i])^2 \\right) = \\sum_{i=1}^{d_k} (1 \\times 1) = d_k$$\n- **Hậu quả khi số chiều $d_k$ lớn (ví dụ $d_k = 64$ hoặc $512$):**\n  - Phương sai của tích vô hướng bằng $d_k$, đồng nghĩa với **độ lệch chuẩn bằng $\\sqrt{d_k}$** ($\\sqrt{64} = 8$).\n  - Giá trị của tích vô hướng $q \\cdot k$ sẽ dao động rất mạnh, thường xuyên vọt lên những con số cực lớn (như $+25$ hoặc $-30$).\n  - Khi nạp các giá trị cực lớn này vào hàm Softmax: $\\frac{e^{z_i}}{\\sum e^{z_j}}$, hàm Softmax bị đẩy sâu vào **vùng bão hòa (Saturation region)**! Một phần tử lớn nhất sẽ chiếm xác suất áp đảo $\\approx 1.0$, trong khi tất cả các phần tử còn lại bị đè bẹp về $\\approx 0.0$.\n  - Đạo hàm của hàm Softmax ở vùng bão hòa cực kỳ nhỏ, tiến sát về $0$! Dẫn đến hiện tượng **TIÊU BIẾN GRADIENT (Vanishing Gradient)** nghiêm trọng, khiến mô hình bị tê liệt và hoàn toàn ngừng học!\n- **Tác dụng cứu cánh của phép chia cho $\\sqrt{d_k}$:**\n  $$\\text{Var}\\left(\\frac{q \\cdot k}{\\sqrt{d_k}}\\right) = \\frac{\\text{Var}(q \\cdot k)}{(\\sqrt{d_k})^2} = \\frac{d_k}{d_k} = 1.0$$\n  Phép chia đưa phương sai của tích vô hướng trở về đúng $1.0$, giữ cho các giá trị đầu vào của Softmax nằm gọn trong vùng có đạo hàm lớn nhất, đảm bảo gradient truyền ngược luôn thông suốt!\n\n---\n\n**5. Cơ chế Chú Ý Đa Đầu (Multi-Head Attention) & Mã Hóa Vị Trí (Positional Encoding):**\n- **Multi-Head Attention:** Thay vì chỉ tính 1 ma trận Attention duy nhất, Transformer chia vector thành $h$ \"đầu\" độc lập (ví dụ $h = 8$ heads, mỗi head có chiều $d_k = d_{\\text{model}} / h = 512 / 8 = 64$).\n  - Head 1 chuyên chú ý đến mối quan hệ ngữ pháp (Chủ ngữ - Vị ngữ).\n  - Head 2 chuyên chú ý đến quan hệ đại từ thay thế (*\"nó\"* liên kết với *\"con gấu\"*).\n  - Head 3 chuyên chú ý đến bối cảnh thời gian, địa điểm.\n  - Kết quả của $h$ heads được ghép nối (Concat) lại và nhân qua ma trận $W_O$:\n    $$\\text{MultiHead}(Q, K, V) = \\text{Concat}(\\text{head}_1, \\dots, \\text{head}_h) W_O$$\n- **Mã Hóa Vị Trí (Positional Encoding):** Vì phép tính Self-Attention hoàn toàn không phụ thuộc vào thứ tự trước sau của các từ (tính chất giao hoán hoán vị - Permutation Equivariant), nếu không có cơ chế đánh dấu vị trí thì hai câu: *\"Mèo bắt chuột\"* và *\"Chuột bắt mèo\"* sẽ cho ra ma trận chú ý y hệt nhau! Transformer khắc phục điều này bằng cách cộng trực tiếp một vector tọa độ vị trí $PE$ (dùng hàm $\\sin$ và $\\cos$) vào vector nhúng từ ban đầu.",
+        "formula": "\\text{Attention}(Q, K, V) = \\text{Softmax}\\left(\\frac{Q K^T}{\\sqrt{d_k}}\\right) V, \\quad \\text{Var}\\left(\\frac{Q K^T}{\\sqrt{d_k}}\\right) = 1.0",
+        "mathExplainer": [
+          {
+            "sym": "Q, K, V",
+            "name": "Query, Key, Value",
+            "mean": "Ba ma trận được chiếu từ đầu vào: Q là truy vấn, K là khóa so khớp, V là giá trị nội dung."
+          },
+          {
+            "sym": "\\sqrt{d_k}",
+            "name": "Hệ số tỉ lệ thu nhỏ",
+            "mean": "Chia căn bậc hai số chiều để đưa phương sai tích vô hướng về 1, tránh bão hòa Softmax."
+          },
+          {
+            "sym": "\\text{Softmax}",
+            "name": "Hàm làm mềm xác suất",
+            "mean": "Chuyển điểm số thô thành phân phối xác suất trọng số chú ý có tổng bằng 1 trên mỗi hàng."
+          },
+          {
+            "sym": "\\text{MultiHead}",
+            "name": "Chú ý đa đầu",
+            "mean": "Chia nhiều không gian con song song giúp mô hình học đa dạng góc nhìn ngữ cảnh."
+          },
+          {
+            "sym": "\\text{Positional Encoding}",
+            "name": "Mã hóa vị trí",
+            "mean": "Vector hàm sin/cos bù đắp thông tin thứ tự từ cho cơ chế Self-Attention."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Scaled Dot-Product Flow -->\n                      <g transform=\"translate(30, 15)\">\n                        <text x=\"110\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Scaled Dot-Product Attention (Câu 74 VAIO)</text>\n                        <!-- Q, K, V inputs -->\n                        <rect x=\"20\" y=\"28\" width=\"40\" height=\"20\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"40\" y=\"42\" font-family=\"Georgia\" font-size=\"9.5\" font-weight=\"bold\" text-anchor=\"middle\">Q</text>\n                        <rect x=\"75\" y=\"28\" width=\"40\" height=\"20\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"95\" y=\"42\" font-family=\"Georgia\" font-size=\"9.5\" font-weight=\"bold\" text-anchor=\"middle\">K</text>\n                        <rect x=\"160\" y=\"28\" width=\"40\" height=\"20\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"180\" y=\"42\" font-family=\"Georgia\" font-size=\"9.5\" font-weight=\"bold\" text-anchor=\"middle\">V</text>\n                        <!-- Q x K^T -->\n                        <line x1=\"40\" y1=\"48\" x2=\"67\" y2=\"62\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"95\" y1=\"48\" x2=\"67\" y2=\"62\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"35\" y=\"62\" width=\"65\" height=\"20\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"67\" y=\"75\" font-family=\"Georgia\" font-size=\"8.5\" text-anchor=\"middle\">MatMul (Q·Kᵀ)</text>\n                        <!-- Scale / sqrt(d_k) -->\n                        <line x1=\"67\" y1=\"82\" x2=\"67\" y2=\"92\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"30\" y=\"92\" width=\"75\" height=\"20\" fill=\"#e0e0e0\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"67\" y=\"105\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">Scale (÷ √d_k)</text>\n                        <!-- Softmax -->\n                        <line x1=\"67\" y1=\"112\" x2=\"67\" y2=\"122\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"25\" y=\"122\" width=\"85\" height=\"20\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"67\" y=\"135\" font-family=\"Georgia\" font-size=\"8.5\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">Softmax</text>\n                        <!-- MatMul with V -->\n                        <line x1=\"110\" y1=\"132\" x2=\"150\" y2=\"132\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"180\" y1=\"48\" x2=\"180\" y2=\"122\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"150\" y=\"122\" width=\"60\" height=\"20\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"2\"/>\n                        <text x=\"180\" y=\"135\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">Output</text>\n                      </g>\n                      <!-- Right: The \"Why divide by sqrt(d_k)\" box -->\n                      <g transform=\"translate(290, 20)\">\n                        <rect x=\"0\" y=\"0\" width=\"345\" height=\"135\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1\" rx=\"3\"/>\n                        <text x=\"172\" y=\"20\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Tại Sao Chia Cho Căn Bậc Hai d_k?</text>\n                        <text x=\"15\" y=\"42\" font-family=\"Georgia\" font-size=\"9\">• Tích vô hướng Q·Kᵀ có phương sai = d_k.</text>\n                        <text x=\"15\" y=\"60\" font-family=\"Georgia\" font-size=\"9\">• Nếu d_k lớn (vd 64, 512) → giá trị bùng nổ cực lớn.</text>\n                        <text x=\"15\" y=\"78\" font-family=\"Georgia\" font-size=\"9\">• Đẩy hàm Softmax vào <tspan font-weight=\"bold\">vùng bão hòa (Saturation)</tspan>.</text>\n                        <text x=\"15\" y=\"96\" font-family=\"Georgia\" font-size=\"9\">• Đạo hàm Softmax bị triệt tiêu ≈ 0 → <tspan font-weight=\"bold\" fill=\"#111\">Tiêu biến gradient!</tspan></text>\n                        <rect x=\"12\" y=\"106\" width=\"320\" height=\"22\" fill=\"#f0f0f0\" rx=\"2\"/>\n                        <text x=\"172\" y=\"120\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">⇒ Chia √d_k đưa phương sai về chuẩn 1.0, ổn định đạo hàm!</text>\n                      </g>\n                    </svg>",
+          "caption": "Sơ đồ khối tính toán Scaled Dot-Product Attention và giải thích bản chất toán học tại sao phải chia cho căn bậc hai của d_k."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 74 & 23 Đề thi chính thức VAIO 2025:\n1. **Hiểu sai lý do chia cho $\\sqrt{d_k}$:**\n   - Đề thi thường đưa các đáp án bẫy như: *\"Để giảm số phép nhân ma trận\"*, *\"Để biến ma trận thành đối xứng\"*, *\"Để loại bỏ từ dừng\"*.\n   - ĐÁP ÁN ĐÚNG DUY NHẤT: Để ngăn tích vô hướng quá lớn đẩy hàm Softmax vào vùng bão hòa gradient (gradient gần bằng 0 gây tiêu biến gradient)!\n2. **Kích thước ma trận Attention:** Ma trận $QK^T$ luôn có kích thước $N \\times N$ (với $N$ là độ dài chuỗi token). Đây là lý do độ phức tạp tính toán và bộ nhớ của Self-Attention tiêu chuẩn là $O(N^2)$ theo độ dài văn bản!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Câu 74 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Trong công thức Scaled Dot-Product Attention của mô hình Transformer, mục đích chính của việc chia tích vô hướng Q·K^T cho hệ số căn bậc hai của d_k là gì?",
+          "options": [
+            "A. Để giảm số lượng phép nhân ma trận giữa các vector từ",
+            "B. Để ngăn giá trị tích vô hướng quá lớn khiến hàm softmax bị bão hòa gradient (gradient tiến sát về 0 gây tiêu biến gradient)",
+            "C. Để đảm bảo ma trận attention trở thành ma trận đường chéo",
+            "D. Để tự động loại bỏ các từ dừng và ký tự đặc biệt"
+          ],
+          "correctIndex": 1,
+          "hint": "Khi số chiều d_k lớn, phương sai của tích vô hướng bằng d_k, khiến giá trị đầu vào của Softmax rất lớn, đẩy đạo hàm của Softmax về 0.",
+          "solution": [
+            "Phân tích xác suất: Giả sử q và k có phương sai bằng 1, tích vô hướng của chúng có phương sai bằng đúng số chiều d_k.",
+            "Khi d_k lớn, tích vô hướng nhận các giá trị rất lớn, đẩy hàm Softmax vào vùng cực biên (bão hòa), nơi mà đạo hàm gần như bằng 0.",
+            "Điều này gây ra hiện tượng tiêu biến gradient (vanishing gradient), cản trở việc cập nhật trọng số trong quá trình tối ưu hóa.",
+            "Việc chia cho căn bậc hai của d_k giúp chuẩn hóa phương sai về lại 1.0, giữ cho gradient luôn ổn định và dòng chảy thông suốt.",
+            "Đáp án chính xác là B."
+          ]
+        }
+      },
+      {
+        "heading": "12.5. Kiến Trúc Transformer Toàn Diện: Đối Đầu Encoder-Only (BERT) vs Decoder-Only (GPT) & Cơ Chế Causal Masking (Câu 20 & 65 VAIO)",
+        "content": "Phân tích cấu trúc khối Transformer chuẩn (LayerNorm, Residual Connection, FFN); giải mã 3 thành phần đầu vào của BERT (Câu 20 VAIO) và token [CLS] (Câu 65 VAIO); cơ chế Causal Masking tạo sinh của GPT và bảng so sánh đối đầu toàn diện.",
+        "deepDive": "**1. Cấu trúc một khối Transformer chuẩn mực (Transformer Block):**\nMỗi khối Transformer được ghép từ hai tầng con cốt lõi (Sub-layers):\n1. **Tầng Multi-Head Attention:** Cho phép các token giao tiếp và tổng hợp thông tin từ nhau.\n2. **Tầng Mạng Nơ-ron Truyền Thẳng (Feed-Forward Network - FFN):** Gồm 2 tầng kết nối đầy đủ (Linear) với hàm kích hoạt phi tuyến tính (như ReLU hoặc GELU) xử lý độc lập trên từng vị trí token:\n   $$\\text{FFN}(x) = \\max(0, x W_1 + b_1) W_2 + b_2$$\n\nBao bọc quanh mỗi tầng con là cơ chế **Kết nối tắt (Residual Connection) & Chuẩn hóa tầng (Layer Normalization)**:\n$$\\text{Output} = \\text{LayerNorm}(x + \\text{SubLayer}(x))$$\n*Tại sao Transformer dùng Layer Normalization (LayerNorm) thay vì Batch Normalization (BatchNorm) của CNN?*\n- BatchNorm chuẩn hóa qua toàn bộ các mẫu trong cùng một mini-batch. Trong NLP, mỗi câu văn có độ dài khác nhau, và kích thước batch khi suy luận có thể chỉ là 1 câu $\\to$ BatchNorm hoạt động rất kém.\n- LayerNorm chuẩn hóa qua tất cả các đặc trưng của **cùng một token đơn lẻ**, hoàn toàn độc lập với kích thước mini-batch và độ dài chuỗi!\n\n---\n\n**2. Nhánh Encoder-Only: Mô hình BERT (Devlin et al., Google 2018 - CÂU 20 & 65 VAIO):**\nBERT viết tắt của **Bidirectional Encoder Representations from Transformers**. Đây là mô hình chuyên gia về **Hiểu Ngôn Ngữ Tự Nhiên (NLU - Natural Language Understanding)**.\n\n- **Cơ chế Chú Ý Hai Chiều (Bidirectional Attention):**\n  Khi đọc một từ, BERT được phép nhìn thấy cả các từ đứng trước nó (bên trái) và các từ đứng sau nó (bên phải) cùng một lúc. Giống như một học sinh đọc đi đọc lại cả đoạn văn để hiểu trọn vẹn ngữ nghĩa.\n- **3 THÀNH PHẦN ĐẦU VÀO HOÀN CHỈNH CỦA BERT (CÂU 20 ĐỀ THI CHÍNH THỨC VAIO 2025):**\n  Để đưa dữ liệu vào BERT, ta không chỉ đưa văn bản thô mà phải chuẩn bị đúng **3 Tensor đầu vào đồng thời**:\n  1. **Token IDs (Vector chỉ số từ):** Danh sách các số nguyên định danh vị trí của từng token trong từ điển WordPiece (gồm token đặc biệt `[CLS]` ở đầu câu và `[SEP]` ở cuối câu hoặc ngăn cách hai câu).\n  2. **Attention Mask (Mặt nạ chú ý):** Tensor nhị phân gồm các số $1$ và $0$:\n     - Giá trị $1$: Vị trí chứa token từ ngữ thực sự (mô hình cần chú ý).\n     - Giá trị $0$: Vị trí của các token đệm `[PAD]` (mô hình phải bỏ qua, không tính attention).\n  3. **Token Type IDs (Segment Embeddings - Chỉ số loại token):** Phân biệt câu thứ nhất (mang giá trị $0$) và câu thứ hai (mang giá trị $1$) khi đưa một cặp câu vào mô hình (như trong bài toán Hỏi - Đáp hoặc Suy luận ngữ nghĩa).\n- **Hai nhiệm vụ tiền huấn luyện (Pre-training Objectives):**\n  1. *Masked Language Modeling (MLM - Điền từ vào chỗ trống):* Che ngẫu nhiên 15% token bằng ký hiệu `[MASK]` và bắt mô hình đoán từ bị che dựa trên ngữ cảnh 2 chiều.\n  2. *Next Sentence Prediction (NSP - Dự đoán câu kế tiếp):* Cho cặp câu (A, B), dự đoán B có phải câu nối tiếp tự nhiên của A hay không.\n- **Quy trình Tinh Chỉnh (Fine-tuning - CÂU 65 VAIO):**\n  Để fine-tune BERT cho bài toán phân loại văn bản (như phân tích cảm xúc tích cực/tiêu cực):\n  - Ta đặt một lớp phân loại tuyến tính (Classification Head) gắn trực tiếp vào vector biểu diễn đầu ra của **token đặc biệt `[CLS]`** (Classification Token)!\n  - Vector của `[CLS]` đã tích lũy và tóm tắt toàn bộ thông tin ngữ nghĩa của toàn bộ câu qua các tầng Self-Attention hai chiều.\n\n---\n\n**3. Nhánh Decoder-Only: Mô hình GPT (OpenAI - Generative Pre-trained Transformer):**\nGPT là mô hình chuyên gia về **Tạo Sinh Ngôn Ngữ Tự Nhiên (NLG - Natural Language Generation)**, nền tảng của ChatGPT.\n\n- **Cơ chế Chú Ý Tự Hồi Quy Một Chiều (Autoregressive & Causal Masking):**\n  - Khác với BERT, GPT sinh văn bản từ trái sang phải, từng từ một.\n  - Khi đang dự đoán từ thứ $t$, mô hình **TUYỆT ĐỐI KHÔNG ĐƯỢC PHÉP NHÌN LÉN** các từ tương lai $t+1, t+2, \\dots$!\n- **Mặt nạ nhân quả (Causal Mask / Look-ahead Mask):**\n  Trong ma trận chú ý $QK^T$, tất cả các vị trí tương lai ở góc tam giác trên ($j > i$) bị ép gán bằng $-\\infty$ trước khi đưa vào Softmax:\n  $$\\text{Mask}_{ij} = \\begin{cases} 0 & \\text{nếu } j \\le i \\\\ -\\infty & \\text{nếu } j > i \\end{cases}$$\n  Vì $e^{-\\infty} = 0$, trọng số chú ý tới các từ tương lai bị triệt tiêu hoàn toàn về $0.0$.\n- **Nhiệm vụ huấn luyện:** Dự đoán từ tiếp theo (Next Token Prediction / Causal Language Modeling) bằng hàm mất mát Cross-Entropy.\n\n---\n\n**4. Bảng So Sánh Đối Đầu Kinh Điển: BERT vs GPT:**\n\n| Tiêu Chí | BERT (Encoder-Only) | GPT (Decoder-Only) |\n| :--- | :--- | :--- |\n| **Hướng Chú Ý** | **Hai chiều (Bidirectional)**: Nhìn cả trái và phải | **Một chiều (Unidirectional / Causal)**: Chỉ nhìn bên trái |\n| **Cơ Chế Mask** | Che ngẫu nhiên 15% token (`[MASK]`) | Che toàn bộ tam giác trên bằng $-\\infty$ (Causal Mask) |\n| **Đầu Vào (Câu 20)** | **Token IDs, Attention Mask, Token Type IDs** | Token IDs, Attention Mask (tùy chọn) |\n| **Mục Tiêu Huấn Luyện**| MLM (Masked LM) + NSP (Next Sentence) | Next Token Prediction (Tự hồi quy) |\n| **Fine-tune Phân Loại (Câu 65)** | Gắn lớp phân loại vào token **`[CLS]`** | Lấy token cuối cùng của chuỗi |\n| **Điểm Mạnh Cốt Lõi** | Đọc hiểu, phân loại văn bản, trích xuất thực thể (NER) | **Sinh văn bản tự do, viết luận, lập trình, Chatbot hội thoại** |",
+        "formula": "\\text{BERT Input} = \\{ \\text{Token IDs}, \\text{Attention Mask}, \\text{Token Type IDs} \\}, \\quad \\text{Mask}_{ij} = -\\infty \\text{ (if } j > i \\text{)}",
+        "mathExplainer": [
+          {
+            "sym": "\\text{Token IDs}",
+            "name": "Chỉ số từ vựng",
+            "mean": "Mã số định danh các token trong bảng từ điển WordPiece (kèm [CLS], [SEP])."
+          },
+          {
+            "sym": "\\text{Attention Mask}",
+            "name": "Mặt nạ chú ý",
+            "mean": "Tensor nhị phân 1/0 phân biệt token nội dung thật và khoảng đệm padding [PAD]."
+          },
+          {
+            "sym": "\\text{Token Type IDs}",
+            "name": "Chỉ số loại token",
+            "mean": "Tensor phân biệt câu A (giá trị 0) và câu B (giá trị 1) trong cặp câu đầu vào."
+          },
+          {
+            "sym": "\\text{[CLS]}",
+            "name": "Classification Token",
+            "mean": "Token đặc biệt đứng đầu câu BERT dùng để gắn Classification Head khi fine-tune."
+          },
+          {
+            "sym": "\\text{Causal Mask}",
+            "name": "Mặt nạ nhân quả GPT",
+            "mean": "Che các vị trí tương lai bằng trừ vô cùng để mô hình không nhìn lén khi tạo sinh."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: BERT Bidirectional Attention -->\n                      <g transform=\"translate(25, 20)\">\n                        <text x=\"130\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">BERT (Encoder - Hai Chiều)</text>\n                        <!-- 4x4 Full Attention Grid -->\n                        <g transform=\"translate(15, 30)\">\n                          <rect x=\"0\" y=\"0\" width=\"80\" height=\"80\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <!-- all cells active (gray fill) -->\n                          <rect x=\"0\" y=\"0\" width=\"80\" height=\"80\" fill=\"#333\"/>\n                          <line x1=\"20\" y1=\"0\" x2=\"20\" y2=\"80\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                          <line x1=\"40\" y1=\"0\" x2=\"40\" y2=\"80\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                          <line x1=\"60\" y1=\"0\" x2=\"60\" y2=\"80\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                          <line x1=\"0\" y1=\"20\" x2=\"80\" y2=\"20\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                          <line x1=\"0\" y1=\"40\" x2=\"80\" y2=\"40\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                          <line x1=\"0\" y1=\"60\" x2=\"80\" y2=\"60\" stroke=\"#fff\" stroke-width=\"0.8\"/>\n                          <text x=\"40\" y=\"44\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">Full 2 Chiều</text>\n                        </g>\n                        <!-- Explanation -->\n                        <g transform=\"translate(110, 32)\">\n                          <text x=\"0\" y=\"15\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Đầu vào BERT (Câu 20):</text>\n                          <text x=\"5\" y=\"30\" font-family=\"Georgia\" font-size=\"8\">• 1. Token IDs</text>\n                          <text x=\"5\" y=\"44\" font-family=\"Georgia\" font-size=\"8\">• 2. Attention Mask</text>\n                          <text x=\"5\" y=\"58\" font-family=\"Georgia\" font-size=\"8\">• 3. Token Type IDs</text>\n                          <text x=\"0\" y=\"75\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\">Fine-tune: Token [CLS]</text>\n                        </g>\n                      </g>\n                      <!-- Divider -->\n                      <line x1=\"330\" y1=\"20\" x2=\"330\" y2=\"155\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                      <!-- Right: GPT Causal Masking -->\n                      <g transform=\"translate(355, 20)\">\n                        <text x=\"130\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">GPT (Decoder - Causal Mask 1 Chiều)</text>\n                        <!-- 4x4 Triangular Mask Grid -->\n                        <g transform=\"translate(15, 30)\">\n                          <rect x=\"0\" y=\"0\" width=\"80\" height=\"80\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                          <!-- Upper triangle masked (-inf, white/pattern) -->\n                          <!-- Lower triangle active (dark) -->\n                          <rect x=\"0\" y=\"0\" width=\"20\" height=\"80\" fill=\"#333\"/>\n                          <rect x=\"20\" y=\"20\" width=\"20\" height=\"60\" fill=\"#333\"/>\n                          <rect x=\"40\" y=\"40\" width=\"20\" height=\"40\" fill=\"#333\"/>\n                          <rect x=\"60\" y=\"60\" width=\"20\" height=\"20\" fill=\"#333\"/>\n                          <!-- Grid lines -->\n                          <line x1=\"20\" y1=\"0\" x2=\"20\" y2=\"80\" stroke=\"#ccc\" stroke-width=\"0.8\"/>\n                          <line x1=\"40\" y1=\"0\" x2=\"40\" y2=\"80\" stroke=\"#ccc\" stroke-width=\"0.8\"/>\n                          <line x1=\"60\" y1=\"0\" x2=\"60\" y2=\"80\" stroke=\"#ccc\" stroke-width=\"0.8\"/>\n                          <line x1=\"0\" y1=\"20\" x2=\"80\" y2=\"20\" stroke=\"#ccc\" stroke-width=\"0.8\"/>\n                          <line x1=\"0\" y1=\"40\" x2=\"80\" y2=\"40\" stroke=\"#ccc\" stroke-width=\"0.8\"/>\n                          <line x1=\"0\" y1=\"60\" x2=\"80\" y2=\"60\" stroke=\"#ccc\" stroke-width=\"0.8\"/>\n                          <text x=\"55\" y=\"25\" font-family=\"Georgia\" font-size=\"8\" fill=\"#999\" text-anchor=\"middle\">-∞</text>\n                          <text x=\"65\" y=\"45\" font-family=\"Georgia\" font-size=\"8\" fill=\"#999\" text-anchor=\"middle\">-∞</text>\n                        </g>\n                        <!-- Explanation -->\n                        <g transform=\"translate(110, 32)\">\n                          <text x=\"0\" y=\"15\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\">Mặt Nạ Causal (-∞):</text>\n                          <text x=\"5\" y=\"30\" font-family=\"Georgia\" font-size=\"8\">• Che các từ tương lai</text>\n                          <text x=\"5\" y=\"44\" font-family=\"Georgia\" font-size=\"8\">• Không được nhìn lén</text>\n                          <text x=\"5\" y=\"58\" font-family=\"Georgia\" font-size=\"8\">• Dự đoán Next Token</text>\n                          <text x=\"0\" y=\"75\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\">Mô hình Tạo Sinh (NLG)</text>\n                        </g>\n                      </g>\n                      <!-- Bottom summary line -->\n                      <g transform=\"translate(0, 135)\">\n                        <rect x=\"25\" y=\"0\" width=\"610\" height=\"24\" fill=\"#f0f0f0\" rx=\"3\"/>\n                        <text x=\"330\" y=\"16\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">BERT: Đọc hiểu 2 chiều (NLU)  |  GPT: Tự hồi quy 1 chiều tạo sinh từ trái sang phải (NLG)</text>\n                      </g>\n                    </svg>",
+          "caption": "So sánh ma trận Attention: BERT chú ý toàn phần 2 chiều vs GPT dùng mặt nạ Causal Masking che góc tam giác trên bằng trừ vô cùng."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 20 & 65 Đề thi chính thức VAIO 2025:\n1. **Thành phần đầu vào của BERT (Câu 20):**\n   - Đề thi thường đưa các đáp án bẫy như: *\"Chỉ văn bản thô\"*, *\"Cặp câu với nhúng\"*, *\"Từ rời rạc\"*.\n   - ĐÁP ÁN CHÍNH XÁC: Phải đủ bộ ba: **Vector ID (Token ID), Mặt nạ chú ý (Attention mask), ID loại token (Token type ID)**!\n2. **Vị trí tinh chỉnh của BERT (Câu 65):** Token dùng để gắn Classification Head khi fine-tune phân loại chuỗi luôn luôn là token đặc biệt **`[CLS]`** đặt ở đầu câu!\n3. **Cơ chế Causal Mask của GPT:** Chú ý rằng các vị trí tương lai bị gán bằng $-\\infty$ (chứ không phải $0$), để sau khi qua hàm Softmax ($e^{-\\infty}$) nó mới biến thành xác suất bằng $0$!",
+        "practiceQuestion": {
+          "level": "Cơ bản (Câu 20 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Mô hình BERT nhận các thành phần tensor đầu vào hoàn chỉnh là gì? (Câu 20 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. Vector ID (Token ID), Mặt nạ chú ý (Attention mask), ID loại token (Token type ID)",
+            "B. Chỉ văn bản thô (raw text)",
+            "C. Cặp câu với nhúng từ (word embeddings)",
+            "D. Danh sách các từ rời rạc đã được hạ chữ thường"
+          ],
+          "correctIndex": 0,
+          "hint": "BERT cần biết mã số từ, vị trí nào là padding cần bỏ qua, và ranh giới phân biệt giữa câu thứ nhất và câu thứ hai.",
+          "solution": [
+            "Đầu vào chuẩn của mô hình BERT bao gồm 3 tensor kết hợp:",
+            "1. Token IDs: Chỉ số nhận diện token trong từ điển WordPiece.",
+            "2. Attention Mask: Mặt nạ nhị phân đánh dấu token thật (1) và token đệm padding (0).",
+            "3. Token Type IDs (Segment IDs): Đánh dấu phân biệt câu A (0) và câu B (1) trong bài toán cặp câu.",
+            "Đáp án chính xác là A."
+          ]
+        }
+      },
+      {
+        "heading": "12.6. Kỷ Nguyên Mô Hình Ngôn Ngữ Lớn (LLMs), Kỹ Thuật Prompt Engineering & Chuỗi Suy Luận Chain-of-Thought (CoT - Câu 16 VAIO)",
+        "content": "Khám phá định luật tỉ lệ Scaling Laws và năng lực bộc phát của LLMs; quy trình căn chỉnh RLHF 3 giai đoạn; nghệ thuật Prompt Engineering; bản chất đột phá của kỹ thuật Chuỗi Suy Luận Chain-of-Thought (Câu 16 VAIO) và giải pháp thích ứng tham số hiệu quả PEFT (LoRA).",
+        "deepDive": "**1. Kỷ nguyên Mô Hình Ngôn Ngữ Lớn (Large Language Models - LLMs):**\nKhi các kỹ sư tiếp tục tăng kích thước mô hình Transformer từ vài trăm triệu tham số lên hàng chục, hàng trăm tỷ tham số và nạp vào hàng nghìn tỷ token văn bản, một hiện tượng kỳ vĩ đã xảy ra:\n- **Định luật tỉ lệ (Scaling Laws - Kaplan et al., OpenAI 2020):** Hiệu năng của mô hình tăng trưởng theo hàm mũ mượt mà tỉ lệ thuận với 3 yếu tố: Số lượng tham số ($N$), Kích thước tập dữ liệu ($D$) và Lượng tính toán ($C$).\n- **Năng lực bộc phát (Emergent Abilities):** Khi mô hình vượt qua một ngưỡng quy mô nhất định (thường trên 10 tỷ - 50 tỷ tham số), nó đột ngột sở hữu những khả năng kỳ diệu mà các mô hình nhỏ hoàn toàn không có: Giải toán học nhiều bước, Lập trình mã nguồn phức tạp, Hiểu sự châm biếm, Suy luận bắc cầu và Dịch thuật đa ngôn ngữ!\n\n---\n\n**2. Quy trình Căn Chỉnh RLHF 3 giai đoạn (Reinforcement Learning from Human Feedback):**\nMột mô hình ngôn ngữ sau giai đoạn Pre-training (huấn luyện trước) chỉ đơn thuần là một cỗ máy dự đoán từ tiếp theo. Nó có thể nói huyên thuyên, bịa đặt thông tin (Ảo giác - Hallucination) hoặc sinh ra nội dung độc hại. Để biến nó thành một trợ lý AI hữu ích, an toàn và trung thực, OpenAI đã áp dụng quy trình **RLHF 3 giai đoạn**:\n1. **Giai đoạn 1: Tinh chỉnh có giám sát (SFT - Supervised Fine-Tuning):** Thu thập hàng chục nghìn cặp (Prompt của người dùng, Câu trả lời mẫu mực do chuyên gia con người biên soạn) để dạy mô hình cách trả lời lễ phép và đúng trọng tâm.\n2. **Giai đoạn 2: Mô hình hóa phần thưởng (Reward Modeling - RM):** Cho mô hình sinh ra 4 câu trả lời khác nhau cho cùng một câu hỏi. Con người xếp hạng từ tốt nhất đến tệ nhất ($A > B > C > D$). Huấn luyện một mạng nơ-ron chấm điểm (Reward Model) để dự đoán sở thích của con người.\n3. **Giai đoạn 3: Tối ưu hóa chính sách PPO (Proximal Policy Optimization):** Dùng điểm số của Reward Model làm tín hiệu phần thưởng để tinh chỉnh LLM bằng thuật toán học tăng cường PPO, kèm theo hàm phạt KL-Divergence để mô hình không bị lệch quá xa khỏi phân phối ngôn ngữ gốc.\n\n---\n\n**3. Nghệ thuật Kỹ Thuật Gợi Ý (Prompt Engineering):**\nPrompt là câu lệnh hoặc hướng dẫn đầu vào mà người dùng cung cấp cho LLM.\n- **Zero-shot Prompting:** Đặt câu hỏi trực tiếp không kèm theo bất kỳ ví dụ mẫu nào:\n  $$\\text{Prompt: \"Hãy dịch câu sau sang tiếng Pháp: Tôi yêu trí tuệ nhân tạo.\"}$$\n- **Few-shot Prompting (In-Context Learning):** Cung cấp 2 - 3 cặp ví dụ minh họa (mẫu câu hỏi và lời giải) ngay trong ngữ cảnh trước khi đưa ra câu hỏi chính. Mô hình tự động nhận diện quy luật và bắt chước khuôn mẫu mà không cần cập nhật bất kỳ trọng số nào!\n\n---\n\n**4. KỸ THUẬT CHUỖI SUY LUẬN CHAIN-OF-THOUGHT (CoT - CÂU 16 ĐỀ THI CHÍNH THỨC VAIO 2025):**\nNăm 2022, bài báo chấn động của Jason Wei và nhóm Google Research đã công bố kỹ thuật **Chain-of-Thought (CoT)**.\n\n- **Vấn đề của phương pháp Prompting truyền thống (Standard Prompting):**\n  Khi gặp các bài toán đố nhiều bước, toán học hoặc suy luận logic, nếu ép mô hình đưa ra ngay đáp án cuối cùng, mô hình Transformer tự hồi quy thường đoán mò và đưa ra kết quả sai bét. Lý do: Mô hình không có \"không gian bộ nhớ nháp\" để thực hiện các phép tính trung gian!\n- **Bản chất của Chain-of-Thought (Câu 16 VAIO):**\n  Thúc đẩy mô hình giải quyết bài toán phức tạp bằng cách **LIỆT KÊ TỪNG BƯỚC SUY LUẬN TRUNG GIAN (Intermediate reasoning steps)** trước khi đưa ra kết luận cuối cùng!\n- **Sức mạnh kỳ diệu của Zero-shot CoT (Kojima et al., 2022):**\n  Chỉ cần thêm một câu thần chú ngắn ngủi vào cuối prompt:\n  $$\\text{\"Hãy suy nghĩ từng bước một (Let's think step by step)\"}$$\n  Độ chính xác của mô hình trên tập bài toán đố tiểu học GSM8K tăng vọt ngoạn mục từ **17.7% lên tới 78.7%**!\n\n*Tại sao Chain-of-Thought lại hiệu quả đến mức thần kỳ như vậy?*\n- Về bản chất toán học, mô hình Transformer dự đoán token tiếp theo dựa trên tất cả các token xuất hiện trước đó.\n- Khi mô hình tự viết ra bước suy luận 1, các token của bước 1 trở thành ngữ cảnh đầu vào mới. Cơ chế Self-Attention dùng các token này để tính toán bước suy luận 2.\n- CoT đã phân rã một bài toán hóc búa có độ phức tạp cao thành một chuỗi các bước suy luận đơn giản, cho phép mạng nơ-ron phân bổ năng lực tính toán tương xứng với độ khó của bài toán!\n\n---\n\n**5. Thách thức tài nguyên tính toán & Kỹ thuật Tinh chỉnh hiệu quả tham số (PEFT - LoRA):**\n- *Liên hệ Câu 4 VAIO:* Các mô hình LLM ngày nay có từ 7 tỷ đến 70 tỷ tham số. Việc fine-tune toàn bộ trọng số (Full Fine-tuning) đòi hỏi cụm siêu máy tính hàng trăm GPU chuyên dụng với dung lượng VRAM khổng lồ $\\to$ Hầu như bất khả thi đối với học sinh hay doanh nghiệp vừa và nhỏ!\n- **Giải pháp LoRA (Low-Rank Adaptation - Hu et al., 2021):**\n  Đóng băng 100% trọng số của mô hình gốc $W_0 \\in \\mathbb{R}^{d \\times k}$. Khi huấn luyện, ta chỉ gắn thêm hai ma trận tích hạng thấp kích thước siêu nhỏ $A \\in \\mathbb{R}^{d \\times r}$ và $B \\in \\mathbb{R}^{r \\times k}$ (với hạng $r \\ll d$, thường chọn $r = 8$ hoặc $16$):\n  $$W = W_0 + \\Delta W = W_0 + B \\cdot A$$\n  Số lượng tham số cần cập nhật giảm hơn **99.9%**, cho phép tinh chỉnh các mô hình ngôn ngữ lớn mạnh mẽ ngay trên một chiếc máy tính cá nhân!",
+        "formula": "\\text{Chain-of-Thought: Input} \\xrightarrow{} \\text{Step 1} \\xrightarrow{} \\text{Step 2} \\xrightarrow{} \\dots \\xrightarrow{} \\text{Final Answer}, \\quad W = W_0 + B \\cdot A",
+        "mathExplainer": [
+          {
+            "sym": "\\text{Chain-of-Thought (CoT)}",
+            "name": "Chuỗi suy luận trung gian",
+            "mean": "Thúc đẩy LLM giải bài toán bằng cách phân tích từng bước lập luận trước khi chốt đáp án."
+          },
+          {
+            "sym": "\\text{Zero-shot CoT}",
+            "name": "CoT không mẫu",
+            "mean": "Thêm câu lệnh 'Hãy suy nghĩ từng bước một' để kích hoạt năng lực suy luận tự nhiên của LLM."
+          },
+          {
+            "sym": "\\text{Few-shot Prompting}",
+            "name": "Gợi ý kèm ví dụ mẫu",
+            "mean": "Cung cấp một vài cặp mẫu (hỏi - đáp) để mô hình học theo ngữ cảnh (In-Context Learning)."
+          },
+          {
+            "sym": "\\text{RLHF}",
+            "name": "Học tăng cường từ phản hồi người",
+            "mean": "Quy trình căn chỉnh 3 bước (SFT -> Reward Model -> PPO) giúp AI an toàn và hữu ích."
+          },
+          {
+            "sym": "\\text{LoRA } (B \\cdot A)",
+            "name": "Thích ứng tích hạng thấp",
+            "mean": "Phương pháp PEFT đóng băng mô hình gốc, chỉ học ma trận hạng nhỏ giúp tiết kiệm 99% VRAM."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Standard Prompting (Fails) -->\n                      <g transform=\"translate(25, 20)\">\n                        <text x=\"135\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Standard Prompting (Đoán Mò)</text>\n                        <rect x=\"0\" y=\"28\" width=\"270\" height=\"42\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"3\"/>\n                        <text x=\"10\" y=\"44\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\">Câu hỏi:</text>\n                        <text x=\"55\" y=\"44\" font-family=\"Georgia\" font-size=\"8\">Mai có 5 quả táo, mẹ cho thêm 3 quả,</text>\n                        <text x=\"10\" y=\"58\" font-family=\"Georgia\" font-size=\"8\">Mai ăn mất 2 quả. Hỏi Mai còn mấy quả?</text>\n                        <!-- Arrow down -->\n                        <line x1=\"135\" y1=\"70\" x2=\"135\" y2=\"85\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <polygon points=\"135,85 131,79 139,79\" fill=\"#111\"/>\n                        <!-- Output Direct Answer -->\n                        <rect x=\"35\" y=\"85\" width=\"200\" height=\"35\" fill=\"#f5f5f5\" stroke=\"#111\" rx=\"3\"/>\n                        <text x=\"135\" y=\"102\" font-family=\"Georgia\" font-size=\"9\" fill=\"#999\" text-anchor=\"middle\">Đáp án: 7 quả (SAI! Ảo giác)</text>\n                        <text x=\"135\" y=\"114\" font-family=\"Georgia\" font-size=\"7.5\" fill=\"#555\" text-anchor=\"middle\">Thiếu bước tính trung gian</text>\n                      </g>\n                      <!-- Divider -->\n                      <line x1=\"320\" y1=\"20\" x2=\"320\" y2=\"155\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                      <!-- Right: Chain-of-Thought (Succeeds) -->\n                      <g transform=\"translate(345, 20)\">\n                        <text x=\"145\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Chain-of-Thought (Câu 16 VAIO)</text>\n                        <rect x=\"0\" y=\"28\" width=\"290\" height=\"42\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"3\"/>\n                        <text x=\"10\" y=\"44\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\">Prompt:</text>\n                        <text x=\"55\" y=\"44\" font-family=\"Georgia\" font-size=\"8\">... (Cùng bài toán trên) ...</text>\n                        <text x=\"10\" y=\"58\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" fill=\"#111\">\"Hãy suy nghĩ từng bước một\"</text>\n                        <!-- Arrow down -->\n                        <line x1=\"145\" y1=\"70\" x2=\"145\" y2=\"80\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <polygon points=\"145,80 141,74 149,74\" fill=\"#111\"/>\n                        <!-- Step by step box -->\n                        <rect x=\"0\" y=\"80\" width=\"290\" height=\"52\" fill=\"#111\" rx=\"3\"/>\n                        <text x=\"10\" y=\"95\" font-family=\"Georgia\" font-size=\"8\" fill=\"#fff\">• Bước 1: Sau khi mẹ cho: 5 + 3 = 8 quả.</text>\n                        <text x=\"10\" y=\"108\" font-family=\"Georgia\" font-size=\"8\" fill=\"#fff\">• Bước 2: Sau khi ăn 2 quả: 8 - 2 = 6 quả.</text>\n                        <text x=\"10\" y=\"122\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" fill=\"#fff\">⇒ Đáp án cuối cùng: 6 quả (ĐÚNG 100%!)</text>\n                      </g>\n                      <!-- Bottom summary -->\n                      <g transform=\"translate(0, 142)\">\n                        <text x=\"330\" y=\"15\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">CoT mở khóa năng lực suy luận logic bằng cách liệt kê từng bước trung gian!</text>\n                      </g>\n                    </svg>",
+          "caption": "So sánh Standard Prompting (đoán mò đáp án trực tiếp dễ sai) vs Chain-of-Thought (lập luận từng bước trung gian giải quyết bài toán phức tạp)."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 16 Đề thi chính thức VAIO 2025:\n1. **Hiểu sai định nghĩa của Chain-of-Thought (Câu 16):**\n   - Đề thi thường đưa các đáp án bẫy như: *\"Yêu cầu mô hình trả lời càng ngắn gọn càng tốt để tiết kiệm tài nguyên\"*, *\"Huấn luyện mô hình sinh câu hỏi thay vì câu trả lời\"*, *\"Dự đoán từ tiếp theo bằng dữ liệu song ngữ\"*.\n   - ĐÁP ÁN ĐÚNG DUY NHẤT: Thúc đẩy mô hình giải bài toán bằng cách **liệt kê từng bước suy luận trung gian (Intermediate reasoning steps)**!\n2. **Khái niệm Few-shot Prompting:** Không phải là cập nhật lại trọng số (fine-tuning) mà là đưa các ví dụ mẫu trực tiếp vào trong ngữ cảnh gợi ý (In-Context Learning).",
+        "practiceQuestion": {
+          "level": "Cơ bản (Câu 16 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Kỹ thuật Chain-of-Thought (CoT) trong các mô hình ngôn ngữ lớn (LLM) là gì? (Câu 16 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. Yêu cầu mô hình trả lời càng ngắn gọn càng tốt để tiết kiệm tài nguyên tính toán",
+            "B. Huấn luyện mô hình dự đoán từ tiếp theo bằng dữ liệu văn bản song ngữ",
+            "C. Yêu cầu mô hình sinh câu hỏi thay vì sinh câu trả lời",
+            "D. Thúc đẩy mô hình giải bài toán bằng cách liệt kê từng bước suy luận trung gian"
+          ],
+          "correctIndex": 3,
+          "hint": "Chain-of-Thought có nghĩa là 'chuỗi suy nghĩ' - hướng dẫn mô hình tư duy từng bước như con người giải toán.",
+          "solution": [
+            "Kỹ thuật Chain-of-Thought (CoT - Chuỗi suy nghĩ) hướng dẫn mô hình phân tích bài toán thành các bước lập luận trung gian từng bước một trước khi đưa ra kết luận cuối cùng.",
+            "Điều này giúp mô hình phân bổ không gian tính toán và sử dụng cơ chế Self-Attention nhìn lại các kết quả trung gian, làm tăng vượt bậc độ chính xác trong giải toán và suy luận logic.",
+            "Đáp án chính xác là D."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-attention-matrix",
+    "examConnection": {
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI Về NLP, Attention & LLMs",
+      "items": [
+        {
+          "code": "Câu 14 (Đề Chính Thức)",
+          "problem": "Thứ tự 4 bước tiền xử lý văn bản thô chuẩn mực trong bài toán NLP.",
+          "solution": [
+            "Quy trình chuẩn: 2. Chuẩn hóa văn bản (Lowercasing, xóa ký tự lạ) → 1. Tách từ (Tokenization) → 3. Rút gọn từ (Stemming/Lemmatization) → 4. Gán nhãn từ loại (POS Tagging). Đáp án B."
+          ]
+        },
+        {
+          "code": "Câu 19 & 91 (Đề Chính Thức)",
+          "problem": "Mục tiêu huấn luyện của mô hình Word2Vec CBOW và GloVe.",
+          "solution": [
+            "CBOW: Dùng các từ ngữ cảnh xung quanh để dự đoán từ trung tâm P(w_t | context).",
+            "GloVe: Được huấn luyện từ Ma trận đồng xuất hiện toàn cục (Co-occurrence matrix) bằng phương pháp hồi quy bình phương tối thiểu có trọng số. Đáp án B."
+          ]
+        },
+        {
+          "code": "Câu 4 (Đề Chính Thức)",
+          "problem": "Tính số lượng tham số có thể huấn luyện của tầng mạng hồi quy RNN và LSTM.",
+          "solution": [
+            "RNN: Params = H × D + H × H + H = H(D + H + 1). Với D = 100, H = 128 ⇒ Params = 29,312.",
+            "LSTM (4 cổng độc lập): Params = 4 × H(D + H + 1) = 4 × 29,312 = 117,248 tham số."
+          ]
+        },
+        {
+          "code": "Câu 74 (Đề Chính Thức)",
+          "problem": "Mục đích của việc chia cho căn bậc hai d_k trong công thức Scaled Dot-Product Attention.",
+          "solution": [
+            "Để ngăn giá trị tích vô hướng quá lớn khiến hàm Softmax bị bão hòa gradient (gradient triệt tiêu về 0 gây tiêu biến gradient). Chia căn d_k đưa phương sai về chuẩn 1.0."
+          ]
+        },
+        {
+          "code": "Câu 20 & 65 (Đề Chính Thức)",
+          "problem": "3 thành phần tensor đầu vào của BERT và vị trí token dùng để fine-tune phân loại.",
+          "solution": [
+            "Đầu vào BERT gồm: Token IDs (chỉ số từ), Attention Mask (mặt nạ padding), Token Type IDs (phân biệt cặp câu A và B). Đáp án A (Câu 20).",
+            "Fine-tune: Đặt lớp phân loại lên vector đại diện của token đặc biệt [CLS] ở đầu câu (Câu 65)."
+          ]
+        },
+        {
+          "code": "Câu 16 (Đề Chính Thức)",
+          "problem": "Bản chất và định nghĩa của kỹ thuật Chain-of-Thought (CoT) trong LLMs.",
+          "solution": [
+            "Thúc đẩy mô hình giải bài toán phức tạp bằng cách liệt kê từng bước suy luận trung gian (Intermediate reasoning steps). Đáp án D."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Tiền xử lý văn bản chuẩn mực: Chuẩn hóa → Tách từ (Tokenization) → Rút gọn từ (Stemming/Lemma) → Gán nhãn từ loại (POS Tagging). Bắt buộc tokenize xong mới lọc từ dừng!",
+      "Biểu diễn từ: One-Hot thất bại vì thưa thớt và trực giao; Word2Vec CBOW dùng ngữ cảnh đoán từ giữa; Skip-gram dùng từ giữa đoán ngữ cảnh; GloVe khớp ma trận đồng xuất hiện toàn cục.",
+      "Đếm tham số mạng chuỗi: RNN có Params = H(D + H + 1); LSTM có 4 cổng van nên Params = 4 × H(D + H + 1); GRU có 3 cổng nên nhân 3.",
+      "Scaled Dot-Product Attention: Softmax(QK^T / √d_k)V. Bắt buộc chia căn d_k để kiểm soát phương sai bằng 1.0, ngăn bão hòa Softmax và triệt tiêu gradient.",
+      "BERT vs GPT: BERT đọc hiểu 2 chiều (nhận 3 đầu vào Token IDs, Attention mask, Token type IDs; fine-tune trên [CLS]); GPT tự hồi quy 1 chiều tạo sinh dùng Causal Masking che góc trên bằng -inf.",
+      "Kỷ nguyên LLM & CoT: Thêm câu lệnh 'Hãy suy nghĩ từng bước một' thúc đẩy mô hình liệt kê các bước suy luận trung gian, tăng vọt độ chính xác giải toán và logic."
+    ]
+  },
+  {
+    "id": "lesson-13",
+    "title": "13. Học Tự Giám Sát, GANs & Mô Hình Khuếch Tán (Diffusion Models)",
+    "syllabusBadge": "BUỔI 12: GENERATIVE AI & ADVANCED TOPICS: SSL, GANS, DIFFUSION & TRIỂN KHAI THỰC CHIẾN",
+    "summary": "Đỉnh cao của Trí Tuệ Nhân Tạo hiện đại và Tạo Sinh (Generative AI) từ con số 0: Thoát khỏi 'cơn ác mộng gán nhãn' bằng Học Tự Giám Sát (Self-Supervised Learning) và Mất mát đối sánh (Contrastive Learning / SimCLR); khám phá không gian tiềm ẩn (Latent Space) từ Bộ mã hóa tự động (Autoencoder nút thắt thông tin - Câu 77 VAIO) đến VAE và lý do ảnh bị mờ (Câu 97 VAIO); giải mã trò chơi đối kháng Minimax của GANs (Câu 95 VAIO) cùng căn bệnh chí mạng Sụp đổ mô hình Mode Collapse (Câu 61 VAIO); làm chủ bước nhảy vọt của Mô hình khuếch tán (Diffusion Models / Stable Diffusion); cùng các kỹ thuật huấn luyện thực chiến: xử lý tràn bộ nhớ GPU Out-of-Memory (Câu 51 VAIO) và tối ưu hóa triển khai thời gian thực ONNX / TensorRT (Câu 86 VAIO).",
+    "intuition": {
+      "title": "Trực giác thực tế: Đứa trẻ sơ sinh khám phá thế giới, Kẻ làm tiền giả & Ly nước mực khuếch tán",
+      "content": "Để thấu hiểu tại sao nhân loại có thể tạo ra những cỗ máy AI vẽ tranh nghệ thuật như Midjourney, Stable Diffusion hay tự học mà không cần con người dán nhãn, hãy cùng lắng đọng qua ba câu chuyện đời thực:\n\n**1. Đứa trẻ sơ sinh khám phá thế giới & Bản chất Học Tự Giám Sát (SSL):**\n- Khi một đứa trẻ sơ sinh mới vài tháng tuổi, cha mẹ không thể ngồi kè kè 24/7 chỉ vào từng đồ vật trong nhà để nói: *\"Đây là cái cốc\", \"Kia là cái thìa\"*. Đứa trẻ tự cầm chiếc cốc, xoay nó nghiêng, nhìn từ trên xuống dưới, làm rơi nó xuống sàn, nhìn nó dưới ánh đèn vàng hay bóng râm ban ngày...\n- Dù góc nhìn thay đổi, màu sắc ánh sáng thay đổi, chiếc cốc bị bàn tay che mất một nửa, bộ não đứa trẻ tự khắc hiểu ra một chân lý bất biến: **TẤT CẢ NHỮNG HÌNH ẢNH ĐÓ ĐỀU LÀ CÙNG MỘT CHIẾC CỐC!**\n- Đó chính là **Học Tự Giám Sát Đối Sánh (Contrastive Learning)**: Máy tính tự áp dụng các phép biến đổi (xoay, cắt, đổi màu) lên cùng một bức ảnh để ép các vector biểu diễn phải nằm sát cạnh nhau trong không gian, tự học được tri thức sâu sắc về thế giới mà không cần con người dán dù chỉ một chiếc nhãn!\n\n---\n\n**2. Kẻ làm tiền giả đối đầu Cảnh sát giám định & Căn bệnh Mode Collapse trong GANs:**\n- Làm sao AI có thể vẽ ra một bức chân dung người chưa từng tồn tại đẹp như thật? Ian Goodfellow đã sáng tạo ra một trò chơi đấu trí 2 đấu thủ (Mạng GANs):\n  - **Kẻ làm tiền giả (Generator):** Xuất phát từ một đống giấy vụn (vector nhiễu ngẫu nhiên $z$), cố gắng in ra những tờ tiền giả trông giống thật nhất có thể.\n  - **Cảnh sát giám định (Discriminator):** Nhận cả tiền thật từ ngân hàng ($x$) và tiền giả từ kẻ làm giả ($G(z)$), cố gắng soi kính hiển vi để vạch trần đâu là giả, đâu là thật.\n- Hai bên liên tục so tài qua hàng triệu vòng lặp: Kẻ làm giả bị bắt thì rút kinh nghiệm để in tinh vi hơn; Cảnh sát cũng phải nâng cao nghiệp vụ. Cuộc đua vũ trang này đẩy cả hai cùng tiến bộ vượt bậc đến khi tiền giả hoàn hảo đến mức Cảnh sát chỉ có thể đoán mò 50-50!\n- Nhưng nếu Cảnh sát học quá nhanh và áp đảo hoàn toàn, Kẻ làm giả sẽ nản chí và tìm \"mẹo tủ\": phát hiện ra 1 tờ tiền mệnh giá 100k duy nhất mà Cảnh sát hay sơ hở, thế là nó **CHỈ IN ĐÚNG DUY NHẤT TỜ TIỀN ĐÓ**! Đó chính là căn bệnh **Sụp đổ mô hình (Mode Collapse - Câu 61 VAIO)**: mô hình mất hoàn toàn tính đa dạng tạo sinh!\n\n---\n\n**3. Giọt mực hòa tan & Phép thuật tua ngược thời gian của Mô Hình Khuếch Tán (Diffusion):**\n- Bạn nhỏ một giọt mực xanh vào ly nước lọc trong suốt. Từng giây trôi qua, các phân tử mực khuếch tán ngẫu nhiên, tan dần, tan dần cho đến khi toàn bộ ly nước biến thành một màu xanh nhạt đồng nhất (Quá trình thuận - Forward process). Theo định luật vật lý nhiệt động lực học, bạn không thể bảo ly nước tự gom các phân tử mực lại thành 1 giọt ban đầu.\n- Thế nhưng, AI Mô hình khuếch tán làm được điều kỳ diệu đó: Nó học cách **tua ngược dòng thời gian** (Quá trình khử nhiễu - Reverse process)! Xuất phát từ một đám hạt bụi nhiễu ngẫu nhiên thuần túy, mạng nơ-ron U-Net đoán đúng lượng bụi vừa thêm vào và quét sạch nó từng bước một, kết tinh lại thành một tác phẩm nghệ thuật kiệt xuất!"
+    },
+    "sections": [
+      {
+        "heading": "13.1. Khởi Đầu Từ Con Số 0: Thoát Khỏi 'Cơn Ác Mộng Gán Nhãn' — Bản Chất Của Học Tự Giám Sát (SSL) & Mất Mát Đối Sánh (Contrastive Learning / SimCLR)",
+        "content": "Khám phá nguyên nhân bế tắc của học có giám sát truyền thống; bản chất của Học Tự Giám Sát (Self-Supervised Learning); cơ chế Cặp Dương Tính (Positive Pairs) và Cặp Âm Tính (Negative Pairs); hàm mất mát InfoNCE với hai lực kéo - đẩy trong không gian cầu.",
+        "deepDive": "**1. Cơn ác mộng chi phí của Học Có Giám Sát (Supervised Learning):**\nSuốt nhiều thập kỷ, sự phát triển của Deep Learning gắn liền với Học Có Giám Sát: muốn dạy máy tính nhận diện 1,000 loài vật trong ImageNet, các nhà khoa học phải thuê hàng chục nghìn sinh viên và cộng tác viên trên Amazon Mechanical Turk ngồi dán nhãn thủ công cho 14 triệu bức ảnh.\n- Để huấn luyện xe tự lái nhận diện biển báo, người ta phải vẽ từng chiếc khung chữ nhật cho hàng triệu giờ video quay đường phố.\n- Trong y tế, muốn dán nhãn ảnh chụp X-quang phổi hay MRI não đòi hỏi bác sĩ chuyên khoa đầu ngành với chi phí hàng trăm USD cho mỗi bức ảnh!\n- **Nghịch lý:** Trên Internet có hàng nghìn tỷ bức ảnh, bài viết, video miễn phí nhưng 99.9% trong số đó là **Dữ liệu không gán nhãn (Unlabeled Data)**. Nếu chỉ dựa vào nhãn thủ công của con người, Trí Tuệ Nhân Tạo sẽ lập tức đâm đầu vào ngõ cụt vì cạn kiệt tài nguyên!\n\n---\n\n**2. Cứu tinh của AI hiện đại: Học Tự Giám Sát (Self-Supervised Learning - SSL):**\nYann LeCun (Giải thưởng Turing, Trưởng nhóm AI Meta) đã đưa ra hình ảnh ẩn dụ kinh điển \"Chiếc bánh kem Trí Tuệ Nhân Tạo\":\n- **Phần cốt bánh (90% thể tích):** Là Học Tự Giám Sát — nạp hàng tỷ dữ liệu thô để mô hình tự hiểu cấu trúc ngữ nghĩa của thế giới.\n- **Lớp kem phủ (9%):** Là Học Có Giám Sát — chỉ cần một lượng nhỏ dữ liệu gán nhãn để định hướng chuyên sâu.\n- **Quả anh đào trên đỉnh (1%):** Là Học Tăng Cường (Reinforcement Learning).\n\n*Bản chất của SSL:* Mô hình tự động tạo ra \"đề bài và đáp án\" (Pretext task) từ chính cấu trúc tự thân của dữ liệu mà không cần con người:\n- Trong xử lý ngôn ngữ: Che 15% từ trong câu rồi tự đoán từ bị che (Masked Language Modeling trong BERT).\n- Trong thị giác máy tính: Cắt một góc ảnh, biến đổi màu sắc rồi tự nhận diện xem hai góc nhìn có thuộc cùng một bức ảnh gốc hay không (**Học đối sánh - Contrastive Learning**)!\n\n---\n\n**3. Khung Học Đối Sánh SimCLR (Chen et al., Google Research 2020):**\nMục tiêu của Contrastive Learning là học một không gian biểu diễn vector sao cho:\n- Những hình ảnh có cùng ngữ nghĩa sẽ nằm **sát cạnh nhau (Kéo gần - Pull)**.\n- Những hình ảnh có ngữ nghĩa khác nhau sẽ bị **đẩy ra xa nhau (Đẩy xa - Push)**.\n\nQuy trình hoạt động từng bước của SimCLR:\n1. **Tạo Cặp Dương Tính (Positive Pair - CÂU HỎI THI OLYMPIC):**\n   - Lấy một bức ảnh gốc $x$ từ tập dữ liệu (gọi là ảnh mỏ neo - Anchor).\n   - Áp dụng ngẫu nhiên hai phép tăng cường dữ liệu (Data Augmentations) $t \\sim \\mathcal{T}$ và $t' \\sim \\mathcal{T}$ (bao gồm: Cắt cúp ngẫu nhiên Random Crop & Resize, Biến đổi màu sắc Random Color Distortion, Lật ngang ngẫu nhiên, Làm mờ Gaussian Blur) để tạo ra hai biến thể:\n     $$x_i = t(x), \\quad x_j = t'(x)$$\n   - *Đặc điểm cốt lõi:* Cặp $(x_i, x_j)$ được gọi là **Cặp Dương Tính (Positive Pair)** vì chúng xuất phát từ **CÙNG MỘT BẢN THỂ ẢNH GỐC $x$**!\n2. **Tạo Cặp Âm Tính (Negative Pairs):**\n   - Lấy tất cả các bức ảnh khác trong cùng mini-batch kích thước $N$.\n   - Mỗi ảnh gốc tạo ra 2 biến thể $\\implies$ mini-batch có tổng cộng $2N$ ảnh.\n   - Với ảnh $x_i$, có duy nhất $1$ ảnh dương tính $x_j$, và có tới $2(N - 1)$ ảnh còn lại đóng vai trò là **Cặp Âm Tính (Negative Pairs)**!\n3. **Mạng trích xuất đặc trưng (Base Encoder $f(\\cdot)$):**\n   - Đưa $x_i, x_j$ qua mạng tích chập ResNet-50 để thu được vector biểu diễn: $h_i = f(x_i), h_j = f(x_j)$.\n4. **Đầu chiếu phi tuyến tính (Projection Head $g(\\cdot)$):**\n   - Đưa $h_i$ qua một tầng MLP nhỏ để chiếu xuống không gian tiềm ẩn chiều thấp: $z_i = g(h_i) = W_2 \\sigma(W_1 h_i + b_1)$.\n   - *Phát hiện đột phá của SimCLR:* Việc tính hàm mất mát trên $z_i$ thay vì trực tiếp trên $h_i$ giúp bảo tồn nhiều đặc trưng giàu ngữ nghĩa hơn trong $h_i$ cho các tác vụ xuôi dòng (Downstream tasks)!\n\n---\n\n**4. Hàm mất mát InfoNCE (Normalized Temperature-scaled Cross Entropy Loss):**\nĐo độ tương đồng giữa hai vector bằng Cosine Similarity trên quả cầu đơn vị:\n$$\\text{sim}(u, v) = \\frac{u^T v}{\\|u\\|_2 \\|v\\|_2}$$\nHàm mất mát cho cặp dương tính $(i, j)$ được định nghĩa:\n$$\\mathcal{L}_{i,j} = -\\log \\frac{\\exp\\left(\\frac{\\text{sim}(z_i, z_j)}{\\tau}\\right)}{\\sum_{k=1}^{2N} \\mathbb{I}_{[k \\neq i]} \\exp\\left(\\frac{\\text{sim}(z_i, z_k)}{\\tau}\\right)}$$\n\n*Giải mã toán học hai lực tương tác trong không gian vector:*\n- **Lực Kéo Gần (Numerator - Tử số):** Muốn làm giảm $\\mathcal{L}_{i,j}$, mô hình buộc phải làm tăng giá trị ở tử số $\\implies$ Tối đa hóa $\\text{sim}(z_i, z_j) \\to 1.0$. Hai biến thể của cùng một bức ảnh bị ép phải có góc gần bằng $0^\\circ$!\n- **Lực Đẩy Xa (Denominator - Mẫu số):** Muốn giảm $\\mathcal{L}_{i,j}$, mô hình phải thu nhỏ tổng ở mẫu số $\\implies$ Tối thiểu hóa $\\text{sim}(z_i, z_k) \\to 0$ hoặc âm. Vector của ảnh $i$ bị đẩy ra xa tất cả các bức ảnh khác trong batch!\n- **Ý nghĩa tham số nhiệt độ $\\tau$ (Temperature $\\tau > 0$, thường chọn $\\tau = 0.07$ hoặc $0.1$):**\n  - Đóng vai trò kiểm soát \"độ khắt khe\" của hàm phạt.\n  - Khi $\\tau$ nhỏ, hàm số cực kỳ nhạy cảm với các **Cặp Âm Tính Khó (Hard Negatives)** — những bức ảnh khác loài nhưng tình cờ có nét giống ảnh gốc. Mô hình sẽ tập trung trừng phạt mạnh mẽ các cặp âm tính khó này để tách bạch chúng ra xa!",
+        "formula": "\\mathcal{L}_{i,j} = -\\log \\frac{\\exp(\\text{sim}(z_i, z_j)/\\tau)}{\\sum_{k=1}^{2N} \\mathbb{I}_{[k \\neq i]} \\exp(\\text{sim}(z_i, z_k)/\\tau)}, \\quad \\text{sim}(u, v) = \\frac{u^T v}{\\|u\\| \\|v\\|}",
+        "mathExplainer": [
+          {
+            "sym": "z_i, z_j",
+            "name": "Cặp dương tính (Positive Pair)",
+            "mean": "Hai vector biểu diễn sinh ra từ cùng một bức ảnh gốc qua hai phép tăng cường dữ liệu ngẫu nhiên."
+          },
+          {
+            "sym": "z_k",
+            "name": "Mẫu âm tính (Negative Sample)",
+            "mean": "Các vector biểu diễn của các bức ảnh hoàn toàn khác nhau trong cùng mini-batch."
+          },
+          {
+            "sym": "\\text{sim}(u, v)",
+            "name": "Độ tương đồng Cosine",
+            "mean": "Đo cos góc giữa hai vector; bằng 1 khi cùng hướng, bằng 0 khi trực giao."
+          },
+          {
+            "sym": "\\tau \\text{ (Tau)}",
+            "name": "Tham số nhiệt độ (Temperature)",
+            "mean": "Hệ số kiểm soát độ nhạy phạt các cặp âm tính khó (Hard Negatives)."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(20, 15)\">\n                        <text x=\"310\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Kiến Trúc Học Đối Sánh SimCLR &amp; Hàm Mất Mát InfoNCE</text>\n                        <!-- Original Image Anchor -->\n                        <rect x=\"0\" y=\"42\" width=\"65\" height=\"45\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"3\"/>\n                        <text x=\"32\" y=\"62\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">Ảnh Gốc x</text>\n                        <text x=\"32\" y=\"76\" font-family=\"Georgia\" font-size=\"8\" fill=\"#555\" text-anchor=\"middle\">(Anchor)</text>\n                        <!-- 2 Augmentations -->\n                        <line x1=\"65\" y1=\"55\" x2=\"110\" y2=\"38\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"65\" y1=\"75\" x2=\"110\" y2=\"92\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <!-- Augmented View 1 -->\n                        <rect x=\"110\" y=\"22\" width=\"75\" height=\"32\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"147\" y=\"37\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">Crop x_i (+)</text>\n                        <text x=\"147\" y=\"48\" font-family=\"Georgia\" font-size=\"7\" fill=\"#666\" text-anchor=\"middle\">Cắt ngẫu nhiên</text>\n                        <!-- Augmented View 2 -->\n                        <rect x=\"110\" y=\"78\" width=\"75\" height=\"32\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"147\" y=\"93\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">Color x_j (+)</text>\n                        <text x=\"147\" y=\"104\" font-family=\"Georgia\" font-size=\"7\" fill=\"#666\" text-anchor=\"middle\">Đổi màu sắc</text>\n                        <!-- Base Encoder f -->\n                        <line x1=\"185\" y1=\"38\" x2=\"225\" y2=\"38\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"185\" y1=\"94\" x2=\"225\" y2=\"94\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"225\" y=\"25\" width=\"70\" height=\"26\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"260\" y=\"41\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">ResNet h_i</text>\n                        <rect x=\"225\" y=\"81\" width=\"70\" height=\"26\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"260\" y=\"97\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">ResNet h_j</text>\n                        <!-- Projection Head g -->\n                        <line x1=\"295\" y1=\"38\" x2=\"330\" y2=\"38\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"295\" y1=\"94\" x2=\"330\" y2=\"94\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"330\" y=\"25\" width=\"55\" height=\"26\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"357\" y=\"41\" font-family=\"Georgia\" font-size=\"8.5\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">Proj z_i</text>\n                        <rect x=\"330\" y=\"81\" width=\"55\" height=\"26\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"357\" y=\"97\" font-family=\"Georgia\" font-size=\"8.5\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">Proj z_j</text>\n                        <!-- Pull Action -->\n                        <line x1=\"385\" y1=\"38\" x2=\"430\" y2=\"58\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <line x1=\"385\" y1=\"94\" x2=\"430\" y2=\"74\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <rect x=\"430\" y=\"52\" width=\"75\" height=\"28\" fill=\"#e0e0e0\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"3\"/>\n                        <text x=\"467\" y=\"69\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">KÉO GẦN</text>\n                        <!-- Negative sample -->\n                        <rect x=\"330\" y=\"125\" width=\"55\" height=\"24\" fill=\"#fff\" stroke=\"#111\" stroke-dasharray=\"2,2\" rx=\"2\"/>\n                        <text x=\"357\" y=\"141\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Ảnh k (-)</text>\n                        <!-- Push Action -->\n                        <line x1=\"385\" y1=\"137\" x2=\"445\" y2=\"120\" stroke=\"#888\" stroke-width=\"1.5\" stroke-dasharray=\"3,3\"/>\n                        <text x=\"475\" y=\"125\" font-family=\"Georgia\" font-size=\"9\" fill=\"#555\" font-weight=\"bold\">ĐẨY XA</text>\n                        <!-- Summary box right -->\n                        <g transform=\"translate(520, 25)\">\n                          <rect x=\"0\" y=\"0\" width=\"105\" height=\"120\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1\" rx=\"3\"/>\n                          <text x=\"52\" y=\"18\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">Nguyên Lý SSL</text>\n                          <text x=\"8\" y=\"38\" font-family=\"Georgia\" font-size=\"7.5\">• 100% tự học</text>\n                          <text x=\"8\" y=\"54\" font-family=\"Georgia\" font-size=\"7.5\">• 0 cần gán nhãn</text>\n                          <text x=\"8\" y=\"70\" font-family=\"Georgia\" font-size=\"7.5\">• Positive: Cùng ảnh</text>\n                          <text x=\"8\" y=\"86\" font-family=\"Georgia\" font-size=\"7.5\">• Negative: Khác ảnh</text>\n                          <text x=\"8\" y=\"104\" font-family=\"Georgia\" font-size=\"7.5\" font-weight=\"bold\">InfoNCE Loss</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Cơ chế học đối sánh SimCLR: Tạo cặp dương tính từ cùng 1 ảnh gốc qua Data Augmentation, kéo gần z_i, z_j và đẩy xa mẫu âm z_k."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi về Học Tự Giám Sát (SSL / SimCLR):\n1. **Hiểu sai cách tạo Cặp Dương Tính (Positive Pair):**\n   - Đề thi thường đưa đáp án bẫy: *\"Lấy hai bức ảnh thuộc cùng danh mục nhãn do con người gán (ví dụ lấy 2 ảnh con chó khác nhau)\"*.\n   - SAI HOÀN TOÀN! Học tự giám sát không hề có nhãn con người! Cặp dương tính bắt buộc phải được tạo ra bằng cách áp dụng **hai phép tăng cường dữ liệu ngẫu nhiên (Augmentation) lên CÙNG MỘT BỨC ẢNH GỐC**!\n2. **Vai trò của Projection Head $g(\\cdot)$:** Sau khi tiền huấn luyện SimCLR xong, khi đem mô hình đi giải quyết bài toán phân loại ảnh thực tế, người ta **VỨT BỎ Projection Head $g$** và chỉ giữ lại Base Encoder $f$ để trích xuất vector đặc trưng $h$!",
+        "practiceQuestion": {
+          "level": "Cơ bản (Đề Thi Olympic AI)",
+          "question": "Trong phương pháp học tự giám sát đối sánh SimCLR, một 'Cặp Dương Tính' (Positive Pair) chuẩn mực được tạo ra bằng cách nào?",
+          "options": [
+            "A. Lấy hai bức ảnh khác nhau được con người gán cùng nhãn trong tập huấn luyện",
+            "B. Áp dụng hai phép tăng cường dữ liệu ngẫu nhiên (như crop, biến đổi màu) lên cùng một bức ảnh gốc",
+            "C. Ghép một bức ảnh thật chụp từ máy ảnh với một bức ảnh giả do mạng GAN tạo ra",
+            "D. Lấy hai khung hình video cách nhau đúng 5 giây của cùng một đoạn phim"
+          ],
+          "correctIndex": 1,
+          "hint": "Học tự giám sát không có nhãn con người; bản thể dương tính xuất phát từ một ảnh duy nhất nhưng nhìn qua hai lăng kính biến dạng khác nhau.",
+          "solution": [
+            "Bản chất cốt lõi của SimCLR là học biểu diễn bất biến với các phép biến dạng dữ liệu.",
+            "Từ một bức ảnh gốc x duy nhất, mô hình áp dụng hai hàm tăng cường dữ liệu ngẫu nhiên t và t' để thu được x_i và x_j. Đây là Cặp Dương Tính (Positive Pair) vì chúng mang cùng một nội dung bản thể.",
+            "Phương án A sai vì đây là học có giám sát (cần nhãn con người).",
+            "Đáp án chính xác là B."
+          ]
+        }
+      },
+      {
+        "heading": "13.2. Không Gian Tiềm Ẩn (Latent Space): Từ Bộ Mã Hóa Tự Động (Autoencoder - Câu 77) Đến Bộ Mã Hóa Tự Động Biến Phân (VAE - Câu 97)",
+        "content": "Khám phá kiến trúc nén dữ liệu phi tuyến tính Autoencoder và nút thắt thông tin (Information Bottleneck - Câu 77 VAIO); cấu trúc xác suất của VAE; thủ thuật Tái tham số hóa (Reparameterization Trick) và lời giải mã tại sao VAE sinh ảnh bị mờ (Câu 97 VAIO).",
+        "deepDive": "**1. Bộ Mã Hóa Tự Động Cổ Điển (Autoencoder - CÂU 77 ĐỀ THI VAIO 2025):**\nMột bức ảnh kích thước $256 \\times 256$ pixel màu chứa tới gần 200,000 con số. Nhưng hầu hết các con số này đều dư thừa (điểm ảnh bầu trời cạnh nhau có màu gần như nhau). Liệu ta có thể nén bức ảnh khổng lồ này thành một vector ngắn gọn chỉ gồm 128 con số mà vẫn giữ trọn vẹn thông tin cốt lõi?\n\nĐó chính là nhiệm vụ của **Autoencoder (AE)** gồm hai khối mạng:\n1. **Bộ mã hóa (Encoder $q_\\phi$):** Nén dữ liệu đầu vào $x \\in \\mathbb{R}^D$ thành vector tiềm ẩn chiều thấp $z \\in \\mathbb{R}^d$ ($d \\ll D$): $z = \\text{Encoder}(x)$.\n2. **Bộ giải mã (Decoder $p_\\theta$):** Tái tạo lại bức ảnh ban đầu $\\hat{x} \\in \\mathbb{R}^D$ từ vector tiềm ẩn $z$: $\\hat{x} = \\text{Decoder}(z)$.\n3. **Hàm mất mát tái tạo (Reconstruction Loss):** Đo sai số bình phương giữa ảnh gốc và ảnh tái tạo:\n   $$\\mathcal{L}_{\\text{Recon}} = \\|x - \\hat{x}\\|^2 = \\frac{1}{D} \\sum_{k=1}^D (x_k - \\hat{x}_k)^2$$\n\n- **NÚT THẮT THÔNG TIN (INFORMATION BOTTLENECK - CÂU 77 VAIO):**\n  - Tại sao số chiều của tầng ẩn trung tâm $z$ bắt buộc phải nhỏ hơn rất nhiều so với đầu vào $x$?\n  - Nếu số chiều $d \\ge D$, mạng nơ-ron chỉ việc \"học vẹt\" hàm đồng nhất (Identity function: $z = x, \\hat{x} = z$), copy toàn bộ điểm ảnh từ đầu vào sang đầu ra mà không học được bất kỳ đặc trưng ngữ nghĩa trừu tượng nào!\n  - Thiết kế **Nút thắt thông tin (Information Bottleneck)** hẹp ở giữa ép buộc mạng phải vứt bỏ toàn bộ nhiễu hạt vụn vặt và chỉ giữ lại những tri thức tinh túy nhất (hình dáng cấu trúc, đường nét, tư thế).\n\n- **Tử huyệt của Autoencoder cổ điển: Không thể tạo sinh ảnh mới (Not Generative)!**\n  - Autoencoder chỉ là một bộ nén dữ liệu tất định (Deterministic). Nó biến mỗi ảnh thành một điểm cô lập trong không gian $\\mathbb{R}^d$.\n  - Khoảng không gian giữa các điểm này là những \"vùng chết hoang vu\" (Discontinuous & Gap-filled). Nếu bạn bốc ngẫu nhiên một vector $z$ từ phân phối chuẩn và nạp vào Decoder, Decoder sẽ sinh ra những mảng pixel rác vô nghĩa bị méo mó kinh dị!\n\n---\n\n**2. Bộ Mã Hóa Tự Động Biến Phân (Variational Autoencoder - VAE - Kingma & Welling, 2013):**\nĐể biến Autoencoder thành một mô hình tạo sinh thực thụ, VAE thực hiện một bước nhảy vọt về tư duy xác suất:\n- Thay vì ép $x$ thành một điểm số cứng $z$, Encoder của VAE dự đoán **PHÂN PHỐI XÁC SUẤT** của $z$ dưới dạng phân phối Gauss:\n  $$\\text{Vector kỳ vọng: } \\boldsymbol{\\mu} \\in \\mathbb{R}^d, \\quad \\text{Vector log-phương sai: } \\log \\boldsymbol{\\sigma}^2 \\in \\mathbb{R}^d$$\n- **Thủ thuật Tái Tham Số Hóa (Reparameterization Trick):**\n  - Ta muốn lấy mẫu $z \\sim \\mathcal{N}(\\boldsymbol{\\mu}, \\boldsymbol{\\sigma}^2 \\mathbf{I})$. Nhưng phép toán bốc mẫu ngẫu nhiên (Stochastic sampling) là một chiếc hộp đen không có đạo hàm, chặn đứng hoàn toàn thuật toán lan truyền ngược (Backpropagation)!\n  - *Giải pháp thiên tài:* Tách yếu tố ngẫu nhiên độc lập ra bên ngoài: Bốc một vector nhiễu chuẩn $\\boldsymbol{\\epsilon} \\sim \\mathcal{N}(0, \\mathbf{I})$, sau đó tính:\n    $$z = \\boldsymbol{\\mu} + \\boldsymbol{\\sigma} \\odot \\boldsymbol{\\epsilon}$$\n  - Giờ đây, gradient có thể truyền ngược mượt mà qua $\\boldsymbol{\\mu}$ và $\\boldsymbol{\\sigma}$ như các phép cộng nhân số học thông thường!\n\n- **Hàm mất mát ELBO (Evidence Lower Bound):**\n  $$\\mathcal{L}_{\\text{VAE}} = \\mathcal{L}_{\\text{Recon}} + \\mathcal{L}_{\\text{KL}} = \\mathbb{E}_{q}[\\log p(x \\mid z)] - D_{\\text{KL}}\\left( q(z \\mid x) \\parallel \\mathcal{N}(0, \\mathbf{I}) \\right)$$\n  - **Thành phần 1 (Tái tạo):** Đảm bảo ảnh giải mã giống ảnh gốc.\n  - **Thành phần 2 (Phân kỳ KL Divergence):** Ép phân phối tiềm ẩn của mọi bức ảnh phải co cụm về gần phân phối chuẩn chuẩn tắc $\\mathcal{N}(0, \\mathbf{I})$. Điều này lấp đầy toàn bộ \"vùng chết\", biến không gian tiềm ẩn thành một quả cầu liên tục và trơn tru!\n\n---\n\n**3. TẠI SAO VAE SINH ẢNH BỊ MỜ? (CÂU 97 ĐỀ THI CHÍNH THỨC VAIO 2025):**\nDù có nền tảng toán học xác suất tuyệt mỹ, VAE luôn nổi tiếng với nhược điểm chí mạng: các bức ảnh sinh ra luôn có cảm giác như bị phủ một lớp sương mù hoặc bị nhòe nét (Blurry images). Tại sao lại như vậy?\n\n1. **Bản chất của hàm mất mát Pixel-level MSE (Mean Squared Error):**\n   - Khi đo sai số bằng $\\|x - \\hat{x}\\|^2$, mô hình phạt sai lệch dựa trên từng điểm ảnh độc lập.\n   - Khi tái tạo những chi tiết tinh xảo (như sợi tóc, nếp nhăn, viền mắt), vị trí của các cạnh sắc nét có thể dao động vài pixel. Thay vì mạo hiểm vẽ một sợi tóc sắc nét ở vị trí có thể bị lệch (và bị phạt MSE rất nặng), bộ giải mã chọn giải pháp \"an toàn nhất\" về mặt thống kê: **Lấy trung bình cộng (Average) của tất cả các khả năng** $\\implies$ Kết quả là sợi tóc bị nhòe thành một vệt mờ!\n2. **Sự giằng co của số hạng Phân kỳ KL (KL Divergence - Câu 97 VAIO):**\n   - Số hạng $D_{\\text{KL}}$ ép phân phối tiềm ẩn phải trơn tru, đồng nhất và khử các đột biến cục bộ.\n   - Điều này khiến mô hình ưu tiên học các **đặc trưng tần số thấp tổng quát (Low-frequency components)** như hình khối cơ thể, màu da, phông nền lớn; và chấp nhận bỏ qua hoàn toàn các **đặc trưng tần số cao (High-frequency details)** như kết cấu bề mặt và đường biên sắc nhọn!",
+        "formula": "\\mathcal{L}_{\\text{VAE}} = \\|x - \\hat{x}\\|^2 + D_{\\text{KL}}(q(z|x) \\parallel \\mathcal{N}(0, \\mathbf{I})), \\quad z = \\boldsymbol{\\mu} + \\boldsymbol{\\sigma} \\odot \\boldsymbol{\\epsilon}",
+        "mathExplainer": [
+          {
+            "sym": "\\text{Bottleneck}",
+            "name": "Nút thắt thông tin (Câu 77)",
+            "mean": "Lớp ẩn có số chiều nhỏ hẹp ở giữa Autoencoder buộc mạng phải nén đặc trưng cốt lõi."
+          },
+          {
+            "sym": "\\boldsymbol{\\mu}, \\boldsymbol{\\sigma}",
+            "name": "Kỳ vọng và độ lệch chuẩn",
+            "mean": "Các tham số phân phối Gauss mà Encoder của VAE dự đoán cho không gian tiềm ẩn."
+          },
+          {
+            "sym": "\\boldsymbol{\\epsilon} \\sim \\mathcal{N}(0, \\mathbf{I})",
+            "name": "Nhiễu chuẩn hóa",
+            "mean": "Biến ngẫu nhiên phụ trợ trong Reparameterization Trick giúp gradient truyền ngược được."
+          },
+          {
+            "sym": "D_{\\text{KL}}",
+            "name": "Phân kỳ Kullback-Leibler",
+            "mean": "Đo khoảng cách giữa phân phối tiềm ẩn và phân phối chuẩn; nguyên nhân khiến ảnh VAE mượt/mờ."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Autoencoder with Bottleneck -->\n                      <g transform=\"translate(25, 20)\">\n                        <text x=\"130\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Autoencoder (Nút Thắt - Câu 77 VAIO)</text>\n                        <rect x=\"0\" y=\"30\" width=\"35\" height=\"80\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"17\" y=\"74\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">x</text>\n                        <!-- Encoder wedge -->\n                        <polygon points=\"35,30 110,50 110,90 35,110\" fill=\"#f0f0f0\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"70\" y=\"73\" font-family=\"Georgia\" font-size=\"8.5\" text-anchor=\"middle\">Encoder</text>\n                        <!-- Bottleneck z -->\n                        <rect x=\"110\" y=\"50\" width=\"30\" height=\"40\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"125\" y=\"74\" font-family=\"Georgia\" font-size=\"9\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">z</text>\n                        <!-- Decoder wedge -->\n                        <polygon points=\"140,50 215,30 215,110 140,90\" fill=\"#f0f0f0\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"177\" y=\"73\" font-family=\"Georgia\" font-size=\"8.5\" text-anchor=\"middle\">Decoder</text>\n                        <!-- Output x_hat -->\n                        <rect x=\"215\" y=\"30\" width=\"35\" height=\"80\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"232\" y=\"74\" font-family=\"Georgia\" font-size=\"9\" text-anchor=\"middle\">x̂</text>\n                        <!-- Bottleneck annotation -->\n                        <text x=\"125\" y=\"108\" font-family=\"Georgia\" font-size=\"7.5\" font-weight=\"bold\" text-anchor=\"middle\">Nút thắt hẹp</text>\n                        <text x=\"125\" y=\"120\" font-family=\"Georgia\" font-size=\"7\" fill=\"#555\" text-anchor=\"middle\">(Bottleneck d &lt;&lt; D)</text>\n                      </g>\n                      <!-- Divider -->\n                      <line x1=\"320\" y1=\"20\" x2=\"320\" y2=\"155\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                      <!-- Right: VAE & Reparameterization Trick -->\n                      <g transform=\"translate(345, 20)\">\n                        <text x=\"140\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">VAE (Tái Tham Số Hóa - Câu 97 VAIO)</text>\n                        <!-- Input -->\n                        <rect x=\"0\" y=\"45\" width=\"25\" height=\"50\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"12\" y=\"74\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">x</text>\n                        <!-- Encoder -->\n                        <line x1=\"25\" y1=\"70\" x2=\"55\" y2=\"70\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"55\" y=\"45\" width=\"45\" height=\"50\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"77\" y=\"73\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Enc</text>\n                        <!-- Splits into mu and sigma -->\n                        <line x1=\"100\" y1=\"58\" x2=\"125\" y2=\"45\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"100\" y1=\"82\" x2=\"125\" y2=\"95\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"125\" y=\"35\" width=\"35\" height=\"20\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"142\" y=\"49\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">μ</text>\n                        <rect x=\"125\" y=\"85\" width=\"35\" height=\"20\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"142\" y=\"99\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">σ</text>\n                        <!-- epsilon noise -->\n                        <rect x=\"125\" y=\"120\" width=\"35\" height=\"18\" fill=\"#e0e0e0\" stroke=\"#111\" rx=\"2\"/>\n                        <text x=\"142\" y=\"132\" font-family=\"Georgia\" font-size=\"7.5\" text-anchor=\"middle\">ε ~ N(0,I)</text>\n                        <!-- Formula z = mu + sigma * eps -->\n                        <line x1=\"160\" y1=\"45\" x2=\"185\" y2=\"70\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"160\" y1=\"95\" x2=\"185\" y2=\"70\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"160\" y1=\"125\" x2=\"175\" y2=\"105\" stroke=\"#111\" stroke-width=\"1\"/>\n                        <rect x=\"185\" y=\"58\" width=\"35\" height=\"25\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"202\" y=\"74\" font-family=\"Georgia\" font-size=\"8.5\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">z</text>\n                        <!-- Decoder -->\n                        <line x1=\"220\" y1=\"70\" x2=\"240\" y2=\"70\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"240\" y=\"45\" width=\"40\" height=\"50\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"260\" y=\"73\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Dec</text>\n                        <!-- Explanation why blur -->\n                        <text x=\"140\" y=\"152\" font-family=\"Georgia\" font-size=\"7.5\" fill=\"#333\" text-anchor=\"middle\">MSE + KL ép trơn phân phối ⇒ Ảnh bị mờ!</text>\n                      </g>\n                    </svg>",
+          "caption": "So sánh Autoencoder với nút thắt thông tin (Bottleneck) ép nén tri thức vs Variational Autoencoder dùng Reparameterization Trick."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 77 & 97 Đề thi chính thức VAIO 2025:\n1. **Thiết kế nút thắt thông tin (Câu 77):**\n   - Nút thắt thông tin (Information Bottleneck) buộc số chiều lớp giữa phải nhỏ hơn rất nhiều so với đầu vào để ngăn mô hình học hàm đồng nhất tầm thường (copy-paste).\n2. **Lý do ảnh VAE bị mờ (Câu 97):**\n   - Đề thi thường hỏi nguyên nhân ảnh VAE bị mờ.\n   - Đáp án chuẩn xác: **Do việc tối ưu hàm mất mát MSE/ELBO kết hợp với ràng buộc phân kỳ KL (KL divergence) ép phân phối phải trơn mượt, khiến mô hình chỉ nắm bắt các đặc trưng tần số thấp tổng quát và triệt tiêu các đặc trưng tần số cao sắc nét!**",
+        "practiceQuestion": {
+          "level": "Vận dụng (Câu 77 & 97 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Trong kiến trúc Autoencoder, mục đích chính của việc thiết kế 'Nút thắt thông tin' (Information Bottleneck) ở lớp biểu diễn tiềm ẩn là gì, và tại sao mô hình VAE thường sinh ra ảnh bị mờ? (Câu 77 & 97 VAIO 2025)",
+          "options": [
+            "A. Để tăng tốc độ lan truyền ngược; VAE mờ do kích thước lô quá lớn",
+            "B. Ép mô hình phải nén và học các đặc trưng cốt lõi thay vì sao chép đồng nhất; VAE mờ do mất mát tái tạo và phân kỳ KL làm mất chi tiết tần số cao",
+            "C. Để loại bỏ các điểm ảnh biên; VAE mờ do sử dụng hàm kích hoạt ReLU",
+            "D. Để chuyển ảnh màu thành ảnh xám; VAE mờ do không đủ dữ liệu huấn luyện"
+          ],
+          "correctIndex": 1,
+          "hint": "Nút thắt cổ chai hẹp ngăn việc copy-paste; phân kỳ KL ép phân phối mượt mà làm mất đi các chi tiết góc cạnh sắc nét.",
+          "solution": [
+            "Phân tích Câu 77: Nút thắt thông tin (Information Bottleneck) giới hạn lượng thông tin có thể đi qua, ép Autoencoder phải chắt lọc các đặc trưng biểu diễn nén quan trọng nhất thay vì học vẹt hàm đồng nhất.",
+            "Phân tích Câu 97: VAE tối ưu hóa cận dưới bằng chứng ELBO kết hợp phân kỳ KL. Ràng buộc thống kê này ưu tiên giải pháp phân phối mượt mà (tần số thấp) và trung bình hóa các sai lệch điểm ảnh, làm mất đi các đường nét tần số cao sắc cạnh dẫn đến ảnh bị mờ.",
+            "Đáp án chính xác là B."
+          ]
+        }
+      },
+      {
+        "heading": "13.3. Mạng Đối Kháng Tạo Sinh (GANs - Goodfellow et al., 2014 - Câu 95) & Trò Chơi Đối Kháng Hai Đấu Thủ Minimax",
+        "content": "Giải mã bài báo làm thay đổi lịch sử thị giác máy tính của Ian Goodfellow; cấu trúc 2 mạng Generator và Discriminator (Câu 95 VAIO); bản chất toán học của trò chơi Minimax và quy tắc sống còn trong pha suy luận thực tế.",
+        "deepDive": "**1. Ý tưởng đột phá của Ian Goodfellow (2014):**\nTrước năm 2014, việc sinh ra một bức ảnh giả bằng máy tính thường dựa trên các mô hình xác suất phức tạp và luôn cho ra kết quả mờ mịt. Ngồi trong một quán rượu sau buổi tranh luận với bạn bè, Ian Goodfellow đã nảy ra một ý tưởng thiên tài: Thay vì dạy một mạng nơ-ron vẽ tranh một mình, tại sao không cho **HAI MẠNG NƠ-RON ĐẤU TRÍ ĐỐI KHÁNG VỚI NHAU**?\n\n**2. Cấu trúc 2 mạng nơ-ron của GAN (CÂU 95 ĐỀ THI VAIO 2025):**\nMột hệ thống GAN bao gồm đúng hai mạng nơ-ron có mục tiêu đối nghịch nhau:\n1. **Bộ Tạo (Generator $G$):**\n   - Nhận đầu vào là một vector nhiễu ngẫu nhiên $z \\sim p_z(z)$ (thường là phân phối chuẩn Gauss $\\mathcal{N}(0, \\mathbf{I})$ kích thước 100 chiều).\n   - Sử dụng các tầng tích chập chuyển vị (Transposed Convolutions / Upsampling) để biến vector $z$ thành một bức ảnh giả hoàn chỉnh $G(z)$.\n   - *Mục tiêu duy nhất:* Đánh lừa Bộ Phân Biệt, làm cho ảnh giả giống thật đến mức không thể nhận ra!\n2. **Bộ Phân Biệt (Discriminator $D$):**\n   - Nhận đầu vào là một bức ảnh $x$ (có thể là ảnh thật từ kho dữ liệu $x \\sim p_{\\text{data}}$, hoặc ảnh giả do Generator tạo ra $x = G(z)$).\n   - Sử dụng mạng tích chập CNN thông thường để xuất ra một con số thực duy nhất $D(x) \\in [0, 1]$ (qua hàm Sigmoid).\n   - $D(x)$ biểu thị xác suất tin rằng bức ảnh đưa vào là ảnh thật ($D \\to 1$: Thật; $D \\to 0$: Giả).\n   - *Mục tiêu duy nhất:* Vạch trần mọi bức ảnh giả do Generator tạo ra!\n\n---\n\n**3. Bản chất toán học của Trò Chơi Minimax (Minimax Game Objective):**\nToàn bộ quá trình huấn luyện GAN là một bài toán tối ưu hóa Minimax theo lý thuyết trò chơi của John Nash:\n$$\\min_G \\max_D V(D, G) = \\mathbb{E}_{x \\sim p_{\\text{data}}}[\\log D(x)] + \\mathbb{E}_{z \\sim p_z}[\\log(1 - D(G(z)))]$$\n\nHãy cùng bóc tách từng vế toán học:\n- **Pha 1: Tối Đa Hóa đối với $D$ ($\\max_D V$):**\n  - Khi đưa ảnh thật $x$ vào, $D$ muốn $D(x) \\to 1 \\implies \\log D(x) \\to \\log 1 = 0$ (giá trị lớn nhất có thể của hàm log).\n  - Khi đưa ảnh giả $G(z)$ vào, $D$ muốn $D(G(z)) \\to 0 \\implies 1 - D(G(z)) \\to 1 \\implies \\log(1 - D(G(z))) \\to 0$ (cực đại).\n  - Cả hai số hạng đều đạt cực đại khi Discriminator phân biệt hoàn hảo!\n- **Pha 2: Tối Thiểu Hóa đối với $G$ ($\\min_G V$):**\n  - Số hạng đầu tiên $\\mathbb{E}[\\log D(x)]$ không chứa $G$ nên bị bỏ qua.\n  - Với số hạng thứ hai, $G$ muốn lừa được $D$, tức là ép $D(G(z)) \\to 1$.\n  - Khi đó $1 - D(G(z)) \\to 0 \\implies \\log(1 - D(G(z))) \\to -\\infty$ (cực tiểu hóa mạnh mẽ)!\n\n- **Cải tiến thực tế: Trò chơi Non-Saturating:**\n  - Ở giai đoạn đầu, Generator còn rất vụng về, Discriminator dễ dàng nhận ra ảnh giả ($D(G(z)) \\approx 0$).\n  - Đạo hàm của hàm $\\log(1 - D(G(z)))$ khi $D(G(z)) \\to 0$ rất phẳng, dẫn đến **bão hòa gradient**, khiến Generator không nhận được tín hiệu để học.\n  - Goodfellow đề xuất: Thay vì cực tiểu hóa $\\log(1 - D(G(z)))$, Generator sẽ **CỰC ĐẠI HÓA $\\log D(G(z))$**! Về mặt trực giác mục tiêu không đổi, nhưng gradient truyền về Generator ở những epoch đầu sẽ mạnh hơn gấp bội!\n\n---\n\n**4. Điểm Cân Bằng Nash (Nash Equilibrium) & Pha Suy Luận (Inference):**\n- **Cân bằng lý thuyết:** Khi Generator đạt đến trình độ hoàn hảo, phân phối ảnh sinh ra trùng khít với phân phối thật $p_g = p_{\\text{data}}$. Khi đó, Discriminator hoàn toàn mất phương hướng và chỉ có thể đoán mò với xác suất:\n  $$D(x) = \\frac{1}{2} = 0.5$$\n- **QUY TẮC PHÒNG THI VỀ PHA SUY LUẬN (INFERENCE):**\n  - Khi triển khai sản phẩm thực tế để tạo ảnh chân dung hay vẽ tranh nghệ thuật:\n  - Ta **VỨT BỎ MẠNG DISCRIMINATOR**! Discriminator chỉ đóng vai trò như \"người thầy chấm thi\" trong quá trình huấn luyện.\n  - Khi ứng dụng, ta chỉ nạp vector nhiễu $z$ vào **DUY NHẤT MẠNG GENERATOR $G$** để xuất ra những bức ảnh tuyệt đẹp!",
+        "formula": "\\min_G \\max_D V(D, G) = \\mathbb{E}_{x \\sim p_{\\text{data}}}[\\log D(x)] + \\mathbb{E}_{z \\sim p_z}[\\log(1 - D(G(z)))]",
+        "mathExplainer": [
+          {
+            "sym": "G(z)",
+            "name": "Generator (Bộ tạo - Câu 95)",
+            "mean": "Mạng nơ-ron nhận vector nhiễu z để sinh ra ảnh giả chân thực nhằm đánh lừa Discriminator."
+          },
+          {
+            "sym": "D(x)",
+            "name": "Discriminator (Bộ phân biệt - Câu 95)",
+            "mean": "Mạng nơ-ron phân loại nhị phân đánh giá xác suất ảnh là thật (1) hay giả (0)."
+          },
+          {
+            "sym": "V(D, G)",
+            "name": "Hàm giá trị Minimax",
+            "mean": "Trò chơi đối kháng 2 đấu thủ: D muốn tối đa hóa độ chính xác, G muốn tối thiểu hóa để đánh lừa D."
+          },
+          {
+            "sym": "D(x) = 0.5",
+            "name": "Cân bằng Nash",
+            "mean": "Trạng thái tối ưu lý thuyết khi ảnh giả giống thật đến mức Discriminator chỉ có thể đoán mò."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"300\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Kiến Trúc Mạng Đối Kháng GANs (Câu 95 VAIO): Trò Chơi Minimax</text>\n                        <!-- Latent vector z -->\n                        <rect x=\"0\" y=\"38\" width=\"55\" height=\"26\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"27\" y=\"54\" font-family=\"Georgia\" font-size=\"8.5\" text-anchor=\"middle\">Nhiễu z</text>\n                        <!-- Arrow to Generator -->\n                        <line x1=\"55\" y1=\"51\" x2=\"85\" y2=\"51\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <polygon points=\"85,51 79,48 79,54\" fill=\"#111\"/>\n                        <!-- Generator Box G -->\n                        <rect x=\"85\" y=\"30\" width=\"95\" height=\"42\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"3\"/>\n                        <text x=\"132\" y=\"48\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">Generator (G)</text>\n                        <text x=\"132\" y=\"62\" font-family=\"Georgia\" font-size=\"7.5\" fill=\"#555\" text-anchor=\"middle\">Kẻ làm giả</text>\n                        <!-- Fake image output -->\n                        <line x1=\"180\" y1=\"51\" x2=\"230\" y2=\"51\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <rect x=\"230\" y=\"36\" width=\"60\" height=\"30\" fill=\"#f0f0f0\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"260\" y=\"54\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Ảnh giả G(z)</text>\n                        <!-- Real image source -->\n                        <rect x=\"230\" y=\"90\" width=\"60\" height=\"30\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"260\" y=\"108\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Ảnh thật x</text>\n                        <!-- Arrows to Discriminator -->\n                        <line x1=\"290\" y1=\"51\" x2=\"340\" y2=\"65\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <line x1=\"290\" y1=\"105\" x2=\"340\" y2=\"85\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <!-- Discriminator Box D -->\n                        <rect x=\"340\" y=\"50\" width=\"115\" height=\"52\" fill=\"#111\" rx=\"3\"/>\n                        <text x=\"397\" y=\"72\" font-family=\"Georgia\" font-size=\"10\" font-weight=\"bold\" fill=\"#fff\" text-anchor=\"middle\">Discriminator (D)</text>\n                        <text x=\"397\" y=\"88\" font-family=\"Georgia\" font-size=\"8\" fill=\"#ddd\" text-anchor=\"middle\">Giám định viên</text>\n                        <!-- Classification output -->\n                        <line x1=\"455\" y1=\"76\" x2=\"505\" y2=\"76\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <polygon points=\"505,76 499,73 499,79\" fill=\"#111\"/>\n                        <rect x=\"505\" y=\"60\" width=\"95\" height=\"32\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"2\"/>\n                        <text x=\"552\" y=\"75\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">D(x) ∈ [0, 1]</text>\n                        <text x=\"552\" y=\"86\" font-family=\"Georgia\" font-size=\"7.5\" fill=\"#555\" text-anchor=\"middle\">1: Thật / 0: Giả</text>\n                        <!-- Feedback gradient loop -->\n                        <path d=\"M 397 102 C 397 140 132 140 132 72\" fill=\"none\" stroke=\"#111\" stroke-width=\"1.2\" stroke-dasharray=\"3,3\"/>\n                        <text x=\"260\" y=\"142\" font-family=\"Georgia\" font-size=\"7.5\" fill=\"#333\" text-anchor=\"middle\">← Gradient phản hồi tinh chỉnh Generator</text>\n                      </g>\n                    </svg>",
+          "caption": "Sơ đồ luồng dữ liệu mạng GAN: Generator tạo ảnh giả, Discriminator phân biệt thật giả, gradient phản hồi thúc đẩy cả hai cùng tiến bộ."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 95 Đề thi chính thức VAIO 2025:\n1. **Thành phần của mạng GAN (Câu 95):**\n   - Đề thi hỏi kiến trúc GAN gồm hai mạng chính nào?\n   - Luôn chọn ngay: **Bộ tạo (Generator) và Bộ phân biệt (Discriminator)**!\n2. **Vai trò trong pha suy luận (Inference):**\n   - Khi đưa mô hình vào sử dụng thực tế để tạo ảnh mới, ta CHỈ CẦN DÙNG MẠNG GENERATOR, Discriminator hoàn toàn bị loại bỏ!\n3. **Mục tiêu đối lập:** Discriminator muốn $D(x) \\to 1$ và $D(G(z)) \\to 0$. Generator muốn $D(G(z)) \\to 1$.",
+        "practiceQuestion": {
+          "level": "Cơ bản (Câu 95 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Kiến trúc mạng đối kháng tạo sinh (GAN - Generative Adversarial Networks) bao gồm hai mạng nơ-ron thành phần chính nào tham gia vào trò chơi đối kháng Minimax? (Câu 95 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. Bộ mã hóa (Encoder) và Bộ giải mã (Decoder)",
+            "B. Bộ tạo (Generator) và Bộ phân biệt (Discriminator)",
+            "C. Bộ tiền huấn luyện (Pre-trainer) và Bộ tinh chỉnh (Fine-tuner)",
+            "D. Bộ trích xuất đặc trưng (Feature Extractor) và Bộ phân loại (Classifier)"
+          ],
+          "correctIndex": 1,
+          "hint": "Một mạng tạo ra dữ liệu giả, một mạng phân biệt giữa dữ liệu thật và dữ liệu giả.",
+          "solution": [
+            "Kiến trúc GAN do Ian Goodfellow đề xuất năm 2014 gồm đúng hai mạng nơ-ron:",
+            "1. Generator (Bộ tạo): Nhận vector nhiễu ngẫu nhiên z để sinh ra dữ liệu giả chân thực.",
+            "2. Discriminator (Bộ phân biệt): Phân loại nhị phân để phân biệt dữ liệu thật x và dữ liệu giả G(z).",
+            "Hai mạng này thi đấu đối kháng theo hàm mục tiêu Minimax.",
+            "Đáp án chính xác là B."
+          ]
+        }
+      },
+      {
+        "heading": "13.4. Căn Bệnh Hiểm Nghèo Của GANs: Hiện Tượng Sụp Đổ Mô Hình (Mode Collapse - Câu 61) & Mất Cân Bằng Động Lực",
+        "content": "Phân tích hiện tượng sụp đổ mô hình Mode Collapse khi Generator sinh ảnh toàn màu xám hoặc lặp lại một mẫu duy nhất (Câu 61 VAIO); nguyên nhân sâu xa từ việc mất cân bằng giữa D và G gây triệt tiêu gradient; cùng bước tiến Wasserstein GAN.",
+        "deepDive": "**1. Hiện tượng Sụp Đổ Mô Hình (Mode Collapse - CÂU 61 ĐỀ THI VAIO 2025):**\nHuấn luyện GAN được mệnh danh là một trong những tác vụ \"đỏng đảnh\" và khó khăn nhất trong toàn bộ ngành học sâu. Trong khi huấn luyện một mạng CNN chuẩn chỉ cần hàm mất mát giảm dần đều, huấn luyện GAN là việc tìm kiếm điểm cân bằng động giữa hai mạng nơ-ron luôn tìm cách tiêu diệt lẫn nhau.\n\nKhi sự cân bằng này bị phá vỡ, Generator sẽ mắc phải căn bệnh hiểm nghèo: **Mode Collapse (Sụp đổ chế độ phân phối)**:\n- Tập dữ liệu ảnh người thật có vô số \"chế độ\" (modes): Người tóc đen, tóc vàng, nam giới, nữ giới, người già, trẻ nhỏ, cười, nghiêm nghị...\n- Đáng lẽ Generator phải học cách biến đổi các vector nhiễu $z$ khác nhau thành các khuôn mặt đa dạng tương ứng.\n- Nhưng khi xảy ra Mode Collapse: Generator phát hiện ra một khuôn mặt cụ thể (hoặc một mảng màu xám mờ nhạt) có khả năng đánh lừa Discriminator với tỷ lệ cao.\n- Thay vì tiếp tục khám phá các mode khác, Generator **\"lười biếng\" co cụm toàn bộ không gian ánh xạ về đúng mode đó**!\n- *Hậu quả trên thực tế (Câu 61 VAIO):* Dù bạn nạp vào 10,000 vector nhiễu $z$ hoàn toàn khác nhau, Generator chỉ sinh ra **lặp đi lặp lại đúng 1 khuôn mặt y hệt nhau**, hoặc sinh ra **ảnh toàn một màu xám xịt đồng nhất vô hồn**!\n\n---\n\n**2. Nguyên nhân sâu xa: Mất cân bằng động lực & Tiêu biến Gradient (Câu 61 VAIO):**\nTại sao Generator lại đầu hàng và sinh ra ảnh xám xịt lặp lại như vậy?\n1. **Sự bất cân xứng về độ khó của bài toán:**\n   - Nhiệm vụ của Discriminator là **Phân loại nhị phân (Binary Classification)** — đây là bài toán cực kỳ dễ đối với một mạng CNN nhiều tầng.\n   - Nhiệm vụ của Generator là **Tạo sinh ma trận ảnh $256 \\times 256 \\times 3$** có cấu trúc giải phẫu học tinh xảo từ một vector 100 chiều — đây là bài toán khó hơn gấp vạn lần!\n2. **Discriminator học quá nhanh và trở nên quá áp đảo (Discriminator Overpowers):**\n   - Chỉ sau vài epoch đầu, Discriminator đã đạt độ chính xác $99.9\\%$. Nó dễ dàng bóc mẽ mọi bức ảnh giả với xác suất $D(G(z)) \\to 0$.\n   - Khi $D(G(z)) \\approx 0$ hoàn toàn, mặt cong mất mát trở nên bằng phẳng lì.\n   - Tín hiệu đạo hàm truyền ngược từ Discriminator về Generator bị **triệt tiêu hoàn toàn (Vanishing Gradient)**!\n   - Không nhận được bất kỳ chỉ dẫn hữu ích nào để biết mình vẽ sai ở đâu, Generator rơi vào trạng thái \"tê liệt\", mất phương hướng và buông xuôi, co cụm về một mẫu duy nhất hoặc tạo ra ảnh nhiễu màu xám vô nghĩa!\n\n---\n\n**3. Khắc phục Mode Collapse: Bước tiến của Wasserstein GAN (WGAN - 2017):**\nĐể giải cứu GAN khỏi Mode Collapse, Martin Arjovsky et al. đã chỉ ra rằng hàm mất mát ban đầu của GAN đo khoảng cách Jensen-Shannon (JSD) giữa hai phân phối không chồng lấn là một hằng số gián đoạn ($\\log 2$).\n- **Khoảng cách Earth Mover (Wasserstein-1 Distance):** Đo \"công sức tối thiểu\" để dịch chuyển đống đất phân phối $p_g$ sang đống đất phân phối $p_{\\text{data}}$.\n- Khoảng cách Wasserstein liên tục và có đạo hàm hầu khắp mọi nơi, cung cấp gradient mượt mà ngay cả khi Discriminator đã rất mạnh!\n- Trong WGAN:\n  - Discriminator bỏ hàm kích hoạt Sigmoid ở tầng cuối, biến thành mạng chấm điểm (Critic).\n  - Ép điều kiện $1$-Lipschitz bằng kỹ thuật kẹp trọng số (Weight Clipping) hoặc phạt độ dốc (Gradient Penalty trong WGAN-GP).\n  - Giúp việc huấn luyện GAN trở nên ổn định vượt bậc và loại bỏ phần lớn nguy cơ Mode Collapse!",
+        "formula": "\\text{Mode Collapse: } G(z_1) \\approx G(z_2) \\approx \\dots \\approx x^* \\quad (\\forall z_1 \\neq z_2), \\quad W(p_r, p_g) = \\inf_{\\gamma \\in \\Pi} \\mathbb{E}_{(x, y) \\sim \\gamma}[\\|x - y\\|]",
+        "mathExplainer": [
+          {
+            "sym": "\\text{Mode Collapse (Câu 61)}",
+            "name": "Sụp đổ mô hình",
+            "mean": "Lỗi Generator mất tính đa dạng, chỉ sinh lặp đi lặp lại 1 mẫu duy nhất hoặc ảnh toàn màu xám."
+          },
+          {
+            "sym": "\\text{Vanishing Gradient in GAN}",
+            "name": "Tiêu biến gradient đối kháng",
+            "mean": "Khi Discriminator quá áp đảo, tín hiệu gradient gửi về Generator bị triệt tiêu về 0."
+          },
+          {
+            "sym": "W(p_r, p_g)",
+            "name": "Khoảng cách Wasserstein",
+            "mean": "Độ đo khoảng cách Earth Mover trong WGAN giúp gradient luôn dồi dào, khắc phục Mode Collapse."
+          },
+          {
+            "sym": "\\text{Critic}",
+            "name": "Bộ phê bình WGAN",
+            "mean": "Thay thế Discriminator, không dùng Sigmoid, chấm điểm liên tục độ chân thực của ảnh."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Healthy Diverse Distribution -->\n                      <g transform=\"translate(30, 20)\">\n                        <text x=\"130\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Phân Phối Lành Mạnh (Đa Dạng)</text>\n                        <!-- Axis -->\n                        <line x1=\"20\" y1=\"120\" x2=\"240\" y2=\"120\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <!-- 3 Gaussian Modes -->\n                        <path d=\"M 30 120 Q 55 40 80 120\" fill=\"none\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <path d=\"M 90 120 Q 125 30 160 120\" fill=\"none\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <path d=\"M 170 120 Q 200 50 230 120\" fill=\"none\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <text x=\"55\" y=\"135\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Mode 1 (Nam)</text>\n                        <text x=\"125\" y=\"135\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Mode 2 (Nữ)</text>\n                        <text x=\"200\" y=\"135\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Mode 3 (Trẻ em)</text>\n                        <text x=\"130\" y=\"65\" font-family=\"Georgia\" font-size=\"8.5\" fill=\"#333\" text-anchor=\"middle\">Bao phủ toàn bộ các dạng dữ liệu</text>\n                      </g>\n                      <!-- Divider -->\n                      <line x1=\"330\" y1=\"20\" x2=\"330\" y2=\"155\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                      <!-- Right: Mode Collapse -->\n                      <g transform=\"translate(350, 20)\">\n                        <text x=\"140\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Sụp Đổ Mô Hình Mode Collapse (Câu 61)</text>\n                        <!-- Axis -->\n                        <line x1=\"20\" y1=\"120\" x2=\"260\" y2=\"120\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <!-- Ghost of true modes -->\n                        <path d=\"M 30 120 Q 55 40 80 120\" fill=\"none\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                        <path d=\"M 90 120 Q 125 30 160 120\" fill=\"none\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                        <path d=\"M 170 120 Q 200 50 230 120\" fill=\"none\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                        <!-- Collapsed spike -->\n                        <rect x=\"120\" y=\"30\" width=\"10\" height=\"90\" fill=\"#111\"/>\n                        <polygon points=\"125,20 118,30 132,30\" fill=\"#111\"/>\n                        <text x=\"125\" y=\"135\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">Co cụm về 1 điểm!</text>\n                        <!-- Explanation box -->\n                        <rect x=\"150\" y=\"45\" width=\"120\" height=\"50\" fill=\"#f0f0f0\" stroke=\"#111\" rx=\"2\"/>\n                        <text x=\"210\" y=\"60\" font-family=\"Georgia\" font-size=\"7.5\" font-weight=\"bold\" text-anchor=\"middle\">Hậu quả Câu 61 VAIO:</text>\n                        <text x=\"210\" y=\"73\" font-family=\"Georgia\" font-size=\"7\" text-anchor=\"middle\">• D quá áp đảo G</text>\n                        <text x=\"210\" y=\"85\" font-family=\"Georgia\" font-size=\"7\" text-anchor=\"middle\">• Gradient triệt tiêu về 0</text>\n                        <text x=\"210\" y=\"97\" font-family=\"Georgia\" font-size=\"7\" font-weight=\"bold\" text-anchor=\"middle\">⇒ Ảnh toàn màu xám!</text>\n                      </g>\n                    </svg>",
+          "caption": "Hiện tượng Mode Collapse: Thay vì học phân phối đa dạng (trái), Generator co cụm toàn bộ vector tiềm ẩn về đúng 1 mẫu duy nhất hoặc sinh ảnh màu xám (phải)."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 61 Đề thi chính thức VAIO 2025:\n1. **Nguyên nhân Generator sinh ảnh toàn màu xám hoặc lặp lại một mẫu:**\n   - Đề thi thường đưa các đáp án gây nhiễu: *\"Mất mát quá nhỏ\"*, *\"Tỷ lệ học quá nhỏ\"*, *\"Kích thước lô quá lớn\"*.\n   - ĐÁP ÁN CHÍNH XÁC: **Mất cân bằng giữa bộ phân biệt (Discriminator) và bộ tạo (Generator) gây ra hiện tượng sụp đổ mô hình (Mode Collapse) và triệt tiêu gradient!**\n2. Nhớ rằng: Discriminator quá mạnh sẽ \"bóp nghẹt\" Generator khiến gradient bằng 0.",
+        "practiceQuestion": {
+          "level": "Vận dụng (Câu 61 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Khi huấn luyện mạng GAN, nếu bộ tạo (Generator) tạo ra ảnh toàn màu xám hoặc lặp đi lặp lại một mẫu duy nhất cho mọi đầu vào ngẫu nhiên, nguyên nhân sâu xa là gì? (Câu 61 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. Hàm mất mát (loss) của bộ tạo quá nhỏ",
+            "B. Tỷ lệ học (learning rate) được thiết lập quá nhỏ",
+            "C. Kích thước lô (batch size) được thiết lập quá lớn",
+            "D. Mất cân bằng giữa bộ phân biệt (Discriminator) và bộ tạo (Generator), gây ra hiện tượng sụp đổ mô hình (Mode Collapse)"
+          ],
+          "correctIndex": 3,
+          "hint": "Discriminator học quá nhanh so với Generator làm triệt tiêu tín hiệu gradient phản hồi.",
+          "solution": [
+            "Khi huấn luyện mạng GAN, nếu Discriminator học quá nhanh và trở nên quá áp đảo so với Generator, nó sẽ dễ dàng phân loại chính xác tuyệt đối mọi ảnh giả.",
+            "Điều này khiến hàm mất mát của Generator rơi vào vùng bão hòa, gradient truyền ngược về Generator bị triệt tiêu hoàn toàn (Vanishing Gradient).",
+            "Generator mất khả năng học các phân phối đặc trưng phức tạp và rơi vào hiện tượng Sụp Đổ Mô Hình (Mode Collapse), chỉ sinh ra lặp lại một vài mẫu duy nhất hoặc ảnh toàn màu xám đồng nhất.",
+            "Đáp án chính xác là D."
+          ]
+        }
+      },
+      {
+        "heading": "13.5. Đỉnh Cao Trí Tuệ Nhân Tạo Tạo Sinh: Mô Hình Khuếch Tán (Diffusion Models / DDPM) & Stable Diffusion",
+        "content": "Khám phá cuộc cách mạng vượt mặt GANs của Diffusion Models; công thức Quá trình khuếch tán thuận (Forward) và Quá trình khử nhiễu ngược (Reverse); bản chất U-Net dự đoán lượng nhiễu; kiến trúc Latent Diffusion (Stable Diffusion) kết hợp VAE và CLIP Cross-Attention.",
+        "deepDive": "**1. Sự trỗi dậy của Mô Hình Khuếch Tán (Diffusion Models):**\nTừ năm 2021 trở lại đây, thế giới Trí Tuệ Nhân Tạo chứng kiến một cuộc chuyển giao quyền lực ngoạn mục: GANs — kẻ từng thống trị suốt 7 năm — đã bị soán ngôi hoàn toàn bởi **Mô Hình Khuếch Tán (Diffusion Models)**. Toàn bộ các hệ thống AI tạo ảnh đỉnh cao hiện nay (như Midjourney v6, DALL-E 3 của OpenAI, Stable Diffusion của Stability AI, Google Imagen hay Sora) đều được xây dựng trên nền tảng của Diffusion Models.\n\n*Tại sao Diffusion Models lại đánh bại hoàn toàn GANs?*\n- **Huấn luyện cực kỳ ổn định:** Không có trò chơi đối kháng 2 đấu thủ $\\implies$ Không bao giờ bị mất cân bằng, không bị hiện tượng Mode Collapse!\n- **Hội tụ theo nguyên lý cực đại hợp lý (Maximum Likelihood):** Quá trình tối ưu hóa dựa trên hàm mất mát bình phương sai số đơn giản và đáng tin cậy.\n- **Dễ dàng điều khiển bằng ngôn ngữ tự nhiên:** Tích hợp mượt mà cơ chế Cross-Attention với các mô hình ngôn ngữ lớn như CLIP/T5.\n\n---\n\n**2. Hai quá trình cốt lõi của Mô hình khuếch tán DDPM (Ho et al., NeurIPS 2020):**\n\n- **Quá trình khuếch tán thuận (Forward Diffusion Process $q$):**\n  - Xuất phát từ bức ảnh gốc sạch sẽ $x_0 \\sim q(x)$.\n  - Ta phá hủy dần thông tin của bức ảnh qua chuỗi $T$ bước thời gian ($T = 1,000$). Tại mỗi bước $t$, ta cộng thêm một lượng nhiễu Gauss nhỏ theo lịch trình phương sai $\\beta_1 < \\beta_2 < \\dots < \\beta_T$:\n    $$q(x_t \\mid x_{t-1}) = \\mathcal{N}\\left(x_t; \\sqrt{1 - \\beta_t} x_{t-1}, \\beta_t \\mathbf{I}\\right)$$\n  - *Công thức tính trực tiếp kỳ diệu (Closed-form sampling):*\n    Đặt $\\alpha_t = 1 - \\beta_t$ và $\\bar{\\alpha}_t = \\prod_{s=1}^t \\alpha_s$. Ta có thể nhảy cóc từ $x_0$ đến bất kỳ bước $t$ nào trong đúng 1 phép tính mà không cần chạy tuần tự $t$ bước:\n    $$x_t = \\sqrt{\\bar{\\alpha}_t} x_0 + \\sqrt{1 - \\bar{\\alpha}_t} \\boldsymbol{\\epsilon}, \\quad \\text{với } \\boldsymbol{\\epsilon} \\sim \\mathcal{N}(0, \\mathbf{I})$$\n  - Tại bước cuối cùng $t = T = 1,000$, $\\bar{\\alpha}_T \\approx 0$, bức ảnh ban đầu hoàn toàn biến mất, chỉ còn lại một đám nhiễu trắng Gauss thuần túy: $x_T \\sim \\mathcal{N}(0, \\mathbf{I})$!\n\n- **Quá trình khử nhiễu ngược (Reverse Denoising Process $p_\\theta$):**\n  - Đây chính là phép màu của AI tạo sinh: Xuất phát từ một đám nhiễu ngẫu nhiên thuần túy $x_T \\sim \\mathcal{N}(0, \\mathbf{I})$, ta muốn từng bước loại bỏ nhiễu để khôi phục lại bức ảnh rõ nét:\n    $$p_\\theta(x_{t-1} \\mid x_t) = \\mathcal{N}\\left(x_{t-1}; \\boldsymbol{\\mu}_\\theta(x_t, t), \\boldsymbol{\\Sigma}_\\theta(x_t, t)\\right)$$\n\n---\n\n**3. MẠNG U-NET TRONG DIFFUSION DỰ ĐOÁN ĐẠI LƯỢNG NÀO? (CÂU HỎI KINH ĐIỂN OLYMPIC):**\nĐể thực hiện quá trình khử nhiễu ngược, ta sử dụng một mạng nơ-ron sâu kiến trúc **U-Net** (ký hiệu là $\\boldsymbol{\\epsilon}_\\theta$).\n\n> [!IMPORTANT]\n> **Bản chất sống còn cần ghi nhớ:**\n> Mạng nơ-ron U-Net **KHÔNG ĐƯỢC HUẤN LUYỆN ĐỂ DỰ ĐOÁN BỨC ẢNH GỐC $x_0$**!\n> Thay vào đó, U-Net nhận đầu vào là bức ảnh nhiễu $x_t$ và bước thời gian $t$, và được tối ưu hóa để **DỰ ĐOÁN LƯỢNG NHIỄU GAUSS $\\boldsymbol{\\epsilon}$ ĐÃ ĐƯỢC CỘNG VÀO** ở bước đó!\n\nHàm mất mát tối giản của DDPM đạt giải thưởng xuất sắc:\n$$\\mathcal{L}_{\\text{simple}}(\\theta) = \\mathbb{E}_{t, x_0, \\boldsymbol{\\epsilon}} \\left[ \\left\\| \\boldsymbol{\\epsilon} - \\boldsymbol{\\epsilon}_\\theta(x_t, t) \\right\\|^2 \\right]$$\nSau khi mạng U-Net dự đoán được vector nhiễu $\\boldsymbol{\\epsilon}_\\theta(x_t, t)$, ta dùng công thức giải tích trừ lượng nhiễu này ra khỏi $x_t$ để lùi về bước sạch hơn $x_{t-1}$:\n$$x_{t-1} = \\frac{1}{\\sqrt{\\alpha_t}} \\left( x_t - \\frac{\\beta_t}{\\sqrt{1 - \\bar{\\alpha}_t}} \\boldsymbol{\\epsilon}_\\theta(x_t, t) \\right) + \\sigma_t \\mathbf{z}$$\nLặp lại 1,000 bước khử nhiễu từ $T \\to 0$, một bức ảnh kiệt tác độ phân giải cao sẽ dần dần hiện hình từ đám bụi nhiễu vô định!\n\n---\n\n**4. Kiến Trúc Đột Phá Stable Diffusion (Latent Diffusion Models - Rombach et al., 2022):**\n- **Vấn đề của DDPM nguyên bản:** Chạy 1,000 bước khử nhiễu trên không gian điểm ảnh gốc $512 \\times 512 \\times 3$ đòi hỏi tính toán trên 786,432 con số ở mỗi bước $\\implies$ Mất 30 giây để sinh 1 ảnh trên card đồ họa khủng, không thể ứng dụng thương mại.\n- **Giải pháp Latent Diffusion (Stable Diffusion):**\n  1. **Nén không gian tiềm ẩn bằng VAE (Câu 77, 97):** Dùng Encoder của VAE nén bức ảnh $512 \\times 512 \\times 3$ xuống tensor tiềm ẩn kích thước nhỏ hơn **64 lần**: $64 \\times 64 \\times 4$.\n  2. **Khuếch tán trong Latent Space:** Toàn bộ quá trình thêm nhiễu và khử nhiễu 1,000 bước được thực hiện trên tensor nhẹ nhàng $64 \\times 64 \\times 4$, tăng tốc độ lên gấp hàng chục lần!\n  3. **Điều khiển bằng câu lệnh (Text Prompting qua CLIP):** Câu văn của người dùng (ví dụ: *\"Phi hành gia cưỡi ngựa trên sao Hỏa\"*) được đưa qua bộ mã hóa văn bản **CLIP Text Encoder** để trích xuất các vector ngữ nghĩa. Các vector này được nạp vào các tầng **Cross-Attention** nằm rải rác bên trong mạng U-Net, định hướng cho U-Net quét nhiễu tạo thành đúng hình ảnh phi hành gia và con ngựa!\n  4. **Giải nén bằng VAE Decoder:** Sau khi khử nhiễu xong tensor tiềm ẩn $z_0$, Decoder của VAE giải nén nó ngược trở lại thành bức ảnh pixel sắc nét $512 \\times 512 \\times 3$!",
+        "formula": "x_t = \\sqrt{\\bar{\\alpha}_t} x_0 + \\sqrt{1 - \\bar{\\alpha}_t} \\boldsymbol{\\epsilon}, \\quad \\mathcal{L}_{\\text{simple}} = \\mathbb{E} \\left[ \\|\\boldsymbol{\\epsilon} - \\boldsymbol{\\epsilon}_\\theta(x_t, t)\\|^2 \\right]",
+        "mathExplainer": [
+          {
+            "sym": "x_0 \to x_T",
+            "name": "Quá trình khuếch tán thuận (Forward)",
+            "mean": "Cộng dần từng lượng nhiễu Gauss qua T=1000 bước biến ảnh thành nhiễu trắng ngẫu nhiên."
+          },
+          {
+            "sym": "x_T \to x_0",
+            "name": "Quá trình khử nhiễu ngược (Reverse)",
+            "mean": "Tua ngược thời gian, trừ dần nhiễu từng bước để tạo ra ảnh nghệ thuật sắc nét."
+          },
+          {
+            "sym": "\\boldsymbol{\\epsilon}_\\theta(x_t, t)",
+            "name": "Mạng U-Net dự đoán nhiễu",
+            "mean": "Mạng nơ-ron học cách ước lượng chính xác lượng nhiễu đã được cộng vào ở bước t."
+          },
+          {
+            "sym": "\\text{CLIP Cross-Attention}",
+            "name": "Cơ chế chú ý chéo văn bản",
+            "mean": "Kết nối prompt văn bản với U-Net để điều khiển nội dung ảnh tạo ra theo ý muốn."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <g transform=\"translate(20, 15)\">\n                        <text x=\"310\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Quy Trình Hoạt Động Của Mô Hình Khuếch Tán (Diffusion Models / Stable Diffusion)</text>\n                        <!-- Step 0: Clean image -->\n                        <rect x=\"0\" y=\"35\" width=\"55\" height=\"45\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"3\"/>\n                        <text x=\"27\" y=\"55\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">Ảnh Rõ</text>\n                        <text x=\"27\" y=\"68\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">x₀</text>\n                        <!-- Forward Arrow 1 -->\n                        <line x1=\"55\" y1=\"57\" x2=\"105\" y2=\"57\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <polygon points=\"105,57 99,54 99,60\" fill=\"#111\"/>\n                        <text x=\"80\" y=\"50\" font-family=\"Georgia\" font-size=\"7\" fill=\"#666\" text-anchor=\"middle\">+ Nhiễu</text>\n                        <!-- Step t: Partially noisy -->\n                        <rect x=\"105\" y=\"35\" width=\"55\" height=\"45\" fill=\"#e0e0e0\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"3\"/>\n                        <text x=\"132\" y=\"55\" font-family=\"Georgia\" font-size=\"8.5\" text-anchor=\"middle\">Nhiễu Vừa</text>\n                        <text x=\"132\" y=\"68\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">x_t</text>\n                        <!-- Forward Arrow 2 -->\n                        <line x1=\"160\" y1=\"57\" x2=\"210\" y2=\"57\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <polygon points=\"210,57 204,54 204,60\" fill=\"#111\"/>\n                        <text x=\"185\" y=\"50\" font-family=\"Georgia\" font-size=\"7\" fill=\"#666\" text-anchor=\"middle\">+ Nhiễu</text>\n                        <!-- Step T: Pure noise -->\n                        <rect x=\"210\" y=\"35\" width=\"55\" height=\"45\" fill=\"#666\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"3\"/>\n                        <text x=\"237\" y=\"55\" font-family=\"Georgia\" font-size=\"8.5\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">Nhiễu Trắng</text>\n                        <text x=\"237\" y=\"68\" font-family=\"Georgia\" font-size=\"8\" fill=\"#fff\" text-anchor=\"middle\">x_T ~ N(0,I)</text>\n                        <!-- Forward Process Label -->\n                        <text x=\"132\" y=\"94\" font-family=\"Georgia\" font-size=\"8\" fill=\"#444\" text-anchor=\"middle\">Quá trình thuận q (Forward: Thêm nhiễu Gauss)</text>\n                        <!-- Reverse Process U-Net arc -->\n                        <path d=\"M 237 105 C 237 145 27 145 27 105\" fill=\"none\" stroke=\"#111\" stroke-width=\"2\"/>\n                        <polygon points=\"27,105 23,113 31,113\" fill=\"#111\"/>\n                        <!-- U-Net Predictor Box in middle of reverse -->\n                        <rect x=\"90\" y=\"120\" width=\"165\" height=\"30\" fill=\"#111\" rx=\"3\"/>\n                        <text x=\"172\" y=\"135\" font-family=\"Georgia\" font-size=\"8.5\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">Mạng U-Net: Dự đoán nhiễu ε_θ</text>\n                        <text x=\"172\" y=\"145\" font-family=\"Georgia\" font-size=\"7\" fill=\"#ccc\" text-anchor=\"middle\">Trừ lượng nhiễu để phục hồi x_{t-1}</text>\n                        <!-- Right Panel: Stable Diffusion Components -->\n                        <g transform=\"translate(320, 28)\">\n                          <rect x=\"0\" y=\"0\" width=\"300\" height=\"125\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1\" rx=\"3\"/>\n                          <text x=\"150\" y=\"18\" font-family=\"Georgia\" font-size=\"9.5\" font-weight=\"bold\" text-anchor=\"middle\">3 Trụ Cột Của Stable Diffusion</text>\n                          <!-- 1. VAE -->\n                          <rect x=\"10\" y=\"28\" width=\"85\" height=\"36\" fill=\"#f0f0f0\" stroke=\"#111\" stroke-width=\"1\" rx=\"2\"/>\n                          <text x=\"52\" y=\"43\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">1. VAE (Nén)</text>\n                          <text x=\"52\" y=\"56\" font-family=\"Georgia\" font-size=\"7\" fill=\"#555\" text-anchor=\"middle\">Nén 64x Latent</text>\n                          <!-- 2. U-Net -->\n                          <rect x=\"105\" y=\"28\" width=\"90\" height=\"36\" fill=\"#111\" rx=\"2\"/>\n                          <text x=\"150\" y=\"43\" font-family=\"Georgia\" font-size=\"8\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">2. U-Net (Khử)</text>\n                          <text x=\"150\" y=\"56\" font-family=\"Georgia\" font-size=\"7\" fill=\"#ddd\" text-anchor=\"middle\">Dự đoán nhiễu ε</text>\n                          <!-- 3. CLIP -->\n                          <rect x=\"205\" y=\"28\" width=\"85\" height=\"36\" fill=\"#f0f0f0\" stroke=\"#111\" stroke-width=\"1\" rx=\"2\"/>\n                          <text x=\"247\" y=\"43\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\" text-anchor=\"middle\">3. CLIP (Text)</text>\n                          <text x=\"247\" y=\"56\" font-family=\"Georgia\" font-size=\"7\" fill=\"#555\" text-anchor=\"middle\">Cross-Attention</text>\n                          <!-- Advantages below -->\n                          <text x=\"15\" y=\"85\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\">• Ưu thế vượt trội so với GANs:</text>\n                          <text x=\"20\" y=\"98\" font-family=\"Georgia\" font-size=\"7.5\">✓ 100% không bị Mode Collapse</text>\n                          <text x=\"20\" y=\"110\" font-family=\"Georgia\" font-size=\"7.5\">✓ Huấn luyện ổn định theo hàm mất mát cực đại hợp lý</text>\n                          <text x=\"20\" y=\"122\" font-family=\"Georgia\" font-size=\"7.5\">✓ Khả năng điều khiển bằng văn bản cực kỳ chính xác</text>\n                        </g>\n                      </g>\n                    </svg>",
+          "caption": "Mô hình khuếch tán: Thêm nhiễu Gauss ở chiều thuận và dùng mạng U-Net dự đoán lượng nhiễu để trừ dần ở chiều nghịch."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi về Mô Hình Khuếch Tán (Diffusion Models):\n1. **Mạng nơ-ron U-Net thực sự học cái gì?**\n   - Đề thi thường đưa đáp án bẫy: *\"Mạng nơ-ron U-Net dự đoán bức ảnh gốc x_0 không còn nhiễu\"*.\n   - ĐÁP ÁN ĐÚNG: **Mạng nơ-ron U-Net dự đoán LƯỢNG NHIỄU GAUSS $\\boldsymbol{\\epsilon}$ ĐÃ ĐƯỢC THÊM VÀO ở bước thời gian $t$!**\n2. **Khác biệt cốt lõi giữa GANs và Diffusion:** GANs huấn luyện theo cơ chế đối kháng 2 đấu thủ (dễ Mode Collapse). Diffusion huấn luyện khử nhiễu từng bước có giám sát chặt chẽ bằng hàm MSE $\\implies$ Hoàn toàn miễn nhiễm với Mode Collapse!",
+        "practiceQuestion": {
+          "level": "Nâng cao (Đề Thi Olympic AI)",
+          "question": "Trong quá trình khử nhiễu ngược (Reverse Process) của mô hình khuếch tán DDPM, mạng nơ-ron U-Net được tối ưu hóa bằng hàm mất mát để dự đoán đại lượng nào sau đây?",
+          "options": [
+            "A. Bức ảnh hoàn chỉnh ban đầu x₀ không còn nhiễu hạt",
+            "B. Vector nhiễu Gauss (epsilon) đã được cộng vào bức ảnh ở bước thời gian t",
+            "C. Nhãn danh mục phân loại của đối tượng xuất hiện trong ảnh",
+            "D. Kích thước chiều cao và chiều rộng của không gian tiềm ẩn"
+          ],
+          "correctIndex": 1,
+          "hint": "Hàm mất mát L_simple = E[||epsilon - epsilon_theta(x_t, t)||^2].",
+          "solution": [
+            "Trong bài báo nền tảng DDPM của Ho et al. (2020), các tác giả đã chứng minh bằng toán học và thực nghiệm rằng:",
+            "Việc huấn luyện mạng U-Net để dự đoán vector nhiễu ngẫu nhiên epsilon mang lại tính ổn định số học cao hơn rất nhiều và chất lượng hình ảnh sắc nét vượt trội so với việc cố gắng dự đoán trực tiếp bức ảnh ban đầu x_0.",
+            "Đáp án chính xác là B."
+          ]
+        }
+      },
+      {
+        "heading": "13.6. Kỹ Thuật Huấn Luyện Thực Chiến: Xử Lý Tràn Bộ Nhớ GPU OOM (Câu 51) & Triển Khai Suy Luận ONNX/TensorRT (Câu 86)",
+        "content": "Làm chủ các tình huống thực chiến trong phòng thi và dự án: Bản chất lỗi tràn bộ nhớ GPU CUDA Out-of-Memory và kỹ thuật Tích lũy độ dốc (Gradient Accumulation - Câu 51 VAIO); Mixed Precision FP16; cùng quy trình chuẩn xuất khẩu mô hình ONNX và tối ưu hóa thời gian thực bằng NVIDIA TensorRT (Câu 86 VAIO).",
+        "deepDive": "**1. Cơn ác mộng phòng thi: Lỗi tràn bộ nhớ GPU (CUDA Out-of-Memory - CÂU 51 VAIO):**\nKhi bạn viết code huấn luyện một mô hình Deep Learning phức tạp trên PyTorch, bạn bấm Run và chỉ sau 2 giây màn hình văng ra thông báo lỗi kinh hoàng:\n```text\ntorch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 2.40 GiB (GPU 0; 15.78 GiB total capacity; 14.10 GiB already allocated)\n```\n\n*Bộ nhớ VRAM của GPU đã bị tiêu tốn vào những đâu?*\n1. **Trọng số mô hình (Model Parameters):** Mỗi tham số kiểu Float32 tốn 4 bytes. Mô hình 100 triệu tham số tốn 400 MB.\n2. **Trạng thái bộ tối ưu hóa (Optimizer States):** Bộ tối ưu hóa Adam lưu cả giá trị trung bình $m_t$ và phương sai $v_t$ $\\implies$ Tốn gấp 2 đến 3 lần kích thước trọng số (8 - 12 bytes/tham số).\n3. **Độ dốc (Gradients):** Tốn thêm 4 bytes/tham số.\n4. **THỦ PHẠM CHÍNH CHIẾM 70% VRAM: Tensor Kích Hoạt Trung Gian (Activations):**\n   - Trong quá trình Forward, để phục vụ cho phép tính đạo hàm Chain Rule ở quá trình Backward, PyTorch **bắt buộc phải lưu giữ toàn bộ tensor đầu ra của tất cả các tầng Conv, ReLU, BatchNorm** trong bộ nhớ VRAM!\n   - Kích thước activation tỉ lệ thuận trực tiếp với: Kích thước Batch Size $\\times$ Độ phân giải ảnh $H \\times W \\times C$.\n\n---\n\n**2. Các giải pháp kỹ thuật xử lý GPU OOM theo thứ tự ưu tiên (CÂU 51 ĐỀ THI VAIO 2025):**\n\n- **Biện pháp 1: Giảm kích thước lô (Reduce Batch Size):**\n  - Biện pháp trực tiếp và đơn giản nhất. Giảm batch size từ 64 xuống 32 hoặc 16 sẽ cắt giảm ngay lập tức một nửa lượng VRAM tiêu tốn cho Activations!\n- **Biện pháp 2: TÍCH LŨY ĐỘ DỐC (GRADIENT ACCUMULATION - CÂU 51 VAIO):**\n  - *Vấn đề:* Nếu giảm batch size xuống quá nhỏ (ví dụ batch size = 4), gradient sẽ bị dao động rất nhiễu, làm mô hình học kém ổn định. Ta muốn có hiệu quả toán học tương đương batch size 64 nhưng VRAM chỉ đủ cho batch size 16 thì phải làm sao?\n  - *Giải pháp:* Chia batch 64 thành 4 micro-batch nhỏ (kích thước 16).\n    1. Chạy forward và backward trên micro-batch 1 $\\to$ Gradient được cộng dồn vào bộ đệm.\n    2. Chạy tiếp micro-batch 2 $\\to$ Gradient tiếp tục được cộng dồn (tích lũy).\n    3. **KHÔNG GỌI `optimizer.step()` và `optimizer.zero_grad()` ở mỗi bước!**\n    4. Chỉ sau khi đã tích lũy đủ 4 micro-batch, ta mới gọi cập nhật trọng số `optimizer.step()` và xóa gradient `optimizer.zero_grad()`!\n    ```python\n    # Kỹ thuật Gradient Accumulation chuẩn PyTorch (Câu 51)\n    accum_steps = 4\n    for i, (inputs, labels) in enumerate(dataloader):\n        outputs = model(inputs)\n        loss = criterion(outputs, labels) / accum_steps  # Chia tỉ lệ loss\n        loss.backward()                                   # Tích lũy gradient\n        \n        if (i + 1) % accum_steps == 0:\n            optimizer.step()                              # Cập nhật trọng số\n            optimizer.zero_grad()                         # Xóa gradient tích lũy\n    ```\n- **Biện pháp 3: Huấn luyện với độ chính xác hỗn hợp tự động (Automatic Mixed Precision - AMP / FP16):**\n  - Chuyển đổi dữ liệu và trọng số từ Float32 (32-bit, 4 bytes) sang Float16 hoặc BFloat16 (16-bit, 2 bytes).\n  - Tiết kiệm ngay 50% bộ nhớ VRAM và tận dụng phần cứng nhân Tensor Cores giúp tăng tốc tính toán từ 2 đến 4 lần!\n  - Cú pháp PyTorch: `with torch.cuda.amp.autocast(): loss = model(inputs)`.\n- **Biện pháp 4: Kích hoạt trạm kiểm soát (Gradient Checkpointing):**\n  - Thay vì lưu trữ toàn bộ activations trong VRAM, ta chỉ lưu ở một vài tầng kiểm soát. Khi lan truyền ngược, mạng sẽ tự tính toán lại (Recompute) các activation bị thiếu $\\implies$ Đổi thời gian tính toán lấy không gian bộ nhớ VRAM!\n\n---\n\n**3. Quy Trình Triển Khai Suy Luận Thực Tế (Deployment - CÂU 86 ĐỀ THI VAIO 2025):**\nTrong môi trường nghiên cứu và thi đấu, ta viết code bằng PyTorch. Nhưng khi mang mô hình ra đời thực để cài vào camera giám sát, điện thoại iPhone hay xe tự lái Tesla, ta không thể cài cả bộ cài PyTorch 5 GB nặng nề!\n\nQuy trình công nghiệp chuẩn quốc tế (Câu 86 VAIO):\n```\n[Mô hình PyTorch (.pth)]\n          │\n          ▼ (Bước 1)\n[Chuyển đổi sang chuẩn mở ONNX (.onnx)]\n          │   • Đồ thị tính toán tĩnh, độc lập nền tảng\n          ▼ (Bước 2)\n[Tối ưu hóa bằng NVIDIA TensorRT / OpenVINO]\n              • Dung hợp tầng (Layer Fusion: Conv + BN + ReLU)\n              • Lượng tử hóa INT8 (Quantization)\n              • Động cơ suy luận siêu tốc thời gian thực (Real-time Engine)\n```\n\n1. **Chuẩn Trung Gian ONNX (Open Neural Network Exchange):**\n   - Đóng băng mô hình thành một đồ thị tính toán tĩnh (Static Computation Graph) không phụ thuộc ngôn ngữ lập trình (có thể chạy bằng C++, Rust, C# hay Java).\n   - Xuất file trong PyTorch: `torch.onnx.export(model, dummy_input, \"model.onnx\")`.\n2. **NVIDIA TensorRT (CÂU 86 VAIO):**\n   - Bộ tối ưu hóa suy luận (Inference Optimizer) đỉnh cao chạy trên phần cứng GPU NVIDIA.\n   - **Dung hợp tầng (Layer Fusion):** Gộp 3 phép tính riêng lẻ `Conv2D` $\\to$ `BatchNorm` $\\to$ `ReLU` thành đúng **1 hàm GPU Kernel duy nhất**, loại bỏ hoàn toàn độ trễ đọc-ghi bộ nhớ đệm VRAM.\n   - **Lượng tử hóa INT8 (INT8 Quantization):** Nén trọng số từ Float32 xuống số nguyên 8-bit INT8 (giảm 75% kích thước mô hình), tăng tốc độ suy luận gấp **5 đến 10 lần** và duy trì FPS thời gian thực!",
+        "formula": "\\text{Gradient Accumulation: } \\nabla W = \\sum_{k=1}^K \\nabla W_{\\text{micro-}k}, \\quad \\text{PyTorch} \\xrightarrow{} \\text{ONNX} \\xrightarrow{} \\text{TensorRT (INT8)}",
+        "mathExplainer": [
+          {
+            "sym": "\\text{GPU OOM (Câu 51)}",
+            "name": "Lỗi tràn bộ nhớ CUDA",
+            "mean": "Xảy ra khi VRAM không đủ chứa weights, optimizer states và đặc biệt là activations."
+          },
+          {
+            "sym": "\\text{Gradient Accumulation}",
+            "name": "Tích lũy độ dốc (Câu 51)",
+            "mean": "Chia batch lớn thành nhiều micro-batch, cộng dồn gradient trước khi optimizer.step()."
+          },
+          {
+            "sym": "\\text{Mixed Precision (FP16)}",
+            "name": "Độ chính xác hỗn hợp",
+            "mean": "Dùng số thực 16-bit thay cho 32-bit giúp giảm 50% VRAM và tăng tốc trên Tensor Cores."
+          },
+          {
+            "sym": "\\text{ONNX & TensorRT (Câu 86)}",
+            "name": "Bộ tối ưu triển khai thực tế",
+            "mean": "ONNX là định dạng đồ thị trung gian; TensorRT dung hợp tầng và lượng tử hóa INT8."
+          }
+        ],
+        "diagram": {
+          "svg": "<svg viewBox=\"0 0 660 170\" width=\"100%\" height=\"170\" xmlns=\"http://www.w3.org/2000/svg\">\n                      <rect width=\"660\" height=\"170\" fill=\"#fafafa\" stroke=\"#111\" stroke-width=\"1\"/>\n                      <!-- Left: Gradient Accumulation (Câu 51) -->\n                      <g transform=\"translate(25, 20)\">\n                        <text x=\"135\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Xử Lý GPU OOM: Tích Lũy Độ Dốc (Câu 51)</text>\n                        <!-- Micro-batch 1 -->\n                        <rect x=\"0\" y=\"32\" width=\"60\" height=\"24\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"30\" y=\"47\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Micro 1 (16)</text>\n                        <line x1=\"60\" y1=\"44\" x2=\"85\" y2=\"44\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"72\" y=\"40\" font-family=\"Georgia\" font-size=\"7\">loss.bk()</text>\n                        <!-- Micro-batch 2 -->\n                        <rect x=\"0\" y=\"62\" width=\"60\" height=\"24\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"30\" y=\"77\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Micro 2 (16)</text>\n                        <line x1=\"60\" y1=\"74\" x2=\"85\" y2=\"74\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <text x=\"72\" y=\"70\" font-family=\"Georgia\" font-size=\"7\">loss.bk()</text>\n                        <!-- Micro-batch 3, 4 -->\n                        <rect x=\"0\" y=\"92\" width=\"60\" height=\"24\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"30\" y=\"107\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Micro 3, 4</text>\n                        <line x1=\"60\" y1=\"104\" x2=\"85\" y2=\"104\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <!-- Accumulator Buffer -->\n                        <rect x=\"95\" y=\"38\" width=\"65\" height=\"85\" fill=\"#f0f0f0\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"3\"/>\n                        <text x=\"127\" y=\"65\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">Bộ Đệm</text>\n                        <text x=\"127\" y=\"78\" font-family=\"Georgia\" font-size=\"8\" text-anchor=\"middle\">Tích Lũy</text>\n                        <text x=\"127\" y=\"92\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">∑ ∇W</text>\n                        <!-- Optimizer step -->\n                        <line x1=\"160\" y1=\"80\" x2=\"195\" y2=\"80\" stroke=\"#111\" stroke-width=\"1.5\"/>\n                        <polygon points=\"195,80 189,77 189,83\" fill=\"#111\"/>\n                        <rect x=\"195\" y=\"65\" width=\"75\" height=\"30\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"232\" y=\"80\" font-family=\"Georgia\" font-size=\"8.5\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">opt.step()</text>\n                        <text x=\"232\" y=\"90\" font-family=\"Georgia\" font-size=\"7\" fill=\"#ccc\" text-anchor=\"middle\">1 lần / 4 bước</text>\n                        <text x=\"135\" y=\"142\" font-family=\"Georgia\" font-size=\"8\" fill=\"#444\" text-anchor=\"middle\">VRAM chỉ tốn cho batch 16 nhưng hiệu quả = batch 64!</text>\n                      </g>\n                      <!-- Divider -->\n                      <line x1=\"335\" y1=\"20\" x2=\"335\" y2=\"155\" stroke=\"#ccc\" stroke-dasharray=\"2,2\"/>\n                      <!-- Right: Deployment Pipeline (Câu 86) -->\n                      <g transform=\"translate(355, 20)\">\n                        <text x=\"140\" y=\"14\" font-family=\"Georgia\" font-size=\"11\" font-weight=\"bold\" text-anchor=\"middle\">Triển Khai Mô Hình Thực Tế (Câu 86 VAIO)</text>\n                        <!-- Stage 1: PyTorch -->\n                        <rect x=\"10\" y=\"35\" width=\"75\" height=\"35\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.2\" rx=\"2\"/>\n                        <text x=\"47\" y=\"52\" font-family=\"Georgia\" font-size=\"8.5\" font-weight=\"bold\" text-anchor=\"middle\">1. PyTorch</text>\n                        <text x=\"47\" y=\"63\" font-family=\"Georgia\" font-size=\"7\" fill=\"#555\" text-anchor=\"middle\">Đồ thị động .pth</text>\n                        <!-- Arrow 1-2 -->\n                        <line x1=\"85\" y1=\"52\" x2=\"115\" y2=\"52\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <polygon points=\"115,52 109,49 109,55\" fill=\"#111\"/>\n                        <!-- Stage 2: ONNX -->\n                        <rect x=\"115\" y=\"35\" width=\"75\" height=\"35\" fill=\"#fff\" stroke=\"#111\" stroke-width=\"1.5\" rx=\"2\"/>\n                        <text x=\"152\" y=\"52\" font-family=\"Georgia\" font-size=\"9\" font-weight=\"bold\" text-anchor=\"middle\">2. ONNX</text>\n                        <text x=\"152\" y=\"63\" font-family=\"Georgia\" font-size=\"7\" fill=\"#555\" text-anchor=\"middle\">Chuẩn đồ thị tĩnh</text>\n                        <!-- Arrow 2-3 -->\n                        <line x1=\"190\" y1=\"52\" x2=\"220\" y2=\"52\" stroke=\"#111\" stroke-width=\"1.2\"/>\n                        <polygon points=\"220,52 214,49 214,55\" fill=\"#111\"/>\n                        <!-- Stage 3: TensorRT -->\n                        <rect x=\"220\" y=\"35\" width=\"70\" height=\"35\" fill=\"#111\" rx=\"2\"/>\n                        <text x=\"255\" y=\"52\" font-family=\"Georgia\" font-size=\"8.5\" fill=\"#fff\" font-weight=\"bold\" text-anchor=\"middle\">3. TensorRT</text>\n                        <text x=\"255\" y=\"63\" font-family=\"Georgia\" font-size=\"7\" fill=\"#ddd\" text-anchor=\"middle\">INT8 Real-time</text>\n                        <!-- Optimization Features Box below -->\n                        <rect x=\"10\" y=\"85\" width=\"280\" height=\"52\" fill=\"#f0f0f0\" stroke=\"#111\" stroke-width=\"1\" rx=\"2\"/>\n                        <text x=\"20\" y=\"100\" font-family=\"Georgia\" font-size=\"8\" font-weight=\"bold\">Kỹ thuật tối ưu TensorRT (Câu 86):</text>\n                        <text x=\"20\" y=\"115\" font-family=\"Georgia\" font-size=\"7.5\">• Layer Fusion: Gộp Conv + BatchNorm + ReLU</text>\n                        <text x=\"20\" y=\"128\" font-family=\"Georgia\" font-size=\"7.5\">• INT8 Quantization: Nén 4x kích thước, tăng tốc 5-10x</text>\n                      </g>\n                    </svg>",
+          "caption": "Kỹ thuật thực chiến: Xử lý GPU OOM bằng Gradient Accumulation (trái) và quy trình chuẩn hóa triển khai qua ONNX và TensorRT (phải)."
+        },
+        "commonPitfalls": "Cạm bẫy phòng thi Câu 51 & 86 Đề thi chính thức VAIO 2025:\n1. **Lỗi GPU Out-of-Memory (Câu 51):**\n   - Đề thi hỏi khi GPU bị đầy bộ nhớ (OOM) trong PyTorch, giải pháp kỹ thuật nào nên thử đầu tiên?\n   - ĐÁP ÁN ĐÚNG: **Giảm kích thước lô (batch size) hoặc dùng Tích lũy độ dốc (Gradient Accumulation)**!\n   - Không chọn: *\"Chuyển sang CPU\"* (chậm gấp 50 lần), *\"Thêm Dropout\"* (không giảm VRAM), *\"Dùng mô hình lớn hơn\"* (càng OOM nặng hơn).\n2. **Quy trình triển khai mô hình (Câu 86):**\n   - Chuyển đổi sang đồ thị trung gian **ONNX** và tối ưu hóa phần cứng bằng **NVIDIA TensorRT** là chuẩn công nghiệp để tăng tốc suy luận thời gian thực.",
+        "practiceQuestion": {
+          "level": "Thực chiến (Câu 51 Đề Thi Chính Thức VAIO 2025)",
+          "question": "Khi huấn luyện mô hình học sâu bằng PyTorch, nếu GPU bị tràn bộ nhớ (Out-of-Memory - OOM), bạn nên thử giải pháp kỹ thuật nào đầu tiên để tiếp tục huấn luyện mà không làm giảm dung lượng của tập dữ liệu? (Câu 51 Đề thi chính thức VAIO 2025)",
+          "options": [
+            "A. Chuyển toàn bộ quá trình huấn luyện sang sử dụng CPU",
+            "B. Bổ sung thêm nhiều tầng bỏ ngẫu nhiên (Dropout) vào mạng",
+            "C. Tăng kích thước các tầng ẩn để tăng dung lượng mô hình",
+            "D. Giảm kích thước lô (batch size) hoặc sử dụng kỹ thuật tích lũy độ dốc (Gradient Accumulation)"
+          ],
+          "correctIndex": 3,
+          "hint": "Bộ nhớ VRAM bị chiếm phần lớn bởi các tensor kích hoạt trung gian (activations), vốn tỉ lệ thuận với kích thước batch size.",
+          "solution": [
+            "Nguyên nhân trực tiếp gây lỗi CUDA OOM trong quá trình forward/backward là bộ nhớ lưu trữ các activations của batch dữ liệu hiện tại vượt quá dung lượng VRAM vật lý của GPU.",
+            "Giải pháp hàng đầu và chuẩn mực là giảm batch size để giảm tức thì lượng activation cần lưu.",
+            "Nếu muốn duy trì kích thước batch hiệu dụng lớn mà không bị tràn VRAM, kỹ thuật Tích Lũy Độ Dốc (Gradient Accumulation) là giải pháp tối ưu: chia batch lớn thành nhiều micro-batch nhỏ, cộng dồn gradient qua nhiều bước rồi mới cập nhật trọng số.",
+            "Đáp án chính xác là D."
+          ]
+        }
+      }
+    ],
+    "interactiveWidget": "widget-generative-diffusion",
+    "examConnection": {
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI Về Generative AI, SSL & Triển Khai",
+      "items": [
+        {
+          "code": "Câu 61 (Đề Chính Thức)",
+          "problem": "Nguyên nhân Generator sinh ảnh toàn màu xám hoặc lặp lại một mẫu duy nhất trong mạng GAN.",
+          "solution": [
+            "Mất cân bằng giữa Discriminator và Generator: Discriminator quá áp đảo khiến gradient phản hồi bị triệt tiêu, Generator rơi vào hiện tượng Sụp Đổ Mô Hình (Mode Collapse). Đáp án D."
+          ]
+        },
+        {
+          "code": "Câu 95 (Đề Chính Thức)",
+          "problem": "Kiến trúc mạng đối kháng tạo sinh GAN gồm hai thành phần chính nào tham gia trò chơi Minimax.",
+          "solution": [
+            "Bộ tạo (Generator) và Bộ phân biệt (Discriminator). Đáp án B."
+          ]
+        },
+        {
+          "code": "Câu 77 (Đề Chính Thức)",
+          "problem": "Bản chất và mục đích của 'Nút thắt thông tin' (Information Bottleneck) trong Autoencoder.",
+          "solution": [
+            "Thiết kế số chiều lớp ẩn trung tâm hẹp hơn nhiều so với đầu vào (d << D) để ép mô hình phải nén và học các đặc trưng biểu diễn cốt lõi thay vì sao chép đồng nhất."
+          ]
+        },
+        {
+          "code": "Câu 97 (Đề Chính Thức)",
+          "problem": "Nguyên nhân mô hình VAE (Variational Autoencoder) thường sinh ra ảnh bị mờ.",
+          "solution": [
+            "Do hàm mất mát MSE/ELBO kết hợp với phân kỳ KL (KL divergence) ép phân phối phải trơn mượt, khiến mô hình chỉ nắm bắt các đặc trưng tần số thấp tổng quát và triệt tiêu các chi tiết tần số cao sắc nét."
+          ]
+        },
+        {
+          "code": "Câu 51 (Đề Chính Thức)",
+          "problem": "Giải pháp kỹ thuật hàng đầu khi gặp lỗi GPU Out-of-Memory (OOM) trong PyTorch.",
+          "solution": [
+            "Giảm kích thước lô (batch size) hoặc sử dụng kỹ thuật Tích lũy độ dốc (Gradient Accumulation). Đáp án D."
+          ]
+        },
+        {
+          "code": "Câu 86 (Đề Chính Thức)",
+          "problem": "Quy trình chuẩn triển khai suy luận mô hình thời gian thực trong môi trường sản xuất.",
+          "solution": [
+            "Chuyển đổi đồ thị tính toán từ PyTorch sang định dạng trung gian mở ONNX, sau đó tối ưu hóa phần cứng bằng NVIDIA TensorRT (Layer Fusion & INT8 Quantization)."
+          ]
+        }
+      ]
+    },
+    "takeaways": [
+      "Học tự giám sát (SimCLR): Cặp dương tính được tạo từ CÙNG 1 ẢNH GỐC qua Data Augmentation; hàm InfoNCE kéo gần mẫu dương và đẩy xa mẫu âm.",
+      "Autoencoder có nút thắt thông tin (Information Bottleneck d << D) để nén đặc trưng; VAE dùng Reparameterization Trick; ảnh VAE bị mờ do phân kỳ KL ép trơn mất chi tiết tần số cao.",
+      "GANs gồm Generator và Discriminator đấu trí Minimax; trong pha suy luận thực tế (Inference) ta VỨT BỎ Discriminator và chỉ dùng Generator.",
+      "Mode Collapse (Câu 61): Discriminator quá mạnh làm triệt tiêu gradient, Generator nản chí sinh ảnh toàn màu xám hoặc lặp lại 1 mẫu duy nhất.",
+      "Mô hình khuếch tán (Diffusion): Quá trình thuận thêm nhiễu Gauss; U-Net được huấn luyện để DỰ ĐOÁN LƯỢNG NHIỄU EPSILON chứ không phải ảnh gốc x0; hoàn toàn không bị Mode Collapse.",
+      "Kỹ thuật thực chiến: GPU OOM giải quyết bằng Gradient Accumulation; Triển khai thời gian thực chuyển sang ONNX và tối ưu bằng NVIDIA TensorRT (Layer Fusion + INT8)."
+    ]
+  }
+];
