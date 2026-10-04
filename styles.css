@@ -893,14 +893,14 @@ body {
   color: #222;
 }
 
-/* Modern IDE Code Block */
+/* Clean White / Light Theme Code Block */
 .code-block-wrap {
   margin: 20px 0;
-  border: 1px solid #30363d;
+  border: 1px solid #d0d7de;
   border-radius: 10px;
   overflow: hidden;
-  background: #161b22;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
 }
 
 .code-block-header {
@@ -908,12 +908,12 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 8px 14px;
-  background: #0d1117;
-  color: #8b949e;
+  background: #f6f8fa;
+  color: #57606a;
   font-family: var(--font-mono);
   font-size: 0.78rem;
   font-weight: 600;
-  border-bottom: 1px solid #30363d;
+  border-bottom: 1px solid #d0d7de;
   user-select: none;
 }
 
@@ -935,23 +935,23 @@ body {
   border-radius: 50%;
   display: inline-block;
 }
-.code-mac-dot.red { background: #ff5f56; box-shadow: 0 0 4px rgba(255, 95, 86, 0.4); }
-.code-mac-dot.yellow { background: #ffbd2e; box-shadow: 0 0 4px rgba(255, 189, 46, 0.4); }
-.code-mac-dot.green { background: #27c93f; box-shadow: 0 0 4px rgba(39, 201, 63, 0.4); }
+.code-mac-dot.red { background: #ff5f56; box-shadow: 0 0 3px rgba(255, 95, 86, 0.35); }
+.code-mac-dot.yellow { background: #ffbd2e; box-shadow: 0 0 3px rgba(255, 189, 46, 0.35); }
+.code-mac-dot.green { background: #27c93f; box-shadow: 0 0 3px rgba(39, 201, 63, 0.35); }
 
 .code-lang-label {
   font-family: var(--font-mono);
   font-size: 0.76rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #c9d1d9;
+  color: #24292f;
   font-weight: 700;
 }
 
 .copy-code-btn {
-  background: #21262d;
-  border: 1px solid #363b42;
-  color: #c9d1d9;
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  color: #24292f;
   padding: 4px 12px;
   border-radius: 6px;
   font-size: 0.75rem;
@@ -962,25 +962,26 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .copy-code-btn:hover {
-  background: #30363d;
-  color: #58a6ff;
-  border-color: #58a6ff;
+  background: #f3f4f6;
+  color: #0969da;
+  border-color: #0969da;
 }
 
 .copy-code-btn.copied {
-  background: #238636;
-  color: #fff;
-  border-color: #2ea043;
+  background: #dafbe1;
+  color: #1a7f37;
+  border-color: #1a7f37;
 }
 
 .code-block {
   margin: 0;
   padding: 16px 18px;
-  background: #161b22;
-  color: #e6edf3;
+  background: #ffffff;
+  color: #1f2328;
   font-family: 'SF Mono', Monaco, Menlo, Consolas, 'Liberation Mono', Courier, monospace;
   font-size: 0.94rem;
   line-height: 1.65;
@@ -989,23 +990,23 @@ body {
   tab-size: 4;
 }
 
-/* Syntax Highlighting Tokens (High Contrast, IDE Palette) */
-.tok-keyword { color: #ff7b72; font-weight: 600; }
-.tok-type { color: #d2a8ff; font-weight: 600; }
-.tok-builtin { color: #79c0ff; font-weight: 500; }
-.tok-string { color: #a5d6ff; }
-.tok-number { color: #fab387; }
-.tok-comment { color: #8b949e; font-style: italic; }
-.tok-decorator { color: #e3b341; }
-.tok-operator { color: #ff7b72; }
+/* Syntax Highlighting Tokens (Clean Light Theme - GitHub Light Palette) */
+.tok-keyword { color: #cf222e; font-weight: 600; }        /* Ruby/Coral Red */
+.tok-type { color: #8250df; font-weight: 600; }           /* Royal Purple */
+.tok-builtin { color: #0969da; font-weight: 600; }        /* Electric Blue */
+.tok-string { color: #0a3069; }                           /* Deep Navy Blue */
+.tok-number { color: #953800; font-weight: 500; }         /* Warm Rust Brown / Orange */
+.tok-comment { color: #6e7781; font-style: italic; }      /* Slate Gray */
+.tok-decorator { color: #8250df; }                        /* Purple */
+.tok-operator { color: #cf222e; font-weight: 600; }       /* Red */
 
 /* Inline Code pills in text and options */
 code {
   font-family: 'SF Mono', Monaco, Menlo, Consolas, monospace;
   font-size: 0.88em;
   padding: 2px 7px;
-  background: #f0f3f6;
-  color: #c93b2b;
+  background: #f6f8fa;
+  color: #cf222e;
   border: 1px solid #d0d7de;
   border-radius: 5px;
   word-break: break-word;
@@ -1021,14 +1022,14 @@ code {
 /* Code Output Console Block */
 .code-output-wrap {
   margin: -12px 0 20px 0;
-  border: 1px solid #30363d;
+  border: 1px solid #d0d7de;
   border-radius: 0 0 10px 10px;
-  border-top: 1px dashed #30363d;
-  background: #0d1117;
+  border-top: 1px dashed #d0d7de;
+  background: #f6f8fa;
   padding: 12px 18px;
   font-family: 'SF Mono', Monaco, Menlo, monospace;
   font-size: 0.86rem;
-  color: #7ee787;
+  color: #1a7f37;
   overflow-x: auto;
   line-height: 1.5;
 }
@@ -1036,7 +1037,7 @@ code {
 .code-output-title {
   font-size: 0.72rem;
   text-transform: uppercase;
-  color: #8b949e;
+  color: #57606a;
   margin-bottom: 6px;
   letter-spacing: 0.05em;
   font-weight: 700;
