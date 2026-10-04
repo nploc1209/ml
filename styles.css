@@ -729,7 +729,6 @@ body {
   width: 100% !important;
   max-width: 100%;
   height: auto !important;
-  min-height: 250px;
   display: block;
   margin: 0 auto;
 }
@@ -2174,10 +2173,11 @@ canvas {
   }
 
   .diagram-wrapper svg {
-    min-width: 620px !important;
-    width: 620px !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
-    min-height: 190px;
+    display: block;
+    margin: 0 auto;
   }
 
   .diagram-zoom-hint {

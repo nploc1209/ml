@@ -28,7 +28,7 @@ def main():
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Sổ Tay Học Máy: Từ Con Số 0 Đến Chuyên Gia</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" onload="if(window.onKaTeXLoaded)window.onKaTeXLoaded();"></script>
 <style>
 {styles_css}
 </style>

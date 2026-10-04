@@ -189,8 +189,10 @@ function nativeRenderMath(formula) {
   s = s.replace(/\\mathcal\{([A-Za-z]+)\}/g, '<em style="font-family:serif; font-style:italic;">$1</em>');
 
   // 7. Delimiters
-  s = s.replace(/\\left[.|(\[]?/g, '');
-  s = s.replace(/\\right[.|)\]]?/g, '');
+  s = s.replace(/\\left\s*\./g, '');
+  s = s.replace(/\\right\s*\./g, '');
+  s = s.replace(/\\left(?=[^a-zA-Z])/g, '');
+  s = s.replace(/\\right(?=[^a-zA-Z])/g, '');
   s = s.replace(/\\(big|Big|bigg|Bigg)[lmr]?/g, '');
   s = s.replace(/\\\{/g, '{');
   s = s.replace(/\\\}/g, '}');
@@ -304,17 +306,52 @@ function nativeRenderMath(formula) {
 }
 
 // Master Math Formatter: uses KaTeX if available, otherwise bulletproof native engine
-function renderMathFormula(formula) {
+function renderMathFormula(formula, isDisplay = false) {
   if (!formula) return "";
   const s = String(formula).trim();
   if (typeof window !== "undefined" && window.katex && typeof window.katex.renderToString === "function") {
     try {
-      return window.katex.renderToString(s, { throwOnError: false, displayMode: false });
+      return window.katex.renderToString(s, {
+        throwOnError: false,
+        displayMode: !!isDisplay
+      });
     } catch (e) {
       // fallback
     }
   }
+  if (typeof window !== "undefined") {
+    window._mathRenderedWithFallback = true;
+  }
   return nativeRenderMath(s);
+}
+
+// Hook to re-render with KaTeX once loaded from CDN
+if (typeof window !== "undefined") {
+  window.onKaTeXLoaded = function() {
+    if (window._mathRenderedWithFallback) {
+      window._mathRenderedWithFallback = false;
+      if (typeof currentLessonIndex !== "undefined" && typeof isQuizMode !== "undefined") {
+        if (isQuizMode && typeof renderQuiz === "function") {
+          renderQuiz();
+        } else if (!isQuizMode && typeof renderLesson === "function") {
+          renderLesson(currentLessonIndex);
+        }
+      }
+    }
+  };
+
+  let katexCheckAttempts = 0;
+  const katexChecker = setInterval(() => {
+    katexCheckAttempts++;
+    if (window.katex && typeof window.katex.renderToString === "function") {
+      clearInterval(katexChecker);
+      if (typeof window.onKaTeXLoaded === "function") {
+        window.onKaTeXLoaded();
+      }
+    } else if (katexCheckAttempts > 40) {
+      clearInterval(katexChecker);
+    }
+  }, 50);
 }
 
 // Helper to escape HTML in code blocks
@@ -406,7 +443,7 @@ function formatContent(text) {
   const mathBlocks = [];
   s = s.replace(/\$\$([\s\S]+?)\$\$/g, (m, formula) => {
     const placeholder = `@@@ML_MATH_BLOCK_${mathBlocks.length}@@@`;
-    mathBlocks.push(`<div class="formula-block">${renderMathFormula(formula)}</div>`);
+    mathBlocks.push(`<div class="formula-block">${renderMathFormula(formula, true)}</div>`);
     return placeholder;
   });
 
@@ -421,7 +458,7 @@ function formatContent(text) {
 
   // 6. Inline Math ($ ... $)
   s = s.replace(/\$([^$\n]+?)\$/g, (m, formula) => {
-    return renderMathFormula(formula);
+    return renderMathFormula(formula, false);
   });
 
   // 7. Restore protected math blocks
@@ -891,7 +928,7 @@ function initVAIOApp() {
       if (sec.formula) {
         html += `
           <div class="formula-block">
-            ${renderMathFormula(sec.formula)}
+            ${renderMathFormula(sec.formula, true)}
           </div>
         `;
       }
@@ -905,7 +942,7 @@ function initVAIOApp() {
             </div>
             <div class="math-explainer-grid">
               ${sec.mathExplainer.map(item => {
-                const sym = item.sym ? renderMathFormula(item.sym) : '';
+                const sym = item.sym ? renderMathFormula(item.sym, false) : '';
                 const name = item.name ? formatContent(item.name) : '';
                 const mean = item.mean ? formatContent(item.mean) : '';
                 return `
