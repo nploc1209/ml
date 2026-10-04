@@ -20,6 +20,7 @@
   --font-serif: Georgia, "Cambria Math", "Times New Roman", Times, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --sidebar-w: 280px;
+  --font-scale: 1;
 }
 
 * {
@@ -309,8 +310,48 @@ body {
 
 .top-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.font-scale-controls {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-muted);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  padding: 1px 2px;
+  gap: 2px;
+}
+
+.font-scale-btn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 3px 6px;
+  min-width: 28px;
+  height: 28px;
+  cursor: pointer;
+  border-radius: 3px;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.font-scale-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.font-scale-btn:active {
+  background: #e0e0e0;
 }
 
 .btn {
@@ -379,6 +420,101 @@ body {
   line-height: 1.6;
 }
 
+/* Quick Table of Contents / Outline */
+.lesson-quick-toc {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 20px 0 32px 0;
+}
+
+.toc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--border-light);
+}
+
+.toc-title {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.toc-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.toc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.toc-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 10px 14px;
+  text-decoration: none;
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.toc-item:hover {
+  border-color: var(--border);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+}
+
+.toc-item:active {
+  transform: translateY(0);
+  background: var(--bg-muted);
+}
+
+.toc-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.82rem;
+  background: var(--text);
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.toc-text {
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Intuition Card */
 .intuition-card {
   background: var(--bg-subtle);
@@ -404,6 +540,7 @@ body {
 /* Sections */
 .content-section {
   margin-bottom: 40px;
+  scroll-margin-top: 75px;
 }
 
 .section-heading {
@@ -684,19 +821,108 @@ body {
   line-height: 1.5;
 }
 
-/* Deep Dive Content */
+/* Deep Dive Content & Markdown Elements */
 .deepdive-box {
-  margin: 16px 0 22px 0;
-  font-size: 0.98rem;
-  line-height: 1.75;
+  margin: 18px 0 26px 0;
+  font-size: 1.05rem;
+  line-height: 1.76;
+  color: var(--text);
 }
 
-.deepdive-box p {
-  margin-bottom: 12px;
+.deepdive-box p, .deep-p {
+  font-size: 1.05rem;
+  line-height: 1.76;
+  color: var(--text);
+  margin-bottom: 14px;
 }
 
 .deepdive-box strong {
   font-weight: 700;
+}
+
+.deep-h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 24px 0 12px 0;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.deep-h4 {
+  font-size: 1.12rem;
+  font-weight: 700;
+  margin: 20px 0 10px 0;
+  color: var(--text);
+}
+
+.deep-ol, .deep-ul {
+  font-size: 1.04rem;
+  line-height: 1.74;
+  margin: 14px 0 18px 24px;
+  color: var(--text);
+}
+
+.deep-ol li, .deep-ul li {
+  margin-bottom: 10px;
+}
+
+.deep-quote {
+  border-left: 3px solid var(--border);
+  padding: 12px 18px;
+  background: var(--bg-subtle);
+  margin: 16px 0;
+  font-style: italic;
+  color: #222;
+}
+
+.code-block-wrap {
+  margin: 20px 0;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #181818;
+}
+
+.code-block-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: #242424;
+  color: #ccc;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  border-bottom: 1px solid #333;
+}
+
+.copy-code-btn {
+  background: #333;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.copy-code-btn:hover {
+  background: #444;
+  color: #fff;
+}
+
+.code-block {
+  margin: 0;
+  padding: 16px;
+  background: #181818;
+  color: #e6e6e6;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Pitfall Box */
@@ -1188,26 +1414,27 @@ canvas {
   }
 
   body {
-    font-size: 17px;
-    line-height: 1.74;
-    color: #1a1a1a;
+    font-size: calc(18px * var(--font-scale, 1));
+    line-height: 1.78;
+    color: #111111;
     background-color: #ffffff;
     padding-bottom: env(safe-area-inset-bottom, 24px);
     -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
   }
 
   /* Top Bar */
   .top-bar {
-    padding: 8px 14px;
+    padding: 8px 12px;
     height: 54px;
-    gap: 8px;
+    gap: 6px;
   }
 
   .sidebar-toggle-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 1.25rem;
-    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1216,9 +1443,47 @@ canvas {
   }
 
   .breadcrumb {
-    max-width: 170px;
-    font-size: 0.92rem;
+    max-width: 135px;
+    font-size: 0.88rem;
     font-weight: 600;
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .font-scale-controls {
+    display: inline-flex;
+    align-items: center;
+    background: var(--bg-muted);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .font-scale-btn {
+    background: transparent;
+    border: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 2px 6px;
+    min-width: 28px;
+    height: 30px;
+    cursor: pointer;
+    border-radius: 4px;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .font-scale-btn:active {
+    background: #d8d8d8;
   }
 
   .btn-print {
@@ -1226,17 +1491,18 @@ canvas {
   }
 
   .top-actions .btn {
-    padding: 8px 14px;
-    font-size: 0.88rem;
-    min-height: 40px;
+    padding: 6px 12px;
+    font-size: 0.84rem;
+    min-height: 38px;
     border-radius: 6px;
     font-weight: 600;
   }
 
-  /* Article Container with generous reading margin */
+  /* Article Container with generous reading typography */
   .article-container {
     padding: 20px 16px calc(70px + env(safe-area-inset-bottom, 20px)) 16px;
     max-width: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Charter", "Georgia", serif;
   }
 
   /* Article Title & Summary */
@@ -1251,114 +1517,187 @@ canvas {
   }
 
   .meta-pill {
-    font-size: 0.78rem;
-    padding: 4px 8px;
+    font-size: 0.82rem;
+    padding: 4px 9px;
     border-radius: 4px;
   }
 
   .article-title {
-    font-size: 1.7rem;
+    font-size: calc(1.78rem * var(--font-scale, 1));
     line-height: 1.28;
     letter-spacing: -0.02em;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     font-weight: 700;
+    color: #111;
   }
 
   .article-summary {
-    font-size: 1.05rem;
-    line-height: 1.68;
-    color: #383838;
+    font-size: calc(1.15rem * var(--font-scale, 1));
+    line-height: 1.74;
+    color: #222;
   }
 
   /* Section Headings */
   .content-section {
-    margin-bottom: 38px;
+    margin-bottom: 42px;
+    scroll-margin-top: 75px;
   }
 
   .sec-index-pill {
-    font-size: 0.76rem;
+    font-size: 0.8rem;
     letter-spacing: 0.08em;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    font-weight: 700;
   }
 
   .section-heading {
-    font-size: 1.32rem;
-    line-height: 1.35;
-    margin-bottom: 14px;
+    font-size: calc(1.4rem * var(--font-scale, 1));
+    line-height: 1.34;
+    margin-bottom: 16px;
+    font-weight: 700;
+    color: #111;
   }
 
   .sec-lead {
-    font-size: 1.08rem;
-    line-height: 1.74;
+    font-size: calc(1.18rem * var(--font-scale, 1));
+    line-height: 1.82;
     color: #111;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    font-weight: 450;
   }
 
-  .deep-p {
-    font-size: 1.04rem;
-    line-height: 1.74;
-    color: #1a1a1a;
-    margin-bottom: 14px;
+  .deepdive-box {
+    font-size: calc(1.15rem * var(--font-scale, 1));
+    line-height: 1.82;
+    margin: 20px 0 26px 0;
+    color: #111;
+  }
+
+  .deepdive-box p, .deep-p {
+    font-size: calc(1.15rem * var(--font-scale, 1));
+    line-height: 1.82;
+    color: #141414;
+    margin-bottom: 18px;
   }
 
   .deep-ol, .deep-ul {
-    font-size: 1.02rem;
-    line-height: 1.72;
-    margin: 12px 0 16px 20px;
+    font-size: calc(1.12rem * var(--font-scale, 1));
+    line-height: 1.8;
+    margin: 16px 0 22px 26px;
+    color: #141414;
   }
 
   .deep-ol li, .deep-ul li {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    padding-left: 2px;
   }
 
   .deep-h3 {
-    font-size: 1.18rem;
-    margin: 22px 0 10px 0;
+    font-size: calc(1.32rem * var(--font-scale, 1));
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 28px 0 14px 0;
+    color: #111;
   }
 
   .deep-h4 {
-    font-size: 1.06rem;
-    margin: 18px 0 8px 0;
+    font-size: calc(1.18rem * var(--font-scale, 1));
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 22px 0 10px 0;
+    color: #111;
   }
 
   /* Quick Table of Contents / Outline */
   .lesson-quick-toc {
+    background: #fbfbfb;
+    border: 1px solid var(--border);
+    border-radius: 10px;
     padding: 16px 14px;
-    margin: 18px 0 28px 0;
-    border-radius: 8px;
+    margin: 18px 0 30px 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+
+  .toc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--border-light);
   }
 
   .toc-title {
-    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text);
   }
 
   .toc-subtitle {
-    font-size: 0.76rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-style: italic;
   }
 
   .toc-grid {
+    display: grid;
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 9px;
   }
 
   .toc-item {
-    min-height: 50px;
-    padding: 10px 14px;
-    font-size: 0.95rem;
+    min-height: 52px;
+    padding: 12px 14px;
+    font-size: 1.02rem;
     border-radius: 8px;
-    line-height: 1.35;
+    line-height: 1.4;
+    border: 1px solid #d4d4d4;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .toc-item:active {
+    background: #eeeeee;
+    border-color: #111111;
+    transform: scale(0.99);
   }
 
   .toc-num {
-    font-size: 0.85rem;
-    padding: 3px 7px;
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    padding: 4px 8px;
+    font-weight: 700;
+    background: #111111;
+    color: #ffffff;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .toc-text {
+    font-weight: 600;
+    line-height: 1.4;
+    color: #111111;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   /* Math Formulas & Explainers */
   .formula-block {
-    padding: 16px 14px;
-    font-size: 1.15rem;
-    margin: 20px 0;
+    padding: 18px 14px;
+    font-size: calc(1.24rem * var(--font-scale, 1));
+    margin: 22px 0;
     border-radius: 8px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -1366,36 +1705,38 @@ canvas {
   }
 
   .math-explainer-box {
-    padding: 16px 14px;
-    border-radius: 8px;
-    margin: 20px 0;
+    padding: 18px 16px;
+    border-radius: 10px;
+    margin: 22px 0;
   }
 
   .math-explainer-title {
-    font-size: 0.96rem;
-    margin-bottom: 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 14px;
   }
 
   .math-explainer-item {
     grid-template-columns: 1fr;
-    gap: 4px;
+    gap: 6px;
     padding: 10px 0;
   }
 
   .math-sym {
-    font-size: 1.1rem;
-    background: var(--bg-muted);
-    padding: 4px 10px;
-    border-radius: 4px;
+    font-size: calc(1.2rem * var(--font-scale, 1));
+    background: #eeeeee;
+    padding: 5px 12px;
+    border-radius: 6px;
     display: inline-block;
     color: #111;
+    font-weight: 600;
   }
 
   .math-mean {
-    font-size: 1rem;
-    line-height: 1.62;
-    color: #222;
-    margin-top: 4px;
+    font-size: calc(1.12rem * var(--font-scale, 1));
+    line-height: 1.74;
+    color: #111;
+    margin-top: 6px;
   }
 
   /* Checkpoint Card & Touch Options */
@@ -1463,27 +1804,41 @@ canvas {
 
   /* Intuition & Pitfall Boxes */
   .intuition-card {
-    padding: 18px 16px;
-    border-radius: 8px;
-    font-size: 1.02rem;
-    line-height: 1.72;
-    margin: 22px 0;
+    padding: 20px 16px;
+    border-radius: 10px;
+    font-size: calc(1.14rem * var(--font-scale, 1));
+    line-height: 1.8;
+    margin: 24px 0;
+    color: #111;
+  }
+
+  .intuition-card p {
+    font-size: calc(1.14rem * var(--font-scale, 1));
+    line-height: 1.8;
+    color: #111;
   }
 
   .pitfall-box {
-    padding: 18px 16px;
-    border-radius: 8px;
-    margin: 22px 0;
+    padding: 20px 16px;
+    border-radius: 10px;
+    margin: 24px 0;
   }
 
   .pitfall-header {
-    font-size: 0.86rem;
-    margin-bottom: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 12px;
   }
 
   .pitfall-content {
-    font-size: 1rem;
-    line-height: 1.68;
+    font-size: calc(1.14rem * var(--font-scale, 1));
+    line-height: 1.8;
+    color: #111;
+  }
+
+  .pitfall-content p, .pitfall-content .deep-p {
+    font-size: calc(1.14rem * var(--font-scale, 1));
+    line-height: 1.8;
   }
 
   /* Diagrams on iPhone 13 */
@@ -1673,9 +2028,46 @@ canvas {
     border-radius: 6px;
   }
 
+  /* Exam Connections & Key Takeaways on Mobile */
+  .exam-card {
+    padding: 18px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .exam-q {
+    font-size: calc(1.12rem * var(--font-scale, 1));
+    line-height: 1.76;
+    margin-bottom: 14px;
+    color: #111;
+  }
+
+  .exam-steps {
+    font-size: calc(1.1rem * var(--font-scale, 1));
+    line-height: 1.76;
+    color: #111;
+  }
+
+  .takeaways-box {
+    padding: 20px 16px;
+    border-radius: 10px;
+    margin: 28px 0;
+  }
+
+  .takeaways-box ul {
+    font-size: calc(1.12rem * var(--font-scale, 1));
+    line-height: 1.8;
+    margin-left: 20px;
+    color: #111;
+  }
+
+  .takeaways-box li {
+    margin-bottom: 12px;
+  }
+
   .code-block {
-    font-size: 0.92rem;
-    line-height: 1.58;
+    font-size: calc(0.96rem * var(--font-scale, 1));
+    line-height: 1.6;
     padding: 14px;
   }
 
@@ -1749,6 +2141,10 @@ canvas {
         <div class="breadcrumb" id="breadcrumbText">Bài 1: Đạo Hàm, Đạo Hàm Riêng & Vector Gradient</div>
       </div>
       <div class="top-actions">
+        <div class="font-scale-controls" aria-label="Điều chỉnh cỡ chữ">
+          <button class="font-scale-btn" id="fontScaleDown" title="Giảm cỡ chữ" aria-label="Giảm cỡ chữ">A−</button>
+          <button class="font-scale-btn" id="fontScaleUp" title="Tăng cỡ chữ" aria-label="Tăng cỡ chữ">A+</button>
+        </div>
         <button class="btn" id="toggleQuizBtn">Đề Thi (24 Câu)</button>
         <button class="btn btn-print" onclick="window.print()">In</button>
       </div>
@@ -7332,6 +7728,32 @@ function initVAIOApp() {
     });
   }
 
+  // Font Scale Adjuster (A- / A+)
+  const fontScaleDownBtn = document.getElementById("fontScaleDown");
+  const fontScaleUpBtn = document.getElementById("fontScaleUp");
+  let currentFontScale = parseFloat(safeStorage.getItem("ml_font_scale") || "1.0");
+
+  function applyFontScale(scale) {
+    currentFontScale = Math.min(1.4, Math.max(0.85, Math.round(scale * 100) / 100));
+    document.documentElement.style.setProperty("--font-scale", currentFontScale.toString());
+    safeStorage.setItem("ml_font_scale", currentFontScale.toString());
+  }
+
+  // Apply saved font scale immediately
+  applyFontScale(currentFontScale);
+
+  if (fontScaleDownBtn) {
+    fontScaleDownBtn.addEventListener("click", () => {
+      applyFontScale(currentFontScale - 0.08);
+    });
+  }
+
+  if (fontScaleUpBtn) {
+    fontScaleUpBtn.addEventListener("click", () => {
+      applyFontScale(currentFontScale + 0.08);
+    });
+  }
+
   if (resetProgressBtn) {
     resetProgressBtn.addEventListener("click", () => {
       if (confirm("Bạn có muốn đặt lại toàn bộ tiến trình học và các bài tập trắc nghiệm không?")) {
@@ -7439,10 +7861,10 @@ function initVAIOApp() {
         </div>
         <div class="toc-grid">
           ${(lesson.sections || []).map((sec, i) => `
-            <a href="#sec-${i}" class="toc-item">
+            <button type="button" class="toc-item" data-sec-idx="${i}">
               <span class="toc-num">${index + 1}.${i + 1}</span>
               <span class="toc-text">${formatContent(sec.heading.replace(/^\d+\.\d+\.\s*/, ''))}</span>
-            </a>
+            </button>
           `).join("")}
         </div>
       </nav>
@@ -7635,6 +8057,25 @@ function initVAIOApp() {
 
     articleContainerEl.innerHTML = html;
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Attach Quick TOC Smooth Scroll Handlers
+    articleContainerEl.querySelectorAll(".toc-item").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const secIdx = btn.getAttribute("data-sec-idx");
+        const targetEl = document.getElementById(`sec-${secIdx}`);
+        if (targetEl) {
+          const topBar = document.querySelector(".top-bar");
+          const topBarHeight = topBar ? topBar.offsetHeight : 56;
+          const targetRect = targetEl.getBoundingClientRect();
+          const offsetPosition = targetRect.top + window.pageYOffset - (topBarHeight + 14);
+          window.scrollTo({
+            top: Math.max(0, offsetPosition),
+            behavior: "smooth"
+          });
+        }
+      });
+    });
 
     // Attach Checkpoint Option Handlers
     articleContainerEl.querySelectorAll(".cp-opt-btn").forEach(btn => {

@@ -68,6 +68,10 @@ def main():
         <div class="breadcrumb" id="breadcrumbText">Bài 1: Đạo Hàm, Đạo Hàm Riêng & Vector Gradient</div>
       </div>
       <div class="top-actions">
+        <div class="font-scale-controls" aria-label="Điều chỉnh cỡ chữ">
+          <button class="font-scale-btn" id="fontScaleDown" title="Giảm cỡ chữ" aria-label="Giảm cỡ chữ">A−</button>
+          <button class="font-scale-btn" id="fontScaleUp" title="Tăng cỡ chữ" aria-label="Tăng cỡ chữ">A+</button>
+        </div>
         <button class="btn" id="toggleQuizBtn">Đề Thi (24 Câu)</button>
         <button class="btn btn-print" onclick="window.print()">In</button>
       </div>

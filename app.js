@@ -569,6 +569,32 @@ function initVAIOApp() {
     });
   }
 
+  // Font Scale Adjuster (A- / A+)
+  const fontScaleDownBtn = document.getElementById("fontScaleDown");
+  const fontScaleUpBtn = document.getElementById("fontScaleUp");
+  let currentFontScale = parseFloat(safeStorage.getItem("ml_font_scale") || "1.0");
+
+  function applyFontScale(scale) {
+    currentFontScale = Math.min(1.4, Math.max(0.85, Math.round(scale * 100) / 100));
+    document.documentElement.style.setProperty("--font-scale", currentFontScale.toString());
+    safeStorage.setItem("ml_font_scale", currentFontScale.toString());
+  }
+
+  // Apply saved font scale immediately
+  applyFontScale(currentFontScale);
+
+  if (fontScaleDownBtn) {
+    fontScaleDownBtn.addEventListener("click", () => {
+      applyFontScale(currentFontScale - 0.08);
+    });
+  }
+
+  if (fontScaleUpBtn) {
+    fontScaleUpBtn.addEventListener("click", () => {
+      applyFontScale(currentFontScale + 0.08);
+    });
+  }
+
   if (resetProgressBtn) {
     resetProgressBtn.addEventListener("click", () => {
       if (confirm("Bạn có muốn đặt lại toàn bộ tiến trình học và các bài tập trắc nghiệm không?")) {
@@ -676,10 +702,10 @@ function initVAIOApp() {
         </div>
         <div class="toc-grid">
           ${(lesson.sections || []).map((sec, i) => `
-            <a href="#sec-${i}" class="toc-item">
+            <button type="button" class="toc-item" data-sec-idx="${i}">
               <span class="toc-num">${index + 1}.${i + 1}</span>
               <span class="toc-text">${formatContent(sec.heading.replace(/^\d+\.\d+\.\s*/, ''))}</span>
-            </a>
+            </button>
           `).join("")}
         </div>
       </nav>
@@ -872,6 +898,25 @@ function initVAIOApp() {
 
     articleContainerEl.innerHTML = html;
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Attach Quick TOC Smooth Scroll Handlers
+    articleContainerEl.querySelectorAll(".toc-item").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const secIdx = btn.getAttribute("data-sec-idx");
+        const targetEl = document.getElementById(`sec-${secIdx}`);
+        if (targetEl) {
+          const topBar = document.querySelector(".top-bar");
+          const topBarHeight = topBar ? topBar.offsetHeight : 56;
+          const targetRect = targetEl.getBoundingClientRect();
+          const offsetPosition = targetRect.top + window.pageYOffset - (topBarHeight + 14);
+          window.scrollTo({
+            top: Math.max(0, offsetPosition),
+            behavior: "smooth"
+          });
+        }
+      });
+    });
 
     // Attach Checkpoint Option Handlers
     articleContainerEl.querySelectorAll(".cp-opt-btn").forEach(btn => {
