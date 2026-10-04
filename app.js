@@ -712,10 +712,27 @@ function initVAIOApp() {
     `;
 
     if (lesson.intuition && (lesson.intuition.title || lesson.intuition.content)) {
+      const overviewDiag = lesson.overviewDiagram || lesson.intuition.diagram;
+      let diagHtml = "";
+      if (overviewDiag) {
+        const svgContent = typeof overviewDiag === "object" ? overviewDiag.svg : overviewDiag;
+        const caption = typeof overviewDiag === "object" ? overviewDiag.caption : "";
+        if (svgContent) {
+          diagHtml = `
+            <div class="diagram-wrapper overview-diagram-wrapper" title="Bấm vào để phóng to chi tiết">
+              ${svgContent}
+              ${caption ? `<div class="diagram-caption" style="text-align:center; font-size:0.88rem; color:var(--text-muted); margin-top:10px; font-style:italic;">${formatContent(caption)}</div>` : ""}
+              <div class="diagram-zoom-hint">🔍 Nhấp vào sơ đồ để phóng to toàn màn hình</div>
+            </div>
+          `;
+        }
+      }
+
       html += `
         <section class="intuition-card">
           <span class="intuition-label">Trực giác thực tế</span>
           <p><strong>${formatContent(lesson.intuition.title || '')}:</strong> ${formatContent(lesson.intuition.content || '')}</p>
+          ${diagHtml}
         </section>
       `;
     }
@@ -764,20 +781,22 @@ function initVAIOApp() {
         `;
       }
 
-      // Pedagogical SVG Diagram
-      const diagramObj = sec.diagram || sec.diagramSvg;
-      if (diagramObj) {
-        const svgContent = typeof diagramObj === "object" ? diagramObj.svg : diagramObj;
-        const caption = typeof diagramObj === "object" ? diagramObj.caption : "";
-        if (svgContent) {
-          html += `
-            <div class="diagram-wrapper" title="Bấm vào để phóng to chi tiết">
-              ${svgContent}
-              ${caption ? `<div class="diagram-caption" style="text-align:center; font-size:0.86rem; color:var(--text-muted); margin-top:10px; font-style:italic;">${formatContent(caption)}</div>` : ""}
-              <div class="diagram-zoom-hint">🔍 Nhấp vào sơ đồ để phóng to toàn màn hình</div>
-            </div>
-          `;
-        }
+      // Pedagogical SVG Diagram (Single or Multiple)
+      const rawDiagrams = sec.diagrams || (sec.diagram ? [sec.diagram] : (sec.diagramSvg ? [sec.diagramSvg] : []));
+      if (rawDiagrams && rawDiagrams.length > 0) {
+        rawDiagrams.forEach((diagramObj) => {
+          const svgContent = typeof diagramObj === "object" ? diagramObj.svg : diagramObj;
+          const caption = typeof diagramObj === "object" ? diagramObj.caption : "";
+          if (svgContent) {
+            html += `
+              <div class="diagram-wrapper" title="Bấm vào để phóng to chi tiết">
+                ${svgContent}
+                ${caption ? `<div class="diagram-caption" style="text-align:center; font-size:0.86rem; color:var(--text-muted); margin-top:10px; font-style:italic;">${formatContent(caption)}</div>` : ""}
+                <div class="diagram-zoom-hint">🔍 Nhấp vào sơ đồ để phóng to toàn màn hình</div>
+              </div>
+            `;
+          }
+        });
       }
 
       // Deep Dive Explanation
