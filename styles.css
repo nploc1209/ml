@@ -1336,6 +1336,12 @@ canvas {
   display: block;
 }
 
+.quiz-exp-para {
+  margin: 8px 0;
+  line-height: 1.65;
+  color: var(--text);
+}
+
 /* Tables */
 .table-minimal {
   width: 100%;

@@ -1082,6 +1082,16 @@ function initVAIOApp() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function renderQuizExplanation(text) {
+    if (!text) return "";
+    const paras = String(text).split(/\n\s*\n/);
+    return paras.map(p => {
+      p = p.trim();
+      if (!p) return "";
+      return `<div class="quiz-exp-para" style="margin-top:8px; line-height:1.65;">${formatContent(p.replace(/\n/g, '<br>'))}</div>`;
+    }).join("");
+  }
+
   function renderQuiz(filterCat = "all") {
     const cats = ["all", "Deep Learning", "Computer Vision", "Machine Learning", "NLP & LLM", "Calculus", "Clustering", "Evaluation"];
 
@@ -1160,8 +1170,8 @@ function initVAIOApp() {
             }).join("")}
           </div>
           <div class="quiz-exp ${isAnswered ? 'show' : ''}" id="qexp-${q.id}">
-            <strong>Đáp án & Giải thích chi tiết:</strong>
-            <p style="margin-top:4px; margin-bottom:0;">${formatContent(q.explanation)}</p>
+            <strong style="color:var(--text); font-size:0.95rem;">Đáp án & Giải thích chi tiết từ đề thi:</strong>
+            <div class="quiz-exp-body" style="margin-top:6px;">${renderQuizExplanation(q.explanation)}</div>
           </div>
         </div>
       `;
