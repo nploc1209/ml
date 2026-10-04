@@ -319,7 +319,7 @@ function renderMathFormula(formula) {
 
 function formatContent(text) {
   if (!text) return "";
-  let s = String(text);
+  let s = Array.isArray(text) ? text.join("\n\n") : String(text);
 
   // 1. Markdown code
   s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
@@ -633,7 +633,7 @@ function initVAIOApp() {
     html += `
       <div class="nav-item quiz-entry ${currentView === 'quiz' ? 'active' : ''}" id="sidebarQuizEntry">
         <span>★ Đề Thi Trắc Nghiệm</span>
-        <span class="quiz-badge">24 Câu</span>
+        <span class="quiz-badge">${QUIZ_DATA.length} Câu</span>
       </div>
     `;
 
@@ -882,8 +882,11 @@ function initVAIOApp() {
               <span class="exam-tag">${item.code || 'BÀI TẬP'}</span>
               <div class="exam-q">${formatContent(item.problem || '')}</div>
               <div class="exam-steps">
-                <div><strong>Lời giải mẫu:</strong></div>
-                <div>${formatContent(item.solution || '')}</div>
+                <div style="font-weight:700; margin-bottom:8px; color:var(--text);">Lời giải chi tiết & Chiến lược phòng thi:</div>
+                ${Array.isArray(item.solution) 
+                  ? item.solution.map(s => `<div class="exam-step-line" style="margin-top:8px; line-height:1.65;">${formatContent(s)}</div>`).join("")
+                  : `<div style="line-height:1.65;">${formatContent(item.solution || '')}</div>`
+                }
               </div>
             </div>
           `).join("")}
@@ -1096,7 +1099,7 @@ function initVAIOApp() {
     let html = `
       <header class="article-header">
         <h1 class="article-title">Bộ Đề Thi Trắc Nghiệm Học Máy</h1>
-        <p class="article-summary">24 câu hỏi bao quát toàn diện các chủ đề từ Đạo hàm, Hồi quy, Cây quyết định đến CNN, Transformer và Diffusion. Chọn đáp án để chấm điểm ngay và xem lời giải phân tích cặn kẽ.</p>
+        <p class="article-summary">${totalQ} câu hỏi thực chiến chuẩn đề thi Olympic AI (VAIO 2025 & VAIC 2026), bao quát toàn diện các chủ đề từ Đạo hàm, Hồi quy, Cây quyết định đến CNN, Transformer và Diffusion. Chọn đáp án để chấm điểm ngay và xem lời giải phân tích cặn kẽ.</p>
         <div class="quiz-score-banner">
           <div class="quiz-score-info">
             <strong>Tiến độ làm bài:</strong> Đã trả lời <strong>${answeredKeys.length}/${totalQ}</strong> câu (${correctCount} câu đúng)

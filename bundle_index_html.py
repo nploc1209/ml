@@ -72,7 +72,7 @@ def main():
           <button class="font-scale-btn" id="fontScaleDown" title="Giảm cỡ chữ" aria-label="Giảm cỡ chữ">A−</button>
           <button class="font-scale-btn" id="fontScaleUp" title="Tăng cỡ chữ" aria-label="Tăng cỡ chữ">A+</button>
         </div>
-        <button class="btn" id="toggleQuizBtn">Đề Thi (24 Câu)</button>
+        <button class="btn" id="toggleQuizBtn">Đề Thi (44 Câu)</button>
         <button class="btn btn-print" onclick="window.print()">In</button>
       </div>
     </header>

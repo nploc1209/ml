@@ -2145,7 +2145,7 @@ canvas {
           <button class="font-scale-btn" id="fontScaleDown" title="Giảm cỡ chữ" aria-label="Giảm cỡ chữ">A−</button>
           <button class="font-scale-btn" id="fontScaleUp" title="Tăng cỡ chữ" aria-label="Tăng cỡ chữ">A+</button>
         </div>
-        <button class="btn" id="toggleQuizBtn">Đề Thi (24 Câu)</button>
+        <button class="btn" id="toggleQuizBtn">Đề Thi (44 Câu)</button>
         <button class="btn btn-print" onclick="window.print()">In</button>
       </div>
     </header>
@@ -2495,7 +2495,7 @@ const LESSONS_DATA = [
     ],
     "interactiveWidget": "widget-gradient-descent",
     "examConnection": {
-      "questionTitle": "Phân Tích Dạng Bài Thi Olympic VAIO 2025 (Mã Đề 006)",
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI (VAIO 2025 & VAIC 2026)",
       "items": [
         {
           "code": "Câu 48",
@@ -2511,6 +2511,17 @@ const LESSONS_DATA = [
           "solution": [
             "Bước 1: Tính tích vô hướng tổng có trọng số: $z = 1(4) + 4(8) + 3(5) = 4 + 32 + 15 = 51$.",
             "Bước 2: Nhân với hệ số kích hoạt: $Output = 3 \\times 51 = 153$."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Tự Luận 2 (4.0 Điểm)",
+          "problem": "**Hồi quy tuyến tính có trọng số (Weighted Linear Regression):** Xét mô hình tuyến tính $\\hat{y} = w^T x$. Mỗi điểm dữ liệu $(x_i, y_i)$ được gán một trọng số $r_i > 0$. Hàm mất mát tổng quát được định nghĩa bởi:<br>$$E(w) = \\sum_{i=1}^n r_i (w^T x_i - y_i)^2$$\n**(a)** Hãy tính gradient $\\nabla_w E(w) = \\frac{dE}{dw}$ theo cả dạng tổng từng mẫu và dạng ma trận tổng quát.<br>**(b)** Tìm công thức đóng (Closed-form solution) của vector tham số tối ưu $w^*$ làm cực tiểu hàm mất mát trên.",
+          "solution": [
+            "**Phần (a) - Đạo hàm Gradient theo vector tham số $w$:**",
+            "• **Cách 1: Tính theo từng mẫu (Summation form):** Áp dụng quy tắc đạo hàm hàm hợp (Chain Rule) cho mỗi số hạng $f_i(w) = r_i (w^T x_i - y_i)^2$. Ta có $\\frac{\\partial}{\\partial w}(w^T x_i - y_i) = x_i$. Do đó:<br>$$\\frac{dE}{dw} = \\sum_{i=1}^n 2 r_i (w^T x_i - y_i) \\cdot x_i = 2 \\sum_{i=1}^n r_i x_i (x_i^T w - y_i).$$",
+            "• **Cách 2: Tính theo dạng ma trận (Matrix form):** Đặt ma trận dữ liệu $X = [x_1^T; \\dots; x_n^T] \\in \\mathbb{R}^{n \\times d}$, vector nhãn $y = [y_1, \\dots, y_n]^T \\in \\mathbb{R}^n$, và ma trận trọng số đường chéo $R = \\text{diag}(r_1, r_2, \\dots, r_n) \\in \\mathbb{R}^{n \\times n}$. Khi đó hàm mất mát viết gọn thành:<br>$$E(w) = (Xw - y)^T R (Xw - y) = w^T X^T R X w - 2 y^T R X w + y^T R y.$$<br>Lấy đạo hàm vector theo $w$ (sử dụng công thức $\\nabla_w (w^T A w) = 2Aw$ khi $A = X^T R X$ đối xứng, và $\\nabla_w (b^T w) = b$):<br>$$\\nabla_w E(w) = 2 X^T R X w - 2 X^T R y = 2 X^T R (Xw - y).$$",
+            "**Phần (b) - Tìm nghiệm tối ưu dạng đóng (Closed-form Solution):**",
+            "Để cực tiểu hóa hàm mất mát lồi $E(w)$, ta cho đạo hàm gradient bằng vector không $\\mathbf{0}$:<br>$$\\nabla_w E(w) = \\mathbf{0} \\iff 2 X^T R X w - 2 X^T R y = \\mathbf{0} \\iff (X^T R X) w = X^T R y.$$<br>Vì $r_i > 0$ với mọi $i$, nếu các vector đặc trưng trong $X$ độc lập tuyến tính (ma trận $X$ đủ hạng cột), ma trận $X^T R X$ sẽ đối xứng và xác định dương (Positive Definite), do đó khả nghịch. Nghiệm tối ưu giải tích duy nhất là:<br>$$w^* = (X^T R X)^{-1} X^T R y.$$<br>Dưới dạng tổng, nghiệm này tương đương:<br>$$w^* = \\left( \\sum_{i=1}^n r_i x_i x_i^T \\right)^{-1} \\left( \\sum_{i=1}^n r_i y_i x_i \\right).$$"
           ]
         }
       ]
@@ -2831,7 +2842,7 @@ const LESSONS_DATA = [
     ],
     "interactiveWidget": "widget-cosine-similarity",
     "examConnection": {
-      "questionTitle": "Phân Tích Dạng Bài Thi Olympic VAIO 2025 (Mã Đề 006)",
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI (VAIO 2025 & VAIC 2026)",
       "items": [
         {
           "code": "Câu 43",
@@ -2848,6 +2859,37 @@ const LESSONS_DATA = [
           "solution": [
             "Bước 1: Tính tích vô hướng tổng có trọng số: $z = \\mathbf{w} \\cdot \\mathbf{x} = 1(4) + 4(8) + 3(5) = 4 + 32 + 15 = 51$.",
             "Bước 2: Nhân với hệ số kích hoạt: $Output = k \\times z = 3 \\times 51 = 153$."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 3",
+          "problem": "Một hệ thống gợi ý phim đang dự đoán mức độ yêu thích của người dùng $U_1$ đối với bộ phim $M$. Từ lịch sử tương tác, hệ thống tính được độ tương đồng Cosine giữa $U_1$ và 3 người dùng lân cận:<br>$$\\text{sim}(U_1, U_2) = 0.9, \\quad \\text{sim}(U_1, U_3) = 0.6, \\quad \\text{sim}(U_1, U_4) = 0.3$$<br>Các người dùng này đã đánh giá phim $M$ lần lượt là $r(U_2, M) = 5$, $r(U_3, M) = 4$, $r(U_4, M) = 2$. Hãy tính đánh giá dự đoán $\\hat{r}(U_1, M)$ theo công thức trung bình có trọng số.",
+          "solution": [
+            "Công thức trung bình có trọng số (Weighted Average Prediction):<br>$$\\hat{r}(U_1, M) = \\frac{\\sum_{i=2}^4 \\text{sim}(U_1, U_i) \\cdot r(U_i, M)}{\\sum_{i=2}^4 \\text{sim}(U_1, U_i)}$$",
+            "Thay các giá trị số vào tử số:<br>$$\\text{Tử số} = 0.9 \\times 5 + 0.6 \\times 4 + 0.3 \\times 2 = 4.5 + 2.4 + 0.6 = 7.5$$",
+            "Tính mẫu số (tổng các trọng số độ tương đồng):<br>$$\\text{Mẫu số} = 0.9 + 0.6 + 0.3 = 1.8$$",
+            "Chia tử số cho mẫu số:<br>$$\\hat{r} = \\frac{7.5}{1.8} = \\frac{75}{18} = \\frac{25}{6} \\approx 4.167$$",
+            "**Kết luận phòng thi:** Đánh giá dự đoán xấp xỉ **4.167** sao."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 7",
+          "problem": "Nếu mô hình Word2Vec học tốt ngữ nghĩa, những phép toán vector nào thường cho kết quả hợp lý nhất trong không gian nhúng từ (Word Embedding)?",
+          "solution": [
+            "Phép toán kinh điển trong bài báo gốc của Mikolov et al. (2013):<br>$$\\vec{v}(\\text{King}) - \\vec{v}(\\text{Man}) + \\vec{v}(\\text{Woman}) \\approx \\vec{v}(\\text{Queen})$$",
+            "**Bản chất đại số tuyến tính:** Vector hiệu $\\vec{v}(\\text{King}) - \\vec{v}(\\text{Man})$ triệt tiêu đặc tính 'giới tính nam' và chỉ giữ lại thành phần đặc trưng 'quân vương / quyền lực hoàng gia'. Khi cộng thêm vector $\\vec{v}(\\text{Woman})$ ('nữ giới'), vector tổng dịch chuyển thẳng đến tọa độ của $\\vec{v}(\\text{Queen})$.",
+            "Độ tương đồng Cosine $\\cos(\\vec{v}_{\\text{kết quả}}, \\vec{v}(\\text{Queen}))$ đạt giá trị cao nhất trong toàn bộ từ điển nhúng."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Tự Luận 3 (4.0 Điểm)",
+          "problem": "**Bộ phân loại tâm gần nhất (Nearest Centroid Classifier - CLOSE):** Giả sử có $n_+$ mẫu dương và $n_-$ mẫu âm. Tâm của hai lớp lần lượt là:<br>$$C_+ = \\frac{1}{n_+} \\sum_{i: y_i = +1} x_i, \\quad C_- = \\frac{1}{n_-} \\sum_{i: y_i = -1} x_i$$<br>Một mẫu kiểm tra $x$ được gán vào lớp có tâm gần nhất theo khoảng cách Euclid. Hãy xác định phương trình biên quyết định và biểu diễn dưới dạng $\\hat{y}(x) = \\text{sign}(w^T x + b)$ theo $C_+$ và $C_-$.",
+          "solution": [
+            "**Bước 1: Thiết lập điều kiện phân lớp theo khoảng cách Euclid:**<br>Mẫu $x$ được phân vào lớp dương ($+1$) khi khoảng cách từ $x$ đến $C_+$ nhỏ hơn khoảng cách đến $C_-$:<br>$$\\|x - C_+\\|^2 < \\|x - C_-\\|^2$$",
+            "**Bước 2: Khai triển bình phương chuẩn Euclid (Tích vô hướng):**<br>$$\\|x - C_+\\|^2 = x^T x - 2 C_+^T x + \\|C_+\\|^2$$<br>$$\\|x - C_-\\|^2 = x^T x - 2 C_-^T x + \\|C_-\\|^2$$",
+            "**Bước 3: Rút gọn bất đẳng thức:**<br>Triệt tiêu số hạng chung $x^T x$ ở cả hai vế:<br>$$- 2 C_+^T x + \\|C_+\\|^2 < - 2 C_-^T x + \\|C_-\\|^2$$<br>Chuyển tất cả các số hạng chứa $x$ sang vế trái:<br>$$2(C_+ - C_-)^T x - (\\|C_+\\|^2 - \\|C_-\\|^2) > 0$$<br>Chia hai vế cho 2:<br>$$(C_+ - C_-)^T x - \\frac{1}{2}(\\|C_+\\|^2 - \\|C_-\\|^2) > 0$$",
+            "**Bước 4: Đồng nhất hệ số với hàm quyết định $\\hat{y} = \\text{sign}(w^T x + b)$:**<br>• Vector pháp tuyến: $w = C_+ - C_-$ (hoặc $w = 2(C_+ - C_-)$).<br>• Hệ số điều chỉnh (bias): $b = -\\frac{1}{2}(\\|C_+\\|^2 - \\|C_-\\|^2) = - (C_+ - C_-)^T \\left( \\frac{C_+ + C_-}{2} \\right)$.",
+            "**Ý nghĩa hình học sâu sắc:** Biên quyết định $w^T x + b = 0$ chính là **mặt phẳng trung trực (Perpendicular Bisector Hyperplane)** của đoạn thẳng nối hai tâm lớp $C_+$ và $C_-$. Mặt phẳng này vuông góc với vector nối $w = C_+ - C_-$ và đi qua đúng trung điểm $x_{\\text{mid}} = \\frac{C_+ + C_-}{2}$!"
           ]
         }
       ]
@@ -3889,7 +3931,7 @@ const LESSONS_DATA = [
     ],
     "interactiveWidget": "widget-linear-regression",
     "examConnection": {
-      "questionTitle": "Điểm Trọng Tâm Về Hồi Quy & Co Rút Trong Đề Thi VAIO 2025",
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI (VAIO 2025 & VAIC 2026)",
       "items": [
         {
           "code": "4 Giả Định LINE & Heteroscedasticity",
@@ -3904,6 +3946,25 @@ const LESSONS_DATA = [
           "problem": "Tại sao trong bài toán tuyển chọn đặc trưng gen hoặc từ vựng văn bản thưa thớt, Lasso lại được ưa chuộng tuyệt đối hơn Ridge?",
           "solution": [
             "Do hình học góc nhọn của hình thoi chuẩn L1, nghiệm của Lasso tiếp xúc ngay tại các đỉnh trên trục tọa độ, ép thẳng các hệ số của thuộc tính không quan trọng về đúng bằng 0. Ridge chỉ co nhỏ hệ số về gần 0 nhưng vẫn giữ lại tất cả đặc trưng, không có khả năng triệt tiêu biến thừa."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 5",
+          "problem": "Một mô hình được huấn luyện qua 30 epoch ghi nhận kết quả:<br>• Epoch 10: Train Acc = 82.1%, Val Acc = 80.5%, Val Loss = 0.63<br>• Epoch 20: Train Acc = 90.4%, Val Acc = 87.8%, Val Loss = 0.42<br>• Epoch 30: Train Acc = 97.5%, Val Acc = 84.1%, Val Loss = 0.70<br>Phân tích hiện tượng học tập của mô hình và đưa ra quyết định tối ưu.",
+          "solution": [
+            "**Phân tích sự phân kỳ Loss & Accuracy:**<br>• Giai đoạn Epoch 10 $\\to$ 20: Cả Train Acc và Val Acc đều tăng, Val Loss giảm mạnh từ 0.63 xuống 0.42. Mô hình đang học tốt đặc trưng tổng quát (Generalization).<br>• Giai đoạn Epoch 20 $\\to$ 30: Train Acc tiếp tục tăng vọt từ 90.4% lên 97.5% (mô hình khớp cực tốt trên tập train), nhưng Val Acc tụt giảm từ 87.8% xuống 84.1% và Val Loss tăng vọt từ 0.42 lên 0.70.",
+            "**Chẩn đoán:** Mô hình bắt đầu bị **Quá khớp (Overfitting)** trầm trọng sau Epoch 20. Việc tăng thêm epoch không hề giúp cải thiện khả năng tổng quát mà chỉ làm mô hình học thuộc nhiễu.",
+            "**Giải pháp kỹ thuật:** Áp dụng cơ chế **Early Stopping** (dừng sớm) có checkpoint lưu lại trọng số tại Epoch 20 (nơi hàm mất mát kiểm định Val Loss đạt giá trị nhỏ nhất)."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Tự Luận 2 (Nghiệm Đóng)",
+          "problem": "Trong bài toán Hồi quy tuyến tính có trọng số $E(w) = \\sum_{i=1}^n r_i (w^T x_i - y_i)^2 = (Xw - y)^T R (Xw - y)$, hãy trình bày phương trình đạo hàm nghiệm đóng (Weighted Normal Equation) và điều kiện để nghiệm $w^*$ tồn tại duy nhất.",
+          "solution": [
+            "Thiết lập phương trình chuẩn có trọng số:<br>$$\\nabla_w E(w) = 2 X^T R (Xw - y) = \\mathbf{0} \\iff (X^T R X) w = X^T R y$$",
+            "Vì trọng số $r_i > 0$, ma trận trọng số $R = \\text{diag}(r_1, \\dots, r_n)$ là ma trận đường chéo xác định dương. Khi ma trận thiết kế $X \\in \\mathbb{R}^{n \\times d}$ có đầy đủ hạng cột ($\text{rank}(X) = d \\le n$), tích $X^T R X$ luôn là ma trận đối xứng và xác định dương, đảm bảo luôn khả nghịch.",
+            "Công thức nghiệm đóng tối ưu duy nhất:<br>$$w^* = (X^T R X)^{-1} X^T R y$$",
+            "Trường hợp đặc biệt khi tất cả các trọng số $r_i = 1$ ($R = I$), công thức lập tức suy biến về phương trình chuẩn kinh điển Ordinary Least Squares (OLS): $w^* = (X^T X)^{-1} X^T y$."
           ]
         }
       ]
@@ -4244,7 +4305,7 @@ const LESSONS_DATA = [
     ],
     "interactiveWidget": "widget-confusion-matrix",
     "examConnection": {
-      "questionTitle": "Điểm Trọng Tâm Về Metrics & Imbalanced Data Trong Đề Thi VAIO 2025",
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI (VAIO 2025 & VAIC 2026)",
       "items": [
         {
           "code": "Accuracy Paradox & Câu 1 IAIO",
@@ -4271,6 +4332,47 @@ const LESSONS_DATA = [
             "1. Áp dụng SMOTE trên toàn bộ tập dữ liệu TRƯỚC KHI chia Train/Validation/Test.",
             "2. Hậu quả: Dữ liệu nhân tạo được sinh ra từ các cặp điểm láng giềng sẽ bị rò rỉ vào tập Test, khiến điểm số kiểm thử cao ảo tưởng nhưng mô hình thất bại khi triển khai thực tế.",
             "3. Quy tắc bắt buộc: Luôn chia Train/Test trước; chỉ áp dụng SMOTE trên tập Train; giữ nguyên vẹn tập Test với phân phối thực tế tự nhiên."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 9",
+          "problem": "Cho ma trận nhầm lẫn (Confusion Matrix) của bài toán phân loại 3 lớp (hàng là nhãn thực tế, cột là nhãn dự đoán):<br>• Lớp A: Dự đoán A=90, B=8, C=2<br>• Lớp B: Dự đoán A=15, B=70, C=15<br>• Lớp C: Dự đoán A=3, B=12, C=85<br>Nếu chỉ được thu thập thêm dữ liệu cho MỘT lớp nhằm cải thiện hiệu năng tổng thể, lựa chọn nào là hợp lý nhất?",
+          "solution": [
+            "Tính chỉ số Recall (Độ thu hồi) cho từng lớp để đo lường độ chính xác phân loại nội tại:<br>• $\\text{Recall}_A = \\frac{90}{90+8+2} = \\frac{90}{100} = 90\\%$ (Sai sót: 10%)<br>• $\\text{Recall}_B = \\frac{70}{15+70+15} = \\frac{70}{100} = 70\\%$ (Sai sót: 30%)<br>• $\\text{Recall}_C = \\frac{85}{3+12+85} = \\frac{85}{100} = 85\\%$ (Sai sót: 15%)",
+            "**Phân tích điểm nghẽn (Bottleneck):** Lớp B có tỷ lệ nhầm lẫn cao nhất (bị đoán nhầm 15 mẫu sang A và 15 mẫu sang C). Lớp B chính là nguyên nhân lớn nhất làm kéo tụt Accuracy và Macro-F1 của toàn bộ hệ thống.",
+            "**Quyết định kỹ thuật:** Thu thập thêm dữ liệu cho **Lớp B** để giúp mô hình phân định rõ ranh giới giữa B với A và C."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 10",
+          "problem": "Cho ma trận nhầm lẫn nhị phân (hàng là Thực tế, cột là Dự đoán): Hàng Dương (P) có [90, 10]; Hàng Âm (N) có [20, 80]. Tính Precision của lớp dương tính (làm tròn 3 chữ số thập phân).",
+          "solution": [
+            "Xác định các thành phần từ ma trận nhầm lẫn:<br>• True Positive ($TP$) = 90 (Thực tế P, đoán đúng P)<br>• False Negative ($FN$) = 10 (Thực tế P, đoán nhầm N)<br>• False Positive ($FP$) = 20 (Thực tế N, đoán nhầm P)<br>• True Negative ($TN$) = 80 (Thực tế N, đoán đúng N)",
+            "Áp dụng công thức tính Precision (Độ chuẩn xác):<br>$$\\text{Precision} = \\frac{TP}{TP + FP} = \\frac{90}{90 + 20} = \\frac{90}{110} = \\frac{9}{11} \\approx 0.81818...$$",
+            "Làm tròn 3 chữ số thập phân ta được: **0.818**."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 15",
+          "problem": "Một hệ thống đề xuất Top-5 sản phẩm cho người dùng: $[A, B, C, D, E]$. Thực tế người dùng quan tâm tới: $[B, C, F, G, Z]$. Hãy tính Precision@5 và Recall@5.",
+          "solution": [
+            "Tập sản phẩm đề xuất Top-5: $S = \\{A, B, C, D, E\\} \\implies |S| = 5$.",
+            "Tập sản phẩm người dùng thực sự quan tâm: $G = \\{B, C, F, G, Z\\} \\implies |G| = 5$.",
+            "Số sản phẩm liên quan trúng đích trong Top-5 là phần giao: $S \\cap G = \\{B, C\\} \\implies |S \\cap G| = 2$.",
+            "• $\\text{Precision@5} = \\frac{|S \\cap G|}{|S|} = \\frac{2}{5} = 0.4$.",
+            "• $\\text{Recall@5} = \\frac{|S \\cap G|}{|G|} = \\frac{2}{5} = 0.4$.",
+            "Đáp án: **0.4 ; 0.4**."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 20",
+          "problem": "Trong bài toán phân loại đa lớp (Multiclass), khi mỗi mẫu chỉ thuộc đúng một lớp (Single-label), nếu sử dụng phương pháp vi mô (Micro-averaging), chứng minh rằng: F1-score = Accuracy = Recall = Precision.",
+          "solution": [
+            "**Bản chất của bài toán Single-label:** Mỗi khi một mẫu dữ liệu thực tế thuộc lớp $i$ bị mô hình dự đoán nhầm thành lớp $j$ ($j \\neq i$):<br>• Lớp $i$ chịu thêm 1 lỗi False Negative ($FN$).<br>• Lớp $j$ đồng thời chịu thêm 1 lỗi False Positive ($FP$).",
+            "Do đó, khi tính tổng trên toàn bộ các lớp phân loại:<br>$$\\sum_{c} FP_c = \\sum_{c} FN_c = \\text{Tổng số mẫu bị phân loại sai (Errors)}$$",
+            "Khi áp dụng Micro-averaging:<br>$$\\text{Micro-Precision} = \\frac{\\sum TP_c}{\\sum TP_c + \\sum FP_c} = \\frac{\\text{Số mẫu đúng}}{\\text{Tổng số mẫu}} = \\text{Accuracy}$$<br>$$\\text{Micro-Recall} = \\frac{\\sum TP_c}{\\sum TP_c + \\sum FN_c} = \\frac{\\sum TP_c}{\\sum TP_c + \\sum FP_c} = \\text{Micro-Precision} = \\text{Accuracy}$$",
+            "Vì Precision = Recall = Accuracy, nên Micro-F1 là trung bình điều hòa của hai số bằng nhau:<br>$$\\text{Micro-F1} = \\frac{2 \\times \\text{Acc} \\times \\text{Acc}}{\\text{Acc} + \\text{Acc}} = \\text{Accuracy}.$$",
+            "**Kết luận:** Đẳng thức đồng nhất tuyệt đối **F1-score = Accuracy = Recall = Precision** luôn đúng trong bài toán Single-label!"
           ]
         }
       ]
@@ -4617,7 +4719,7 @@ const LESSONS_DATA = [
     ],
     "interactiveWidget": "widget-entropy-calculator",
     "examConnection": {
-      "questionTitle": "Điểm Trọng Tâm Về Decision Tree & Ensemble Trong Đề Thi VAIO 2025",
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI (VAIO 2025 & VAIC 2026)",
       "items": [
         {
           "code": "Câu 12 VAIO: Bagging vs Random Forest",
@@ -4642,6 +4744,46 @@ const LESSONS_DATA = [
           "solution": [
             "1. Bagging mục tiêu là GIẢM PHƯƠNG SAI (Variance): Cây sâu có Bias thấp nhưng Variance cao. Gom trung bình nhiều cây sâu độc lập sẽ triệt tiêu Variance mà vẫn giữ được Bias thấp.",
             "2. Boosting mục tiêu là GIẢM ĐỘ LỆCH (Bias): Cây nông có Variance thấp nhưng Bias cao. Nối tiếp các cây nông sửa sai liên tiếp sẽ bào mòn Bias xuống thấp."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 4",
+          "problem": "Những hạn chế nào liên quan trực tiếp nhất đến việc sử dụng Information Gain trong thuật toán Cây quyết định ID3?",
+          "solution": [
+            "Information Gain dựa trên độ giảm Entropy: $IG(S, A) = H(S) - \\sum \\frac{|S_v|}{|S|} H(S_v)$.",
+            "**Hạn chế chí mạng:** Thuật toán luôn có xu hướng thiên vị (ưu tiên bất thường) các thuộc tính có số lượng giá trị phân biệt lớn (ví dụ: Số CCCD, ID khách hàng, Mã đơn hàng).",
+            "Nếu chia theo thuộc tính ID, mỗi nút con chỉ có đúng 1 mẫu $\\implies$ Entropy của mọi nút con rơi về 0 $\\implies IG$ đạt cực đại tuyệt đối. Tuy nhiên, cây bị phân mảnh hoàn toàn, vô giá trị trong thực tế (Overfitting cực nặng).",
+            "**Giải pháp khắc phục:** Thuật toán C4.5 ra đời thay thế $IG$ bằng **Gain Ratio** bằng cách chia chuẩn hóa cho độ hỗn loạn phân chia $SplitInfo(A)$."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 11",
+          "problem": "Trong một bộ dữ liệu phân loại nhị phân, có đúng 8 mẫu dương và 8 mẫu âm. Hãy tính Entropy Shannon của bộ dữ liệu này.",
+          "solution": [
+            "Tổng số mẫu $N = 8 + 8 = 16$.",
+            "Xác suất tiên nghiệm của mỗi lớp: $p_+ = \\frac{8}{16} = 0.5$ và $p_- = \\frac{8}{16} = 0.5$.",
+            "Áp dụng công thức Entropy Shannon cơ số 2:<br>$$H(S) = - \\sum_{c} p_c \\log_2(p_c) = - [0.5 \\log_2(0.5) + 0.5 \\log_2(0.5)]$$",
+            "Vì $\\log_2(0.5) = \\log_2(2^{-1}) = -1$, ta có:<br>$$H(S) = - [0.5(-1) + 0.5(-1)] = 0.5 + 0.5 = 1.0\\text{ bit}.$$",
+            "Khi dữ liệu phân đôi đồng đều 50-50, mức độ bất định đạt cực đại toàn cục ($1.0$ bit)."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 14 & 16",
+          "problem": "**Đặc tính của Cây quyết định:** (1) Vì sao cây rất sâu hoạt động kém trên tập test dù Train Acc xấp xỉ 100%? (2) Khi một nút có Entropy bằng 0, điều gì xảy ra?",
+          "solution": [
+            "**(1) Nguyên nhân cây quá sâu bị suy giảm hiệu năng:** Cây quyết định không giới hạn độ sâu sẽ tiếp tục tách nhánh cho đến khi phân tách triệt để từng điểm dữ liệu, dẫn tới việc học thuộc cả các điểm nhiễu (noise) và biến động ngẫu nhiên trong tập train. Đây là hiện tượng **Phương sai cao (High Variance - Overfitting)**. Ranh giới quyết định bị chia cắt vụn vặt và mất tính khái quát.",
+            "**(2) Tính chất của nút có Entropy = 0:** Khi $H = 0$, toàn bộ các mẫu trong nút đó đều thuộc về cùng một lớp phân loại duy nhất (nút thuần khiết - Pure leaf). Vì không còn sự hỗn loạn nào, không có bất kỳ phép chia nào có thể làm giảm entropy thêm được nữa, do đó **Information Gain của mọi phép chia tại nút này đều bằng 0**."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Tự Luận 1 (2.0 Điểm)",
+          "problem": "**Mô hình tổ hợp (Ensemble) & Định lý Bồi thẩm đoàn Condorcet:** Xét một mô hình tổ hợp gồm 5 bộ phân loại độc lập $h_1, h_2, h_3, h_4, h_5$ kết hợp bằng cơ chế bỏ phiếu đa số (Majority Vote). Mỗi bộ phân loại cơ sở có xác suất dự đoán sai độc lập $p = 0.3$. Hãy tính xác suất mô hình tổ hợp dự đoán sai trên một mẫu kiểm tra ngẫu nhiên và trình bày các bước lập luận.",
+          "solution": [
+            "**Bước 1: Mô hình hóa toán học:** Gọi $X$ là biến ngẫu nhiên đếm số lượng bộ phân loại dự đoán SAI trong tổng số $n = 5$ bộ. Vì các bộ phân loại hoạt động độc lập và có cùng xác suất sai $p = 0.3$, $X$ tuân theo phân phối nhị thức:<br>$$X \\sim B(n = 5, p = 0.3)$$<br>Xác suất để có đúng $k$ bộ phân loại dự đoán sai là:<br>$$P(X = k) = \\binom{5}{k} p^k (1-p)^{5-k} = \\binom{5}{k} (0.3)^k (0.7)^{5-k}$$",
+            "**Bước 2: Điều kiện để mô hình tổ hợp đưa ra quyết định sai:**<br>Với cơ chế bỏ phiếu đa số trên 5 bộ phân loại, mô hình tổ hợp sẽ ra quyết định SAI khi và chỉ khi có ít nhất 3 bộ phân loại cùng dự đoán sai, tức $X \\ge 3$ (gồm các biến cố rời nhau $k = 3, 4, 5$).",
+            "**Bước 3: Tính toán chi tiết từng thành phần xác suất:**<br>• $k = 3$: $P(X=3) = \\binom{5}{3} (0.3)^3 (0.7)^2 = 10 \\times 0.027 \\times 0.49 = 0.1323$<br>• $k = 4$: $P(X=4) = \\binom{5}{4} (0.3)^4 (0.7)^1 = 5 \\times 0.0081 \\times 0.7 = 0.02835$<br>• $k = 5$: $P(X=5) = \\binom{5}{5} (0.3)^5 (0.7)^0 = 1 \\times 0.00243 \\times 1 = 0.00243$",
+            "**Bước 4: Tính tổng xác suất sai của mô hình tổ hợp:**<br>$$P_{\\text{ensemble}}(\\text{sai}) = 0.1323 + 0.02835 + 0.00243 = 0.16308 \\approx 16.31\\%.$$",
+            "**Bài học kinh nghiệm phòng thi:** Xác suất sai của mô hình giảm mạnh từ **30%** (bộ phân loại đơn lẻ) xuống chỉ còn **16.31%** (tổ hợp 5 bộ). Đây là minh chứng mẫu mực cho sức mạnh của Ensemble Learning và Định lý Bồi thẩm đoàn Condorcet!"
           ]
         }
       ]
@@ -4972,7 +5114,7 @@ const LESSONS_DATA = [
     ],
     "interactiveWidget": "widget-knn-classifier",
     "examConnection": {
-      "questionTitle": "Điểm Trọng Tâm Về SVM & k-NN Trong Đề Thi VAIO 2025",
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI (VAIO 2025 & VAIC 2026)",
       "items": [
         {
           "code": "Câu 25 VAIO: Tính Toán Khoảng Cách k-NN",
@@ -4997,6 +5139,25 @@ const LESSONS_DATA = [
           "solution": [
             "1. C lớn = Phạt nặng vi phạm => Lề hẹp => Overfitting. C nhỏ = Khoan dung => Lề rộng => Chống Overfitting.",
             "2. Gamma lớn = Bán kính RBF co hẹp => Uốn lượn quanh từng điểm => Overfitting. Gamma nhỏ => Bán kính phẳng => Underfitting."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 18",
+          "problem": "Trong thuật toán k-NN, phân tích đánh đổi Bias-Variance khi lựa chọn giá trị $k$ rất nhỏ (chẳng hạn $k = 1$).",
+          "solution": [
+            "Khi $k = 1$, thuật toán gán nhãn cho điểm truy vấn dựa trên đúng một điểm lân cận gần nhất trong tập huấn luyện.",
+            "• **Bias (Thiên lệch): Rất thấp.** Trên tập train, mô hình đạt độ chính xác 100% (không có thiên lệch cố hữu vì khớp chính xác từng điểm).",
+            "• **Variance (Phương sai): Cực kỳ cao.** Ranh giới quyết định trở nên gồ ghề, uốn lượn phức tạp và cực kỳ nhạy cảm với các điểm nhiễu (noise) hay điểm ngoại lai (outliers). Một sự dịch chuyển nhỏ của dữ liệu cũng làm đảo lộn kết quả phân loại.",
+            "**Kết luận:** $k = 1$ mang đặc trưng **Low Bias, High Variance (Quá khớp - Overfitting)**. Tăng $k$ sẽ làm trơn đường biên, giảm phương sai nhưng tăng thiên lệch."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Tự Luận 3 (Dạng Ranh Giới Tuyến Tính SVM)",
+          "problem": "Bộ phân loại khoảng cách tâm gần nhất (Nearest Centroid Classifier) xác định nhãn theo dấu của hàm tuyến tính: $\\hat{y}(x) = \\text{sign}(w^T x + b)$. Hãy biểu diễn vector pháp tuyến $w$ và hệ số chặn $b$ theo tâm hai lớp $C_+$ và $C_-$, và so sánh với siêu phẳng phân tách trong Máy Vector Hỗ Trợ (SVM).",
+          "solution": [
+            "Từ điều kiện $\\|x - C_+\\|^2 < \\|x - C_-\\|^2$, ta thu được phương trình siêu phẳng phân tách:<br>$$2(C_+ - C_-)^T x - (\\|C_+\\|^2 - \\|C_-\\|^2) = 0$$",
+            "Chuẩn hóa về dạng chính tắc $\\hat{y}(x) = \\text{sign}(w^T x + b)$:<br>• Vector trọng số pháp tuyến: $w = C_+ - C_-$ (hướng từ tâm lớp âm sang tâm lớp dương).<br>• Độ lệch bias: $b = -\\frac{1}{2}(\\|C_+\\|^2 - \\|C_-\\|^2) = -w^T \\left(\\frac{C_+ + C_-}{2}\\right)$.",
+            "**So sánh với SVM:** Cả hai mô hình đều tạo ra siêu phẳng phân tách tuyến tính dạng $w^T x + b = 0$. Tuy nhiên:<br>• Nearest Centroid sử dụng trung bình của **tất cả các mẫu** trong mỗi lớp để xác định $w$ và $b$, do đó dễ bị lệch khi dữ liệu có ngoại lai hoặc phân bố không đều.<br>• SVM chỉ dựa vào các điểm nằm sát biên nhất (**Support Vectors**) để tối đa hóa lề (Margin), mang lại biên phân cách tối ưu và bền bỉ hơn nhiều."
           ]
         }
       ]
@@ -6085,7 +6246,7 @@ const LESSONS_DATA = [
     ],
     "interactiveWidget": "widget-cnn-calculator",
     "examConnection": {
-      "questionTitle": "Tổng Hợp Ma Trận Câu Hỏi Thị Giác Máy Tính Đề Thi Olympic AI (VAIO 2025)",
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI (VAIO 2025 & VAIC 2026)",
       "items": [
         {
           "code": "Câu 2 VAIO",
@@ -6120,6 +6281,31 @@ const LESSONS_DATA = [
           "problem": "Tính toán số tham số Params = (K^2 * C_in + 1) * C_out và số phép tính MACs = H_out * W_out * C_out * (K^2 * C_in).",
           "solution": [
             "Mỗi bộ lọc 3D có độ sâu C_in và 1 bias riêng."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 1 & Câu 6",
+          "problem": "**Đánh giá và Tối ưu hóa Object Detection:** (1) Độ đo chuẩn để đánh giá mô hình Object Detection là gì? (2) Khi detector đạt $AP_{\\text{small}} = 0.30$, $AP_{\\text{medium}} = 0.69$, $AP_{\\text{large}} = 0.84$, những hướng cải tiến nào tác động trực tiếp nhất?",
+          "solution": [
+            "**(1) Độ đo chuẩn:** Là **mAP (Mean Average Precision)**. mAP đo diện tích dưới đường cong Precision-Recall ở các ngưỡng chồng lấn IoU khác nhau (ví dụ mAP@0.5 hoặc COCO mAP@[0.5:0.95]), tính trung bình trên toàn bộ danh mục vật thể.",
+            "**(2) Chiến lược nâng cao $AP_{\\text{small}}$:** Điểm số vật thể nhỏ thấp do thông tin bị tiêu biến qua các tầng pooling/striding. Ba giải pháp trực tiếp nhất:<br>• **Tăng độ phân giải ảnh đầu vào:** Cung cấp nhiều pixel hơn cho các vật thể nhỏ.<br>• **Feature Pyramid Network (FPN):** Kết hợp các tầng đặc trưng nông (giàu thông tin không gian, độ phân giải cao) với các tầng sâu (giàu ngữ nghĩa).<br>• **Tăng cường dữ liệu chuyên biệt:** Kỹ thuật Mosaic, Copy-Paste và thu thập thêm mẫu vật thể nhỏ."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 8",
+          "problem": "Chứng minh tính khả tách của bộ lọc Sobel $3 \\times 3$: $\\begin{bmatrix} 1 & 2 & 1 \\\\ 0 & 0 & 0 \\\\ -1 & -2 & -1 \\end{bmatrix} = \\begin{bmatrix} 1 \\\\ 0 \\\\ -1 \\end{bmatrix} \\begin{bmatrix} 1 & 2 & 1 \\end{bmatrix}$ và giải thích ý nghĩa tính toán.",
+          "solution": [
+            "**Kiểm tra tính khả tách đại số:** Nhân vector cột $[1, 0, -1]^T$ với vector hàng $[1, 2, 1]$ cho ra đúng ma trận Sobel $3 \\times 3$.",
+            "**Tối ưu hóa số phép tính:** Tích chập 2D thông thường với kernel $3 \\times 3$ đòi hỏi 9 phép nhân và 8 phép cộng mỗi pixel. Khi phân tách thành hai phép tích chập 1D liên tiếp, số phép nhân giảm xuống chỉ còn $3 + 3 = 6$ (giảm 33.3% chi phí tính toán).",
+            "**Ý nghĩa thị giác máy tính:** Bộ lọc $[1, 2, 1]$ đóng vai trò làm mịn Gaussian 1D để triệt tiêu nhiễu cao tần, sau đó $[1, 0, -1]^T$ lấy đạo hàm sai phân bậc 1 theo chiều dọc. Đây chính là phép xấp xỉ đạo hàm bậc 1 của hàm Gaussian."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 13 & Câu 19",
+          "problem": "**Vision Transformer (ViT) vs CNN:** (1) Ảnh $224 \\times 224$, patch size tăng từ $16 \\times 16$ lên $32 \\times 32$ thì độ phức tạp Self-Attention thay đổi thế nào? (2) So sánh Inductive Bias giữa ViT và CNN trên dữ liệu nhỏ.",
+          "solution": [
+            "**(1) Độ phức tạp Self-Attention:**<br>• Patch $16 \\times 16$: Số tokens $N_1 = (224/16)^2 = 14^2 = 196$.<br>• Patch $32 \\times 32$: Số tokens $N_2 = (224/32)^2 = 7^2 = 49$.<br>Số token giảm 4 lần ($N_2 = N_1 / 4$). Vì cơ chế Self-Attention $QK^T$ có độ phức tạp bậc hai $\\mathcal{O}(N^2)$, độ phức tạp tính toán giảm đi: $4^2 = \\mathbf{16\\text{ lần}}$.",
+            "**(2) Inductive Bias trên tập dữ liệu nhỏ:**<br>• CNN tích hợp sẵn thiên kiến quy nạp về tính cục bộ (Locality) và bất biến tịnh tiến (Translation Invariance) nên tận dụng dữ liệu nhỏ cực kỳ hiệu quả.<br>• ViT có Inductive Bias rất yếu (tính toán chú ý toàn cục không có giả định không gian), do đó khi dữ liệu nhỏ ViT rất dễ overfitting và bắt buộc phải phụ thuộc vào Pretraining quy mô lớn hoặc Data Augmentation hạng nặng."
           ]
         }
       ]
@@ -6497,7 +6683,7 @@ const LESSONS_DATA = [
     ],
     "interactiveWidget": "widget-attention-matrix",
     "examConnection": {
-      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI Về NLP, Attention & LLMs",
+      "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI (VAIO 2025 & VAIC 2026)",
       "items": [
         {
           "code": "Câu 14 (Đề Chính Thức)",
@@ -6542,6 +6728,25 @@ const LESSONS_DATA = [
           "problem": "Bản chất và định nghĩa của kỹ thuật Chain-of-Thought (CoT) trong LLMs.",
           "solution": [
             "Thúc đẩy mô hình giải bài toán phức tạp bằng cách liệt kê từng bước suy luận trung gian (Intermediate reasoning steps). Đáp án D."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 2",
+          "problem": "Trong cơ chế Scaled Dot-Product Attention: $\\text{Attention}(Q, K, V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d}}\\right)V$, phân tích nguy cơ toán học khi bỏ thừa số chia $\\sqrt{d}$.",
+          "solution": [
+            "Giả sử các thành phần của vector Query và Key là các biến ngẫu nhiên độc lập có kỳ vọng bằng 0 và phương sai bằng 1. Tích vô hướng $q \\cdot k = \\sum_{i=1}^d q_i k_i$ sẽ có kỳ vọng bằng 0 và phương sai bằng $d$.",
+            "Khi số chiều $d$ lớn (ví dụ $d = 64$ hoặc $512$), phương sai $d$ làm cho giá trị tích vô hướng có biên độ cực lớn (rất âm hoặc rất dương).",
+            "Khi đưa các giá trị biên độ lớn vào hàm softmax, phân phối xác suất trở nên cực nhọn (một vị trí xấp xỉ 1, các vị trí còn lại xấp xỉ 0).",
+            "Tại các vùng cực trị bão hòa này, đạo hàm của hàm softmax xấp xỉ bằng 0 ($\\,\\approx 0$), dẫn đến hiện tượng **Triệt tiêu Gradient (Vanishing Gradient)** trầm trọng, làm tê liệt quá trình huấn luyện mạng Transformer.",
+            "Thừa số tỉ lệ $\\frac{1}{\\sqrt{d}}$ kéo phương sai của tích vô hướng trở về 1, giữ hàm softmax nằm trong vùng có đạo hàm tối ưu."
+          ]
+        },
+        {
+          "code": "VAIC 2026 - Câu 12 & Câu 17",
+          "problem": "**NLP Ứng Dụng & Hệ Thống Gợi Ý:** (1) Mô hình tốt nhất cho phân loại cảm xúc tiếng Việt là gì? (2) Phương pháp giải quyết bài toán Khởi đầu lạnh (Cold-Start) cho phim mới chưa có rating là gì?",
+          "solution": [
+            "**(1) Phân loại cảm xúc tiếng Việt:** Lựa chọn tối ưu nhất là **Fine-tuning PhoBERT**. Nhờ tiền huấn luyện trên 20GB văn bản tiếng Việt và công cụ tách từ âm tiết chuyên biệt (RDRSegmenter), PhoBERT nắm bắt sâu sắc ngữ cảnh, đảo ngữ và sắc thái tiếng Việt vượt trội hơn hẳn các mô hình tĩnh (TF-IDF, BoW, Word2Vec).",
+            "**(2) Giải quyết Cold-Start phim mới:** Khi phim vừa xuất bản chưa có lượt đánh giá nào, Collaborative Filtering và Matrix Factorization đều vô hiệu. Phương pháp hiệu quả duy nhất là **Content-based Filtering** (so khớp thể loại, đạo diễn, diễn viên, tóm tắt nội dung của phim với sở thích của người dùng qua Cosine Similarity)."
           ]
         }
       ]
@@ -7255,6 +7460,267 @@ const QUIZ_DATA = [
     correctIndex: 3,
     explanation: "Tính hàm phân tách: o = w1·x1 + w2·x2 + b = 2(1) + (-3)(2) + 1 = 2 - 6 + 1 = -3. Vì o < 0, theo nguyên tắc phân lớp của SVM y = sign(w^T x + b), nhãn được dự đoán là -1."
   }
+,
+{
+  "id": 101,
+  "category": "Computer Vision",
+  "question": "Câu 101 (VAIC 2026). Những độ đo nào sau đây được sử dụng phổ biến nhất để đánh giá chất lượng của mô hình phát hiện vật thể (Object Detection) như YOLO hay Faster R-CNN?",
+  "options": [
+    "A. Mean Average Precision (mAP)",
+    "B. Peak Signal-to-Noise Ratio (PSNR)",
+    "C. Structural Similarity Index (SSIM)",
+    "D. Mean Squared Error (MSE)"
+  ],
+  "correctIndex": 0,
+  "explanation": "Trong bài toán phát hiện vật thể (Object Detection), mô hình phải đồng thời định vị (Bounding Box qua IoU) và phân loại lớp vật thể. Độ đo chuẩn mực toàn cầu là mAP (Mean Average Precision), tính diện tích dưới đường cong Precision-Recall trung bình trên tất cả các lớp vật thể ở các ngưỡng IoU khác nhau (ví dụ mAP@0.5 hoặc mAP@[0.5:0.95]). Ngược lại, PSNR và SSIM dùng cho phục chế ảnh (Super-resolution, Denoising), còn MSE dùng cho bài toán hồi quy (Regression)."
+},
+{
+  "id": 102,
+  "category": "NLP & LLM",
+  "question": "Câu 102 (VAIC 2026). Trong kiến trúc Transformer, nếu sử dụng $\\text{softmax}(QK^T)$ thay vì $\\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d}}\\right)$, những hiện tượng bất lợi nào có thể xuất hiện khi số chiều $d$ lớn?",
+  "options": [
+    "A. Hàm softmax quá sắc nhọn, gradient bị triệt tiêu (vanishing) và sự chú ý bị bão hòa vào một số ít token",
+    "B. Số lượng tham số học được của mô hình bị bùng nổ tăng gấp đôi",
+    "C. Độ phức tạp tính toán bị tăng từ $\\mathcal{O}(N^2)$ lên $\\mathcal{O}(N^3)$",
+    "D. Ma trận trọng số Attention mất hoàn toàn tính đối xứng"
+  ],
+  "correctIndex": 0,
+  "explanation": "Khi hai vector $q, k$ có chiều $d$ với các phần tử có phương sai bằng 1, tích vô hướng $q \\cdot k = \\sum_{i=1}^d q_i k_i$ sẽ có phương sai bằng $d$. Khi $d$ rất lớn (ví dụ $d=64$ hoặc $512$), các giá trị tích vô hướng có biên độ rất lớn, khiến hàm softmax bị đẩy vào các vùng cực đoan (gần 0 hoặc gần 1) với phân phối cực nhọn. Tại vùng bão hòa này, đạo hàm của hàm softmax xấp xỉ bằng 0 (triệt tiêu gradient), khiến mô hình học rất chậm hoặc ngừng học. Việc chia cho $\\sqrt{d}$ giúp kéo phương sai trở về 1, ổn định gradient lan truyền ngược."
+},
+{
+  "id": 103,
+  "category": "Machine Learning",
+  "question": "Câu 103 (VAIC 2026). Một hệ thống gợi ý phim dự đoán mức độ yêu thích của người dùng $U_1$ cho phim $M$ dựa trên lịch sử của 3 người dùng lân cận: $\\text{sim}(U_1, U_2) = 0.9$, $\\text{sim}(U_1, U_3) = 0.6$, $\\text{sim}(U_1, U_4) = 0.3$. Đánh giá thực tế cho phim $M$ lần lượt là $r(U_2, M) = 5$, $r(U_3, M) = 4$, $r(U_4, M) = 2$. Đánh giá dự đoán $\\hat{r}(U_1, M)$ theo trung bình có trọng số là bao nhiêu?",
+  "options": [
+    "A. 3.667",
+    "B. 4.167",
+    "C. 4.500",
+    "D. 3.833"
+  ],
+  "correctIndex": 1,
+  "explanation": "Áp dụng công thức trung bình có trọng số (Weighted Average):<br>$$\\hat{r} = \\frac{\\sum \\text{sim}(U_1, U_i) \\cdot r(U_i, M)}{\\sum \\text{sim}(U_1, U_i)} = \\frac{0.9 \\times 5 + 0.6 \\times 4 + 0.3 \\times 2}{0.9 + 0.6 + 0.3} = \\frac{4.5 + 2.4 + 0.6}{1.8} = \\frac{7.5}{1.8} = \\frac{25}{6} \\approx 4.167.$$"
+},
+{
+  "id": 104,
+  "category": "Machine Learning",
+  "question": "Câu 104 (VAIC 2026). Những hạn chế nào liên quan trực tiếp nhất đến việc sử dụng Information Gain trong thuật toán Cây quyết định ID3?",
+  "options": [
+    "A. Không thể áp dụng cho các bài toán phân loại nhiều lớp",
+    "B. Có xu hướng thiên vị (ưu tiên) các thuộc tính có nhiều giá trị khác nhau",
+    "C. Luôn tạo ra cây quyết định cân bằng hoàn hảo",
+    "D. Phải dùng thuật toán Gradient Descent để tối ưu hóa"
+  ],
+  "correctIndex": 1,
+  "explanation": "Information Gain $IG(S, A) = H(S) - \\sum \\frac{|S_v|}{|S|} H(S_v)$ có nhược điểm chí mạng là thiên vị các thuộc tính có số lượng giá trị phân biệt lớn (ví dụ thuộc tính 'Số CMND' hay 'ID khách hàng'). Nếu chia theo ID, mỗi nhánh con chỉ có 1 mẫu, entropy rơi về 0 khiến $IG$ đạt cực đại, nhưng cây bị overfitting nặng và mất hoàn toàn khả năng khái quát. Thuật toán C4.5 đã khắc phục nhược điểm này bằng cách sử dụng Gain Ratio (chuẩn hóa bằng Split Information)."
+},
+{
+  "id": 105,
+  "category": "Deep Learning",
+  "question": "Câu 105 (VAIC 2026). Một mô hình huấn luyện có kết quả:<br>• Epoch 10: Train Acc = 82.1%, Val Acc = 80.5%, Val Loss = 0.63<br>• Epoch 20: Train Acc = 90.4%, Val Acc = 87.8%, Val Loss = 0.42<br>• Epoch 30: Train Acc = 97.5%, Val Acc = 84.1%, Val Loss = 0.70<br>Nhận định nào sau đây là chính xác nhất?",
+  "options": [
+    "A. Mô hình bắt đầu bị quá khớp (overfitting) sau Epoch 20, nên áp dụng Early Stopping gần Epoch 20",
+    "B. Epoch 30 là checkpoint tốt nhất để triển khai vì Train Acc đạt cao nhất (97.5%)",
+    "C. Mô hình đang bị underfitting vì Train Acc chưa đạt 100%",
+    "D. Nên tiếp tục huấn luyện thêm 50 epoch nữa vì Val Loss sẽ tự động giảm sâu"
+  ],
+  "correctIndex": 0,
+  "explanation": "Từ Epoch 20 sang Epoch 30, Train Acc tiếp tục tăng mạnh từ 90.4% lên 97.5%, nhưng Val Acc giảm từ 87.8% xuống 84.1% và Val Loss tăng vọt từ 0.42 lên 0.70. Đây là dấu hiệu kinh điển của Overfitting (mô hình học thuộc dữ liệu huấn luyện nhưng mất khả năng tổng quát hóa trên tập kiểm thử). Do đó, checkpoint tại Epoch 20 (nơi Val Loss đạt cực tiểu 0.42) là tối ưu nhất và kỹ thuật Early Stopping gần Epoch 20 là chuẩn xác."
+},
+{
+  "id": 106,
+  "category": "Computer Vision",
+  "question": "Câu 106 (VAIC 2026). Một bộ phát hiện vật thể (detector) đạt kết quả: $AP_{\\text{small}} = 0.30$, $AP_{\\text{medium}} = 0.69$, $AP_{\\text{large}} = 0.84$. Hướng cải thiện nào sau đây có khả năng tác động trực tiếp và hiệu quả nhất?",
+  "options": [
+    "A. Tăng độ phân giải ảnh, bổ sung đặc trưng đa tỉ lệ (FPN) và thu thập thêm dữ liệu chứa vật thể nhỏ",
+    "B. Đổi bộ tối ưu hóa từ Adam sang SGD thuần túy sẽ lập tức giải quyết triệt để vấn đề",
+    "C. Tăng mạnh hệ số Regularization $L_2$ để làm mờ các vật thể lớn",
+    "D. Giảm số lượng lớp tích chập (Conv layers) xuống một nửa để giảm chi phí tính toán"
+  ],
+  "correctIndex": 0,
+  "explanation": "$AP_{\\text{small}} = 0.30$ thấp hơn rất nhiều so với vật thể vừa (0.69) và lớn (0.84) do vật thể nhỏ chiếm rất ít pixel và thông tin bị mất mát sau các lớp Downsampling/Pooling. Ba giải pháp kinh điển và trực tiếp nhất bao gồm: 1. Tăng độ phân giải ảnh đầu vào (giúp vật thể nhỏ có nhiều pixel đặc trưng hơn); 2. Bổ sung Feature Pyramid Network (FPN) để trích xuất đặc trưng đa tỉ lệ từ các tầng nông có độ phân giải cao; 3. Bổ sung dữ liệu và kỹ thuật Data Augmentation chuyên biệt cho vật thể nhỏ (Mosaic, Copy-Paste)."
+},
+{
+  "id": 107,
+  "category": "NLP & LLM",
+  "question": "Câu 107 (VAIC 2026). Nếu mô hình Word2Vec học tốt mối quan hệ ngữ nghĩa trong không gian vector (Word Embedding), phép toán vector nào sau đây cho kết quả hợp lý nhất?",
+  "options": [
+    "A. $\\vec{v}(\\text{King}) - \\vec{v}(\\text{Man}) + \\vec{v}(\\text{Woman}) \\approx \\vec{v}(\\text{Queen})$",
+    "B. $\\vec{v}(\\text{King}) + \\vec{v}(\\text{Queen}) \\approx \\vec{v}(\\text{Woman})$",
+    "C. $\\vec{v}(\\text{Man}) - \\vec{v}(\\text{Woman}) \\approx \\vec{v}(\\text{King})$",
+    "D. $\\vec{v}(\\text{Queen}) - \\vec{v}(\\text{King}) \\approx \\vec{v}(\\text{Man})$"
+  ],
+  "correctIndex": 0,
+  "explanation": "Đây là ví dụ nổi tiếng nhất về tính chất tương tự ngữ nghĩa tuyến tính (Semantic Analogy) của Word2Vec (Mikolov et al., 2013). Vector hiệu $\\vec{v}(\\text{King}) - \\vec{v}(\\text{Man})$ mã hóa khái niệm trừu tượng về 'hoàng gia/vương quyền không xét giới tính'. Khi cộng thêm $\\vec{v}(\\text{Woman})$, vector kết quả sẽ nằm gần nhất với vector $\\vec{v}(\\text{Queen})$ theo độ tương đồng Cosine."
+},
+{
+  "id": 108,
+  "category": "Computer Vision",
+  "question": "Câu 108 (VAIC 2026). Bộ lọc Sobel $3 \\times 3$ có thể được phân tách thành tích ngoài của hai vector $1\\text{D}$:<br>$$\\begin{bmatrix} 1 & 2 & 1 \\\\ 0 & 0 & 0 \\\\ -1 & -2 & -1 \\end{bmatrix} = \\begin{bmatrix} 1 \\\\ 0 \\\\ -1 \\end{bmatrix} \\begin{bmatrix} 1 & 2 & 1 \\end{bmatrix}$$<br>Phát biểu nào sau đây là chính xác?",
+  "options": [
+    "A. Việc phân tách giúp giảm số phép tính từ 9 xuống 6 phép nhân mỗi pixel, và đây là phép xấp xỉ đạo hàm bậc 1 của Gaussian (Smoothing theo chiều ngang rồi lấy đạo hàm theo chiều dọc)",
+    "B. Việc phân tách gây ra hiện tượng biên giả (spurious edge artifacts) do mất mát thông tin",
+    "C. Bộ lọc Sobel không thể phân tách được trong không gian thực",
+    "D. Phân tách bộ lọc chỉ có tác dụng nén dung lượng bộ nhớ chứ không tăng tốc độ tính toán"
+  ],
+  "correctIndex": 0,
+  "explanation": "Bộ lọc Sobel là một bộ lọc khả tách (Separable Filter) hạng 1. Tách ma trận $3 \\times 3$ thành hai bộ lọc $1\\text{D}$ ($[1, 0, -1]^T$ và $[1, 2, 1]$) giúp giảm số phép nhân tích chập cho mỗi pixel từ $3 \\times 3 = 9$ xuống chỉ còn $3 + 3 = 6$ phép tính (tổng quát với kernel $K \\times K$ giảm từ $K^2$ xuống $2K$). Về bản chất toán học, vector $[1, 2, 1]$ thực hiện làm mịn Gauss nhị thức (Gaussian smoothing), còn $[1, 0, -1]^T$ lấy đạo hàm sai phân trung tâm bậc 1, không hề gây biên giả."
+},
+{
+  "id": 109,
+  "category": "Evaluation",
+  "question": "Câu 109 (VAIC 2026). Cho ma trận nhầm lẫn (Confusion Matrix) của bài toán phân loại 3 lớp (hàng là nhãn thực tế, cột là nhãn dự đoán):<br>• Lớp A: Dự đoán A=90, B=8, C=2<br>• Lớp B: Dự đoán A=15, B=70, C=15<br>• Lớp C: Dự đoán A=3, B=12, C=85<br>Nếu chỉ được thu thập thêm dữ liệu cho MỘT lớp để cải thiện hiệu năng tổng thể, lựa chọn nào hợp lý nhất?",
+  "options": [
+    "A. Lớp A vì có số mẫu dự đoán đúng lớn nhất (90 mẫu)",
+    "B. Lớp B vì có tỷ lệ nhầm lẫn cao nhất (Recall chỉ đạt 70%, sai 30 mẫu sang A và C)",
+    "C. Lớp C vì có 12 mẫu bị nhầm sang lớp B",
+    "D. Cả 3 lớp đều có hiệu năng ngang nhau nên chọn ngẫu nhiên"
+  ],
+  "correctIndex": 1,
+  "explanation": "Xét Recall (Độ thu hồi) thực tế của từng lớp:<br>• Lớp A: $\\text{Recall}_A = 90 / (90+8+2) = 90 / 100 = 90\\%$ (chỉ sai 10 mẫu).<br>• Lớp C: $\\text{Recall}_C = 85 / (3+12+85) = 85 / 100 = 85\\%$ (chỉ sai 15 mẫu).<br>• Lớp B: $\\text{Recall}_B = 70 / (15+70+15) = 70 / 100 = 70\\%$ (bị sai tới 30 mẫu sang A và C).<br>Lớp B có tỷ lệ lỗi cao nhất và là nút thắt cổ chai làm giảm hiệu năng của toàn bộ hệ thống. Do đó, ưu tiên bổ sung dữ liệu cho lớp B sẽ đem lại cải thiện lớn nhất cho mô hình."
+},
+{
+  "id": 110,
+  "category": "Evaluation",
+  "question": "Câu 110 (VAIC 2026). Cho ma trận nhầm lẫn nhị phân (hàng là Thực tế, cột là Dự đoán):<br>• Thực tế Dương (P): Dự đoán P = 90 (TP), Dự đoán N = 10 (FN)<br>• Thực tế Âm (N): Dự đoán P = 20 (FP), Dự đoán N = 80 (TN)<br>Precision của lớp dương tính bằng bao nhiêu (làm tròn 3 chữ số thập phân)?",
+  "options": [
+    "A. 0.818",
+    "B. 0.900",
+    "C. 0.850",
+    "D. 0.750"
+  ],
+  "correctIndex": 0,
+  "explanation": "Độ chuẩn xác (Precision) của lớp dương tính là tỉ lệ các mẫu thực sự dương tính trong tổng số các mẫu mà mô hình dự đoán là dương:<br>$$\\text{Precision} = \\frac{TP}{TP + FP} = \\frac{90}{90 + 20} = \\frac{90}{110} = \\frac{9}{11} \\approx 0.81818... \\approx 0.818.$$"
+},
+{
+  "id": 111,
+  "category": "Machine Learning",
+  "question": "Câu 111 (VAIC 2026). Trong một bộ dữ liệu phân loại nhị phân, có đúng 8 mẫu dương và 8 mẫu âm. Entropy Shannon của bộ dữ liệu này bằng bao nhiêu?",
+  "options": [
+    "A. 0.0 bit",
+    "B. 0.5 bit",
+    "C. 1.0 bit",
+    "D. 2.0 bit"
+  ],
+  "correctIndex": 2,
+  "explanation": "Tổng số mẫu $N = 8 + 8 = 16$. Xác suất mỗi lớp là $p_+ = 8/16 = 0.5$ và $p_- = 8/16 = 0.5$.<br>Áp dụng công thức Entropy Shannon cơ số 2:<br>$$H(S) = -p_+ \\log_2(p_+) - p_- \\log_2(p_-) = -0.5 \\log_2(0.5) - 0.5 \\log_2(0.5) = -0.5(-1) - 0.5(-1) = 0.5 + 0.5 = 1.0\\text{ bit}.$$<br>Khi hai lớp cân bằng tuyệt đối, mức độ hỗn loạn (bất định) đạt cực đại và bằng đúng 1 bit."
+},
+{
+  "id": 112,
+  "category": "NLP & LLM",
+  "question": "Câu 112 (VAIC 2026). Trong bài toán phân loại cảm xúc văn bản tiếng Việt (Sentiment Analysis: Tích cực / Tiêu cực), phương pháp nào sau đây thường đem lại hiệu năng vượt trội và độ chính xác cao nhất?",
+  "options": [
+    "A. TF-IDF kết hợp Logistic Regression",
+    "B. Word2Vec kết hợp Support Vector Machine (SVM)",
+    "C. Fine-tuning mô hình ngôn ngữ ngữ cảnh tiền huấn luyện PhoBERT",
+    "D. Bag of Words (BoW) kết hợp Naive Bayes"
+  ],
+  "correctIndex": 2,
+  "explanation": "PhoBERT là mô hình ngôn ngữ dựa trên kiến trúc RoBERTa được tiền huấn luyện chuyên sâu trên kho ngữ liệu tiếng Việt khổng lồ (20GB văn bản). Nhờ cơ chế Self-Attention đa tầng hai chiều và phân tách từ theo âm tiết/từ ghép tiếng Việt (RDRSegmenter), PhoBERT nắm bắt được ngữ cảnh phức tạp, từ đồng nghĩa, đảo ngữ và sắc thái cảm xúc tốt hơn rất nhiều so với các mô hình biểu diễn tĩnh (Word2Vec, TF-IDF, BoW)."
+},
+{
+  "id": 113,
+  "category": "Computer Vision",
+  "question": "Câu 113 (VAIC 2026). Mô hình Vision Transformer (ViT) nhận ảnh kích thước $224 \\times 224$ với kích thước patch là $16 \\times 16$. Nếu kích thước patch tăng lên thành $32 \\times 32$, độ phức tạp tính toán của cơ chế Self-Attention thay đổi như thế nào?",
+  "options": [
+    "A. Giảm xấp xỉ 4 lần",
+    "B. Giảm xấp xỉ 16 lần",
+    "C. Tăng xấp xỉ 4 lần",
+    "D. Tăng xấp xỉ 16 lần"
+  ],
+  "correctIndex": 1,
+  "explanation": "Số lượng patches $N$ được tính bằng diện tích ảnh chia cho diện tích mỗi patch:<br>• Với patch $16 \\times 16$: $N_1 = \\frac{224}{16} \\times \\frac{224}{16} = 14 \\times 14 = 196$ tokens.<br>• Với patch $32 \\times 32$: $N_2 = \\frac{224}{32} \\times \\frac{224}{32} = 7 \\times 7 = 49$ tokens.<br>Số token giảm đi $\\frac{196}{49} = 4$ lần. Vì độ phức tạp tính toán của ma trận Attention $QK^T$ tỷ lệ bậc hai với số lượng token $\\mathcal{O}(N^2)$, nên độ phức tạp giảm đi:<br>$$\\left(\\frac{N_1}{N_2}\\right)^2 = 4^2 = 16\\text{ lần}.$$"
+},
+{
+  "id": 114,
+  "category": "Machine Learning",
+  "question": "Câu 114 (VAIC 2026). Vì sao một Cây quyết định (Decision Tree) được phát triển quá sâu thường hoạt động rất kém trên tập kiểm thử (Test Set), dù đạt độ chính xác gần 100% trên tập huấn luyện?",
+  "options": [
+    "A. Cây học thuộc cả các điểm nhiễu (noise) và dao động ngẫu nhiên trong tập huấn luyện (Overfitting, phương sai cao)",
+    "B. Cây càng sâu thì luôn có thiên lệch (bias) cao hơn cây nông",
+    "C. Cây quyết định về bản chất không thể phân tách được các ranh giới phi tuyến",
+    "D. Hàm Entropy không còn xác định được khi cây vượt quá 5 tầng"
+  ],
+  "correctIndex": 0,
+  "explanation": "Khi cây quyết định phát triển không kiểm soát (không giới hạn độ sâu tối đa max_depth hay điều kiện dừng min_samples_split), các nhánh sẽ tiếp tục phân chia cho tới khi mỗi nút lá chỉ chứa 1-2 điểm dữ liệu. Khi đó mô hình học thuộc toàn bộ nhiễu và các ngoại lệ cục bộ (High Variance, Low Bias), dẫn đến ranh giới quyết định bị chia cắt manh mún và mất khả năng khái quát hóa. Để khắc phục, cần áp dụng tỉa cành (pruning) hoặc giới hạn độ sâu cây."
+},
+{
+  "id": 115,
+  "category": "Evaluation",
+  "question": "Câu 115 (VAIC 2026). Một hệ thống gợi ý Top-5 sản phẩm cho người dùng đưa ra danh sách: $[A, B, C, D, E]$. Thực tế người dùng quan tâm đến danh sách các sản phẩm: $[B, C, F, G, Z]$. Giá trị của $\\text{Precision@5}$ và $\\text{Recall@5}$ lần lượt là bao nhiêu?",
+  "options": [
+    "A. 0.4 ; 0.4",
+    "B. 0.4 ; 0.5",
+    "C. 0.2 ; 0.4",
+    "D. 0.5 ; 0.4"
+  ],
+  "correctIndex": 0,
+  "explanation": "Tập gợi ý Top-5: $R_5 = \\{A, B, C, D, E\\}$ ($|R_5| = 5$).<br>Tập thực tế quan tâm (Relevant): $Rel = \\{B, C, F, G, Z\\}$ ($|Rel| = 5$).<br>Số sản phẩm liên quan xuất hiện trong Top-5 là phần giao: $R_5 \\cap Rel = \\{B, C\\} \\implies 2$ sản phẩm.<br>• $\\text{Precision@5} = \\frac{|R_5 \\cap Rel|}{5} = \\frac{2}{5} = 0.4$.<br>• $\\text{Recall@5} = \\frac{|R_5 \\cap Rel|}{|Rel|} = \\frac{2}{5} = 0.4$."
+},
+{
+  "id": 116,
+  "category": "Machine Learning",
+  "question": "Câu 116 (VAIC 2026). Nếu một nút trong Cây quyết định (Decision Tree) có giá trị Entropy bằng 0, những kết luận nào sau đây là hoàn toàn chính xác?",
+  "options": [
+    "A. Tất cả các mẫu trong nút đó đều thuộc cùng một lớp (nút thuần khiết), và Information Gain của mọi phép chia tiếp theo tại nút này đều bằng 0",
+    "B. Các mẫu trong nút được phân bố đồng đều 50-50 giữa các lớp",
+    "C. Nút đó bắt buộc phải là nút gốc (Root node) của cây",
+    "D. Cây quyết định đang bị lỗi tràn số học"
+  ],
+  "correctIndex": 0,
+  "explanation": "Theo định nghĩa Entropy Shannon $H = -\\sum p_i \\log_2 p_i$, $H = 0$ khi và chỉ khi có một lớp có xác suất $p=1$ và các lớp còn lại có $p=0$. Điều này chứng minh nút đó là 'nút thuần khiết' (Pure node) - mọi mẫu dữ liệu bên trong đều mang cùng một nhãn phân loại. Vì trạng thái đã hoàn toàn thuần khiết (không còn sự bất định nào), không thể thực hiện thêm bất kỳ phép chia nào để giảm entropy thêm được nữa, tức Information Gain của mọi phép chia tại nút lá này đều bằng 0."
+},
+{
+  "id": 117,
+  "category": "Machine Learning",
+  "question": "Câu 117 (VAIC 2026). Một nền tảng phim vừa tải lên một bộ phim mới toanh chưa có bất kỳ người dùng nào đánh giá hay xem (rating = null), nhưng có đầy đủ siêu dữ liệu: Thể loại, Đạo diễn, Diễn viên, Mô tả tóm tắt nội dung. Phương pháp gợi ý nào vẫn có thể hoạt động hiệu quả để giải quyết hiện tượng này?",
+  "options": [
+    "A. User-based Collaborative Filtering",
+    "B. Item-based Collaborative Filtering",
+    "C. Content-based Filtering (Lọc dựa trên nội dung)",
+    "D. Matrix Factorization (Phân rã ma trận SVD)"
+  ],
+  "correctIndex": 2,
+  "explanation": "Đây là bài toán Khởi đầu lạnh cho vật phẩm (Item Cold-Start Problem) kinh điển. Các phương pháp Lọc cộng tác (Collaborative Filtering và Matrix Factorization SVD) đều dựa hoàn toàn vào ma trận tương tác User-Item (ratings/views); khi vật phẩm mới chưa có lượt tương tác nào, các phương pháp này hoàn toàn tê liệt. Trái lại, Content-based Filtering biểu diễn vật phẩm bằng vector đặc trưng từ siêu dữ liệu (Thể loại, Diễn viên qua TF-IDF / Embedding) và so khớp với hồ sơ sở thích của người dùng qua Cosine Similarity, do đó hoạt động hoàn hảo ngay khi vật phẩm vừa ra mắt."
+},
+{
+  "id": 118,
+  "category": "Machine Learning",
+  "question": "Câu 118 (VAIC 2026). Trong thuật toán $k$-Nearest Neighbors ($k$-NN), điều gì có khả năng cao nhất xảy ra khi ta thiết lập giá trị $k$ rất nhỏ, cụ thể là $k = 1$?",
+  "options": [
+    "A. Mô hình trở nên mượt mà hơn và miễn nhiễm hoàn toàn với nhiễu",
+    "B. Mô hình có thiên lệch thấp (Low Bias) nhưng phương sai rất cao (High Variance, dễ Overfitting)",
+    "C. Mô hình bị thiên lệch rất cao (High Bias) và Underfitting",
+    "D. Thuật toán tự động chuyển đổi thành Hồi quy tuyến tính"
+  ],
+  "correctIndex": 1,
+  "explanation": "Với $k=1$, mô hình chỉ gán nhãn dựa trên đúng 1 điểm dữ liệu gần nhất trong không gian huấn luyện. Do đó, trên tập huấn luyện độ chính xác đạt 100% (Bias = 0), nhưng biên phân lớp sẽ bị bẻ ngoằn ngoèo, cực kỳ nhạy cảm với từng điểm nhiễu hoặc điểm ngoại lai (Outlier). Khi áp dụng vào tập kiểm thử, chỉ một biến động nhỏ cũng làm thay đổi dự đoán, thể hiện tính chất Phương sai cực cao (High Variance - Overfitting). Tăng $k$ sẽ làm biên quyết định phẳng hơn, tăng Bias nhưng giảm Variance."
+},
+{
+  "id": 119,
+  "category": "Computer Vision",
+  "question": "Câu 119 (VAIC 2026). Khi huấn luyện trên một tập dữ liệu có quy mô tương đối nhỏ, nhận định nào sau đây là đúng nhất khi so sánh Vision Transformer (ViT) với Convolutional Neural Network (CNN) có cùng lượng tham số?",
+  "options": [
+    "A. ViT có Inductive Bias (thiên kiến quy nạp) yếu hơn CNN nên phụ thuộc nặng nề vào Data Augmentation hoặc Pretraining; CNN tận dụng dữ liệu nhỏ hiệu quả hơn",
+    "B. ViT luôn luôn vượt trội hơn CNN trong mọi kịch bản dữ liệu nhỏ mà không cần bất kỳ kỹ thuật bổ trợ nào",
+    "C. CNN không có khả năng trích xuất đặc trưng cục bộ trên tập dữ liệu nhỏ",
+    "D. ViT không thể huấn luyện được bằng thuật toán lan truyền ngược"
+  ],
+  "correctIndex": 0,
+  "explanation": "Mạng CNN được tích hợp sẵn hai Inductive Bias (thiên kiến quy nạp) vật lý cực mạnh: Tính cục bộ (Locality) (các pixel gần nhau có quan hệ mật thiết) và Tính bất biến tịnh tiến (Translation Invariance) (bộ lọc quét đồng nhất khắp ảnh). Nhờ đó, CNN học rất nhanh và ổn định ngay cả với tập dữ liệu nhỏ. Trong khi đó, ViT coi ảnh như chuỗi các patches tự do liên kết qua Global Self-Attention và hoàn toàn thiếu hai thiên kiến này, đòi hỏi phải được huấn luyện trước (Pretraining) trên các bộ dữ liệu khổng lồ (JFT-300M, ImageNet-21k) hoặc dùng kỹ thuật tăng cường dữ liệu mạnh để tự học các cấu trúc không gian."
+},
+{
+  "id": 120,
+  "category": "Evaluation",
+  "question": "Câu 120 (VAIC 2026). Trong bài toán phân loại đa lớp (Multi-class Classification) với giả thiết mỗi mẫu chỉ thuộc duy nhất một lớp (Single-label), khi áp dụng phương pháp tính trung bình vi mô (Micro-averaging), đẳng thức nào sau đây luôn luôn đúng?",
+  "options": [
+    "A. F1-score = Accuracy, nhưng Recall ≠ Precision",
+    "B. Accuracy ≥ F1-score ≥ Recall ≥ Precision",
+    "C. F1-score = Accuracy = Recall = Precision",
+    "D. F1-score ≠ Accuracy, nhưng Recall = Precision"
+  ],
+  "correctIndex": 2,
+  "explanation": "Trong bài toán phân loại đơn nhãn (mỗi mẫu thuộc đúng 1 lớp):<br>Tổng các mẫu phân loại đúng của tất cả các lớp là $\\sum TP_i$. Khi một mẫu thuộc lớp $A$ bị mô hình dự đoán nhầm thành lớp $B$, nó đồng thời tạo ra một False Negative cho lớp $A$ ($FN_A$) và một False Positive cho lớp $B$ ($FP_B$). Do đó, trên toàn bộ tập dữ liệu: $\\sum FP_i = \\sum FN_i = \\text{Tổng số mẫu bị phân loại sai}$.<br>Khi tính Micro-average:<br>• $\\text{Micro-Precision} = \\frac{\\sum TP_i}{\\sum TP_i + \\sum FP_i} = \\frac{\\text{Số mẫu đúng}}{\\text{Tổng số mẫu}} = \\text{Accuracy}$.<br>• $\\text{Micro-Recall} = \\frac{\\sum TP_i}{\\sum TP_i + \\sum FN_i} = \\text{Micro-Precision} = \\text{Accuracy}$.<br>• $\\text{Micro-F1} = 2 \\times \\frac{\\text{Precision} \\times \\text{Recall}}{\\text{Precision} + \\text{Recall}} = \\text{Accuracy}$.<br>Vậy F1-score = Accuracy = Recall = Precision."
+}
 ];
 
 </script>
@@ -7580,7 +8046,7 @@ function renderMathFormula(formula) {
 
 function formatContent(text) {
   if (!text) return "";
-  let s = String(text);
+  let s = Array.isArray(text) ? text.join("\n\n") : String(text);
 
   // 1. Markdown code
   s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
@@ -7894,7 +8360,7 @@ function initVAIOApp() {
     html += `
       <div class="nav-item quiz-entry ${currentView === 'quiz' ? 'active' : ''}" id="sidebarQuizEntry">
         <span>★ Đề Thi Trắc Nghiệm</span>
-        <span class="quiz-badge">24 Câu</span>
+        <span class="quiz-badge">${QUIZ_DATA.length} Câu</span>
       </div>
     `;
 
@@ -8143,8 +8609,11 @@ function initVAIOApp() {
               <span class="exam-tag">${item.code || 'BÀI TẬP'}</span>
               <div class="exam-q">${formatContent(item.problem || '')}</div>
               <div class="exam-steps">
-                <div><strong>Lời giải mẫu:</strong></div>
-                <div>${formatContent(item.solution || '')}</div>
+                <div style="font-weight:700; margin-bottom:8px; color:var(--text);">Lời giải chi tiết & Chiến lược phòng thi:</div>
+                ${Array.isArray(item.solution) 
+                  ? item.solution.map(s => `<div class="exam-step-line" style="margin-top:8px; line-height:1.65;">${formatContent(s)}</div>`).join("")
+                  : `<div style="line-height:1.65;">${formatContent(item.solution || '')}</div>`
+                }
               </div>
             </div>
           `).join("")}
@@ -8357,7 +8826,7 @@ function initVAIOApp() {
     let html = `
       <header class="article-header">
         <h1 class="article-title">Bộ Đề Thi Trắc Nghiệm Học Máy</h1>
-        <p class="article-summary">24 câu hỏi bao quát toàn diện các chủ đề từ Đạo hàm, Hồi quy, Cây quyết định đến CNN, Transformer và Diffusion. Chọn đáp án để chấm điểm ngay và xem lời giải phân tích cặn kẽ.</p>
+        <p class="article-summary">${totalQ} câu hỏi thực chiến chuẩn đề thi Olympic AI (VAIO 2025 & VAIC 2026), bao quát toàn diện các chủ đề từ Đạo hàm, Hồi quy, Cây quyết định đến CNN, Transformer và Diffusion. Chọn đáp án để chấm điểm ngay và xem lời giải phân tích cặn kẽ.</p>
         <div class="quiz-score-banner">
           <div class="quiz-score-info">
             <strong>Tiến độ làm bài:</strong> Đã trả lời <strong>${answeredKeys.length}/${totalQ}</strong> câu (${correctCount} câu đúng)
