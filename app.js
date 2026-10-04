@@ -516,18 +516,40 @@ function initVAIOApp() {
     if (sidebarBackdropEl) sidebarBackdropEl.classList.add("active");
   }
 
+  // Desktop & Mobile Sidebar Toggle
   if (sidebarToggleBtn) {
     sidebarToggleBtn.addEventListener("click", () => {
-      if (sidebarEl && sidebarEl.classList.contains("open")) {
-        closeMobileSidebar();
+      if (window.innerWidth > 860) {
+        document.body.classList.toggle("sidebar-collapsed");
+        const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+        safeStorage.setItem("ml_sidebar_collapsed", isCollapsed ? "1" : "0");
+        sidebarToggleBtn.setAttribute("title", isCollapsed ? "Hiện danh mục bài học (Sidebar)" : "Ẩn danh mục bài học (Sidebar)");
       } else {
-        openMobileSidebar();
+        if (sidebarEl && sidebarEl.classList.contains("open")) {
+          closeMobileSidebar();
+        } else {
+          openMobileSidebar();
+        }
       }
     });
   }
 
   if (sidebarCloseBtn) {
-    sidebarCloseBtn.addEventListener("click", closeMobileSidebar);
+    sidebarCloseBtn.addEventListener("click", () => {
+      if (window.innerWidth > 860) {
+        document.body.classList.add("sidebar-collapsed");
+        safeStorage.setItem("ml_sidebar_collapsed", "1");
+        if (sidebarToggleBtn) sidebarToggleBtn.setAttribute("title", "Hiện danh mục bài học (Sidebar)");
+      } else {
+        closeMobileSidebar();
+      }
+    });
+  }
+
+  // Restore desktop sidebar collapsed state
+  if (window.innerWidth > 860 && safeStorage.getItem("ml_sidebar_collapsed") === "1") {
+    document.body.classList.add("sidebar-collapsed");
+    if (sidebarToggleBtn) sidebarToggleBtn.setAttribute("title", "Hiện danh mục bài học (Sidebar)");
   }
 
   if (sidebarBackdropEl) {

@@ -42,7 +42,7 @@ def main():
         <h1>Sổ Tay Học Máy</h1>
         <span class="brand-subtitle">Machine Learning & Deep Learning</span>
       </div>
-      <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Đóng menu">✕</button>
+      <button class="sidebar-close-btn" id="sidebarCloseBtn" aria-label="Thu gọn menu" title="Thu gọn danh mục (Sidebar)">✕</button>
     </div>
     <div class="search-wrap">
       <input type="text" id="searchInput" class="search-input" placeholder="Tìm kiếm bài học, khái niệm...">
@@ -64,7 +64,7 @@ def main():
   <main class="main-content">
     <header class="top-bar">
       <div class="top-bar-left">
-        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Mở danh mục">☰</button>
+        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Ẩn / Hiện thanh điều hướng" title="Ẩn / Hiện thanh điều hướng (Sidebar)">☰</button>
         <div class="breadcrumb" id="breadcrumbText">Bài 1: Đạo Hàm, Đạo Hàm Riêng & Vector Gradient</div>
       </div>
       <div class="top-actions">
@@ -73,7 +73,7 @@ def main():
           <button class="font-scale-btn" id="fontScaleUp" title="Tăng cỡ chữ" aria-label="Tăng cỡ chữ">A+</button>
         </div>
         <button class="btn" id="toggleQuizBtn">Đề Thi (120 Câu)</button>
-        <button class="btn btn-print" onclick="window.print()">In</button>
+        <button class="btn btn-print" onclick="window.print()" title="In bài học sạch (ẩn toàn bộ thanh bar, chỉ in nội dung)">🖨 In</button>
       </div>
     </header>
     <article class="article-container" id="articleContainer"></article>
