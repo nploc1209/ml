@@ -317,35 +317,108 @@ function renderMathFormula(formula) {
   return nativeRenderMath(s);
 }
 
+// Helper to escape HTML in code blocks
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Single-pass Python Syntax Highlighter (Lightweight, Zero-Dependency, High-Contrast)
+function highlightPython(code) {
+  if (!code) return "";
+  const tokenRegex = /("""[\s\S]*?"""|'''[\s\S]*?'''|f?"(?:\\.|[^"\\])*"|f?'(?:\\.|[^'\\])*'|#[^\n]*|@\w+|\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b|\b(?:def|class|return|if|elif|else|for|while|in|is|not|and|or|import|from|as|try|except|finally|with|yield|lambda|pass|break|continue|raise|True|False|None)\b|\b(?:torch|nn|optim|F|tf|keras|layers|models|sklearn|np|pd|plt|Linear|Conv2d|Conv2D|BatchNorm2d|BatchNormalization|Dropout|Sequential|LinearRegression|Ridge|Lasso|SGDRegressor|LogisticRegression|DecisionTreeClassifier|RandomForestClassifier|SVC|KNeighborsClassifier|KMeans|PCA|CountVectorizer|TfidfVectorizer|StandardScaler|MinMaxScaler|GridSearchCV|MultinomialNB|CosineSimilarity|Adam|SGD|RMSprop|CrossEntropyLoss|MSELoss|BCEWithLogitsLoss|Softmax|Sigmoid|ReLU|LeakyReLU|DataLoader|Dataset)\b|\b(?:print|len|range|enumerate|zip|map|filter|sum|min|max|abs|round|int|float|str|list|dict|set|tuple|type|isinstance|shape|dtype|device|squeeze|unsqueeze|reshape|item|numpy|tensor|cat|stack|fit|predict|predict_proba|fit_transform|transform|score|backward|step|zero_grad|toarray|mean|var|std|dot|cos|sin|exp|log|sqrt|zeros|ones|eye|arange|linspace|matmul)\b)/g;
+
+  let lastIndex = 0;
+  let html = "";
+  let match;
+
+  while ((match = tokenRegex.exec(code)) !== null) {
+    const preText = code.slice(lastIndex, match.index);
+    if (preText) html += escapeHtml(preText);
+
+    const token = match[0];
+    if (token.startsWith("#")) {
+      html += '<span class="tok-comment">' + escapeHtml(token) + '</span>';
+    } else if (token.startsWith('"') || token.startsWith("'") || token.startsWith('f"') || token.startsWith("f'")) {
+      html += '<span class="tok-string">' + escapeHtml(token) + '</span>';
+    } else if (token.startsWith("@")) {
+      html += '<span class="tok-decorator">' + escapeHtml(token) + '</span>';
+    } else if (/^\d/.test(token)) {
+      html += '<span class="tok-number">' + escapeHtml(token) + '</span>';
+    } else if (/^(?:def|class|return|if|elif|else|for|while|in|is|not|and|or|import|from|as|try|except|finally|with|yield|lambda|pass|break|continue|raise|True|False|None)$/.test(token)) {
+      html += '<span class="tok-keyword">' + escapeHtml(token) + '</span>';
+    } else if (/^(?:torch|nn|optim|F|tf|keras|layers|models|sklearn|np|pd|plt|Linear|Conv2d|Conv2D|BatchNorm2d|BatchNormalization|Dropout|Sequential|LinearRegression|Ridge|Lasso|SGDRegressor|LogisticRegression|DecisionTreeClassifier|RandomForestClassifier|SVC|KNeighborsClassifier|KMeans|PCA|CountVectorizer|TfidfVectorizer|StandardScaler|MinMaxScaler|GridSearchCV|MultinomialNB|CosineSimilarity|Adam|SGD|RMSprop|CrossEntropyLoss|MSELoss|BCEWithLogitsLoss|Softmax|Sigmoid|ReLU|LeakyReLU|DataLoader|Dataset)$/.test(token)) {
+      html += '<span class="tok-type">' + escapeHtml(token) + '</span>';
+    } else {
+      html += '<span class="tok-builtin">' + escapeHtml(token) + '</span>';
+    }
+
+    lastIndex = tokenRegex.lastIndex;
+  }
+
+  const remaining = code.slice(lastIndex);
+  if (remaining) html += escapeHtml(remaining);
+
+  return html;
+}
+
+function renderHighlightedCodeBlock(code, lang = "python") {
+  const codeId = "code-" + Math.random().toString(36).substring(2, 9);
+  const cleanLang = (lang || "python").toLowerCase().trim();
+  const displayLang = cleanLang === "py" ? "PYTHON" : (cleanLang ? cleanLang.toUpperCase() : "PYTHON");
+
+  let highlighted = cleanLang === "output" || cleanLang === "text" || cleanLang === "bash" 
+    ? escapeHtml(code.trim()) 
+    : highlightPython(code.trim());
+
+  return `
+    <div class="code-block-wrap">
+      <div class="code-block-header">
+        <div class="code-header-left">
+          <div class="code-mac-dots">
+            <span class="code-mac-dot red"></span>
+            <span class="code-mac-dot yellow"></span>
+            <span class="code-mac-dot green"></span>
+          </div>
+          <span class="code-lang-label">${displayLang}</span>
+        </div>
+        <button class="copy-code-btn" data-target="${codeId}">
+          <span>📋 Sao chép</span>
+        </button>
+      </div>
+      <pre class="code-block" id="${codeId}"><code>${highlighted}</code></pre>
+    </div>
+  `;
+}
+
 function formatContent(text) {
   if (!text) return "";
   let s = Array.isArray(text) ? text.join("\n\n") : String(text);
 
-  // 1. Markdown code
-  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // 1. Multi-line code block: ```lang\n ... \n```
+  s = s.replace(/```([a-zA-Z0-9_-]*)\s*\n([\s\S]*?)```/g, (m, lang, code) => {
+    return renderHighlightedCodeBlock(code, lang);
+  });
 
-  // 2. Markdown Bold
+  // 2. Inline Markdown code `...`
+  s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+
+  // 3. Markdown Bold
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
-  // 3. Markdown Italic
+  // 4. Markdown Italic
   s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
 
-  // 4. Display Math ($$ ... $$)
+  // 5. Display Math ($$ ... $$)
   s = s.replace(/\$\$([\s\S]+?)\$\$/g, (m, formula) => {
     return `<div class="formula-block">${renderMathFormula(formula)}</div>`;
   });
 
-  // 5. Inline Math ($ ... $)
-  s = s.replace(/\$([^$]+?)\$/g, (m, formula) => {
+  // 6. Inline Math ($ ... $)
+  s = s.replace(/\$([^$\n]+?)\$/g, (m, formula) => {
     return renderMathFormula(formula);
   });
 
   return s;
-}
-
-// Helper to escape HTML in code blocks
-function escapeHtml(str) {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 // Markdown block parser for deep pedagogical text
@@ -374,16 +447,7 @@ function renderMarkdownBlock(text) {
         i++;
       }
       i++; // skip closing ```
-      const codeId = "code-" + Math.random().toString(36).substring(2, 9);
-      out.push(`
-        <div class="code-block-wrap">
-          <div class="code-block-header">
-            <span>${lang}</span>
-            <button class="copy-code-btn" data-target="${codeId}">Sao chép</button>
-          </div>
-          <pre class="code-block" id="${codeId}"><code>${escapeHtml(codeLines.join("\n"))}</code></pre>
-        </div>
-      `);
+      out.push(renderHighlightedCodeBlock(codeLines.join("\n"), lang));
       continue;
     }
 
@@ -634,6 +698,43 @@ function initVAIOApp() {
       }
     });
   }
+
+  // Global Event Delegation for Copy Code & Hands-On Exercises
+  document.addEventListener("click", (e) => {
+    // 1. Copy Code Button
+    const copyBtn = e.target.closest(".copy-code-btn");
+    if (copyBtn) {
+      const targetId = copyBtn.getAttribute("data-target");
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        const textToCopy = targetEl.textContent || targetEl.innerText || "";
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          copyBtn.innerHTML = "<span>✓ Đã chép</span>";
+          copyBtn.classList.add("copied");
+          setTimeout(() => {
+            copyBtn.innerHTML = "<span>📋 Sao chép</span>";
+            copyBtn.classList.remove("copied");
+          }, 1800);
+        }).catch(() => {
+          copyBtn.innerHTML = "<span>Lỗi chép</span>";
+        });
+      }
+      return;
+    }
+
+    // 2. Exercise Solution Toggle
+    const exBtn = e.target.closest(".code-exercise-toggle-btn");
+    if (exBtn) {
+      const targetId = exBtn.getAttribute("data-ex-id");
+      const solBox = document.getElementById(targetId);
+      if (solBox) {
+        const isHidden = solBox.style.display === "none";
+        solBox.style.display = isHidden ? "block" : "none";
+        exBtn.textContent = isHidden ? "✕ Ẩn Code Lời Giải" : "📖 Xem Code Lời Giải & Hướng Dẫn Mẫu";
+      }
+      return;
+    }
+  });
 
   function renderSidebar(filtered = null) {
     const list = filtered || LESSONS_DATA;
@@ -893,6 +994,66 @@ function initVAIOApp() {
 
     // Mount Interactive Simulator Placeholder
     html += `<div id="interactive-widget-mount"></div>`;
+
+    // Hands-On Code Lab: Thực hành Lập trình & Scikit-Learn (Vừa học lý thuyết vừa học thực hành)
+    if (lesson.codeLab) {
+      const lab = lesson.codeLab;
+      html += `
+        <section class="code-lab-section">
+          <div class="code-lab-header">
+            <div class="code-lab-header-left">
+              <span class="code-lab-badge">💻 HANDS-ON CODE LAB</span>
+              <h2 class="code-lab-title">${lab.title || 'Thực Hành Lập Trình & Huấn Luyện Mô Hình'}</h2>
+            </div>
+          </div>
+          ${lab.description ? `<div class="code-lab-desc">${formatContent(lab.description)}</div>` : ''}
+
+          ${(lab.steps || []).map((step, sIdx) => `
+            <div class="code-step-card">
+              <div class="code-step-header">
+                <span class="code-step-num">${sIdx + 1}</span>
+                <span>${step.title}</span>
+              </div>
+              ${step.explanation ? `<div class="code-step-desc">${formatContent(step.explanation)}</div>` : ''}
+              ${step.code ? renderHighlightedCodeBlock(step.code, step.lang || 'python') : ''}
+              ${step.output ? `
+                <div class="code-output-wrap">
+                  <div class="code-output-title">▶ Kết Quả Thực Thi (Console Output):</div>
+                  <pre style="margin:0; font-family:inherit; color:inherit;">${escapeHtml(step.output.trim())}</pre>
+                </div>
+              ` : ''}
+            </div>
+          `).join("")}
+
+          ${lab.exercise ? `
+            <div class="code-exercise-card">
+              <div class="code-exercise-header">
+                <div class="code-exercise-title">
+                  <span>🎯 Bài Tập Tự Luyện Thực Chiến:</span>
+                  <strong>${lab.exercise.title || 'Tự code & Huấn luyện'}</strong>
+                </div>
+              </div>
+              <div class="code-exercise-task">${formatContent(lab.exercise.task)}</div>
+              ${lab.exercise.hint ? `
+                <div class="code-exercise-hint">
+                  <strong>💡 Gợi ý tư duy:</strong> ${formatContent(lab.exercise.hint)}
+                </div>
+              ` : ''}
+              <div style="margin-top:14px;">
+                <button class="code-exercise-toggle-btn" data-ex-id="${lesson.id}-ex">
+                  📖 Xem Code Lời Giải & Hướng Dẫn Mẫu
+                </button>
+              </div>
+              <div class="exercise-solution-box" id="${lesson.id}-ex" style="display:none;">
+                <div style="font-weight:700; color:#b45309; margin-bottom:10px;">Lời giải chuẩn & Hướng dẫn từng dòng code:</div>
+                ${lab.exercise.solutionDesc ? `<div style="margin-bottom:10px; line-height:1.65;">${formatContent(lab.exercise.solutionDesc)}</div>` : ''}
+                ${lab.exercise.solutionCode ? renderHighlightedCodeBlock(lab.exercise.solutionCode, 'python') : ''}
+              </div>
+            </div>
+          ` : ''}
+        </section>
+      `;
+    }
 
     // Exam Connection
     if (lesson.examConnection) {

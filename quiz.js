@@ -69,12 +69,12 @@ const QUIZ_DATA = [
   {
     "id": 6,
     "category": "NLP & LLM",
-    "question": "Câu 6. Giả sử bạn đang xây dựng một mô hình phân loại cảm xúc văn bản (positive/negative) bằng cách sử dụng biểu diễn Bag-of-Words (BoW) và PyTorch (phiên bản ≥ 1.6).\n\nĐoạn mã tiền xử lý:\n```python\nfrom sklearn.feature_extraction.text import CountVectorizer\nfrom sklearn.model_selection import train_test_split\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\n\ntexts = [\"I love this movie\", \"I hate this product\", \"Amazing quality\", \"Terrible service\"]\nlabels = [1, 0, 1, 0]\nvectorizer = CountVectorizer()\nX = vectorizer.fit_transform(texts).toarray()\ny = torch.tensor(labels)\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)\nX_train = torch.tensor(X_train, dtype=torch.float32)\n```\n\nPhương án nào sau đây là phần mã đúng để huấn luyện mô hình phân loại nhị phân đơn giản với biểu diễn BoW, một tầng tuyến tính và hàm loss phù hợp?",
+    "question": "Câu 6. Giả sử bạn đang xây dựng một mô hình phân loại cảm xúc văn bản (positive/negative) bằng cách sử dụng biểu diễn Bag-of-Words (BoW) và PyTorch (phiên bản ≥ 1.6).\n\nĐoạn mã tiền xử lý:\n```python\nfrom sklearn.feature_extraction.text import CountVectorizer\nfrom sklearn.model_selection import train_test_split\nimport torch\nimport torch.nn as nn\nimport torch.optim as optim\n\ntexts = [\"I love this movie\", \"I hate this product\", \"Amazing quality\", \"Terrible service\"]\nlabels = [1, 0, 1, 0]\n\nvectorizer = CountVectorizer()\nX = vectorizer.fit_transform(texts).toarray()\ny = torch.tensor(labels)\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)\nX_train = torch.tensor(X_train, dtype=torch.float32)\n```\n\nPhương án nào sau đây là phần mã đúng để huấn luyện mô hình phân loại nhị phân đơn giản với biểu diễn BoW, một tầng tuyến tính và hàm loss phù hợp?",
     "options": [
-      "A. model = nn.Linear(X_train.shape[1], 1); loss_fn = nn.BCEWithLogitsLoss(); outputs = model(X_train).squeeze(); loss = loss_fn(outputs, y_train.float())",
-      "B. model = nn.Sequential(nn.Linear(X_train.shape[1], 10), nn.ReLU(), nn.Linear(10, 2)); loss_fn = nn.NLLLoss()",
-      "C. model = nn.Linear(X_train.shape(1), 2); loss_fn = nn.CrossEntropyLoss() (sai cú pháp .shape(1))",
-      "D. model = nn.Linear(X_train.shape[1], 1); loss_fn = nn.MSELoss() (dùng MSE cho phân loại nhị phân)"
+      "A. `model = nn.Linear(X_train.shape[1], 1); loss_fn = nn.BCEWithLogitsLoss(); outputs = model(X_train).squeeze(); loss = loss_fn(outputs, y_train.float())`",
+      "B. `model = nn.Sequential(nn.Linear(X_train.shape[1], 10), nn.ReLU(), nn.Linear(10, 2)); loss_fn = nn.NLLLoss()`",
+      "C. `model = nn.Linear(X_train.shape(1), 2); loss_fn = nn.CrossEntropyLoss()` (sai cú pháp .shape(1))",
+      "D. `model = nn.Linear(X_train.shape[1], 1); loss_fn = nn.MSELoss()` (dùng MSE cho phân loại nhị phân)"
     ],
     "correctIndex": 0,
     "explanation": "**Đáp án đúng: A**\n\n• **Bản chất:** Với phân loại nhị phân (nhãn 0/1) và một tầng tuyến tính đầu ra 1 chiều `nn.Linear(X_train.shape[1], 1)`, hàm mất mát chuẩn mực trong PyTorch là `nn.BCEWithLogitsLoss()` (tích hợp sẵn Sigmoid và Binary Cross-Entropy ổn định số học). Đầu ra cần `.squeeze()` để khớp chiều với `y_train.float()`.\n• **Vì sao các đáp án khác sai:**\n- (B sai): `nn.NLLLoss()` yêu cầu đầu vào là log-xác suất (LogSoftmax), không dùng trực tiếp cho logits.\n- (C sai): Sai cú pháp `X_train.shape(1)` (shape là tuple, không phải hàm gọi).\n- (D sai): `nn.MSELoss()` không phù hợp cho bài toán phân loại nhị phân vì dễ gây triệt tiêu gradient."
@@ -342,12 +342,12 @@ const QUIZ_DATA = [
   {
     "id": 27,
     "category": "Computer Vision",
-    "question": "Câu 27. Cho đoạn mã dưới đây, kích thước của output_tensor là bao nhiêu?\n1 import tensorflow as tf\n2\n3 input_tensor = tf.constant(tf.random.normal(shape = (1, 32, 32, 3)), dtype =\n4\ntf.float32)\n5 conv_layer = tf.keras.layers.Conv2D(filters = 32, kernel_size = (5, 5),\n\nstrides = (2, 2), padding = 'same')\n6\n7 output_tensor = conv_layer(input_tensor)\n8\n9 print(output_tensor.shape)",
+    "question": "Câu 27. Cho đoạn mã dưới đây, kích thước của `output_tensor` là bao nhiêu?\n\n```python\nimport tensorflow as tf\n\ninput_tensor = tf.constant(tf.random.normal(shape=(1, 32, 32, 3)), dtype=tf.float32)\nconv_layer = tf.keras.layers.Conv2D(filters=32, kernel_size=(5, 5), strides=(2, 2), padding='same')\n\noutput_tensor = conv_layer(input_tensor)\nprint(output_tensor.shape)\n```",
     "options": [
-      "A. (1,16,16,32)",
-      "B. (1,16,16,3)",
-      "C. (1,14,14,32)",
-      "D. (1,32,32,32)"
+      "A. `(1, 16, 16, 32)`",
+      "B. `(1, 16, 16, 3)`",
+      "C. `(1, 14, 14, 32)`",
+      "D. `(1, 32, 32, 32)`"
     ],
     "correctIndex": 0,
     "explanation": "**Đáp án đúng: A**\n\n• **Công thức kích thước đầu ra Conv2D với `padding='same'` và `strides=(2, 2)`:**\n- Chiều cao: $H_{\\text{out}} = \\lceil H_{\\text{in}} / \\text{stride} \\rceil = \\lceil 32 / 2 \\rceil = 16$.\n- Chiều rộng: $W_{\\text{out}} = \\lceil W_{\\text{in}} / \\text{stride} \\rceil = \\lceil 32 / 2 \\rceil = 16$.\n- Số kênh: $C_{\\text{out}} = \\text{filters} = 32$.\n- Kích thước batch: Giữ nguyên $B = 1$.\n• **Kích thước tensor đầu ra:** $(1, 16, 16, 32)$."
@@ -420,12 +420,12 @@ const QUIZ_DATA = [
   {
     "id": 33,
     "category": "Computer Vision",
-    "question": "Câu 33. Chương trình sau thực hiện:\n- Tải ResNet-50 pre-trained trên ImageNet.\n- Đóng băng toàn bộ các layer convolution.\n- Lấy output của lớp avgpool(shape(2048,1,1)) và flatten thành vector 2048.\nBạn thiếu dòng nào dưới đây để trả về vec tơ đặc trưng (feature vector)?\n1 import torch, torchvision.models as models\n2\n3 model = models.resnet50(weights = 'DEFAULT')\n4\n5 for p in model.parameters():\n6 p.requires_grad_(False)\n7\n8\n10 11 12\n13 9 model.fc = torch.nn.Identity()\nx = torch.randn(1, 3, 224, 224)\n... #  fil here\nprint(feature.shape)",
+    "question": "Câu 33. Chương trình sau thực hiện:\n- Tải mô hình ResNet-50 pre-trained trên ImageNet.\n- Đóng băng toàn bộ các layer convolution.\n- Lấy output của lớp `avgpool` (shape `(2048, 1, 1)`) và flatten thành vector 2048 chiều.\n\nBạn thiếu dòng nào dưới đây để trả về vector đặc trưng (`features`)?\n\n```python\nimport torch\nimport torchvision.models as models\n\nmodel = models.resnet50(weights='DEFAULT')\n\nfor p in model.parameters():\n    p.requires_grad_(False)\n\nmodel.fc = torch.nn.Identity()\nx = torch.randn(1, 3, 224, 224)\n\n... # <-- Điền dòng mã vào đây\n\nprint(features.shape)\n```",
     "options": [
-      "A. features = model(x)",
-      "B. features = model.layer4(x)",
-      "C. features = model.avgpool(x)",
-      "D. features = x"
+      "A. `features = model(x)`",
+      "B. `features = model.layer4(x)`",
+      "C. `features = model.avgpool(x)`",
+      "D. `features = x`"
     ],
     "correctIndex": 0,
     "explanation": "**Đáp án đúng: A**\n\n• **Bản chất:** Khi ta đã thay thế lớp phân loại cuối cùng bằng `model.fc = torch.nn.Identity()`, mô hình ResNet50 sẽ trả về trực tiếp vector đặc trưng 2048 chiều tại đầu ra của lớp `avgpool`. Do đó, chỉ cần gọi hàm truyền xuôi `features = model(x)` để thu được vector đặc trưng."
@@ -890,10 +890,10 @@ const QUIZ_DATA = [
     "category": "NLP & LLM",
     "question": "Câu 69. Để tải nhúng từ (embedding) Word2Vec đã được huấn luyện trước trong thư viện gensim, bạn sử dụng\nlệnh nào?",
     "options": [
-      "A. gensim.models.load(\"word2vec\")",
-      "B. import word2vec.load_model(path)",
-      "C. KeyedVectors.load_word2vec_format(path)",
-      "D. spacy.load_word2vec(path)"
+      "A. `gensim.models.load(\"word2vec\")`",
+      "B. `import word2vec.load_model(path)`",
+      "C. `KeyedVectors.load_word2vec_format(path)`",
+      "D. `spacy.load_word2vec(path)`"
     ],
     "correctIndex": 2,
     "explanation": "**Đáp án đúng: C**\n\n• **Bản chất:** Trong thư viện `gensim`, để tải mô hình nhúng từ Word2Vec đã được huấn luyện trước (định dạng nhị phân hoặc text), lệnh chuẩn là: `from gensim.models import KeyedVectors; model = KeyedVectors.load_word2vec_format(path)`."
@@ -901,9 +901,9 @@ const QUIZ_DATA = [
   {
     "id": 70,
     "category": "Deep Learning",
-    "question": "Câu 70. Khi sử dụng câu lệnh nn.CrossEntropyLoss trong PyTorch, bạn nên đưa gì vào đối số đầu tiên?",
+    "question": "Câu 70. Khi sử dụng câu lệnh `nn.CrossEntropyLoss` trong PyTorch, bạn nên đưa gì vào đối số đầu tiên?",
     "options": [
-      "A. Logits do lớp cuối cùng của mạng tạo ra",
+      "A. Logits (chưa qua Softmax) do lớp cuối cùng của mạng tạo ra",
       "B. Vector gồm các số 0 và một số 1 (one-hot vector) biểu diễn các lớp mục tiêu",
       "C. Xác suất thu được sau khi áp dụng softmax lên đầu ra của mạng",
       "D. Log-xác suất sau khi áp dụng log_softmax lên đầu ra của mạng"
@@ -940,12 +940,12 @@ const QUIZ_DATA = [
   {
     "id": 73,
     "category": "Computer Vision",
-    "question": "Câu 73. Mạng nơ-ron ResNet sử dụng một kỹ thuật quan trọng gọi là kết nối tắt (skip connection) để giải\nquyết hiện tượng biến mất đạo hàm (Vanishing Gradient) trong quá trình huấn luyện. Dựa trên đoạn mã của\n\nkhối identity_block dưới đây, hãy liệt kê các thành phần chính của khối theo đúng thứ tự xuất hiện và chỉ\nra dòng mã thực hiện phép kết nối tắt.\n1 def identity_block(X, f, filters, stage, block):\n2\n3 conv_name_base = 'res' + str(stage) + block + '_branch'\n4 bn_name_base = 'bn' + str(stage) + block + '_branch'\n5\n6 F1, F2, F3 = filters\n7\n8 X_shortcut = X\n9\n10 X = BatchNormalization(axis = 3, name = bn_name_base + '2b')(X)\nX = Conv2D(filters = F1, kernel_size = (1, 1), strides = (1, 1), padding =\n'valid', name = conv_name_base + '2a', kernel_initializer = glorot_uniform(seed =\n0))(X)\n11 12 13\n14 X = BatchNormalization(axis = 3, name = bn_name_base + '2a')(X)\nX = Activation('relu')(X)\nX = Conv2D(filters = F2, kernel_size = (1, 1), strides = (1, 1), padding =\n'same', name = conv_name_base + '2b', kernel_initializer = glorot_uniform(seed =\n0))(X)\n15 16 17\n18 X = Activation('relu')(X)\nX = Conv2D(filters = F3, kernel_size = (1, 1), strides = (1, 1), padding =\n'valid', name = conv_name_base + '2c', kernel_initializer = glorot_uniform(seed =\n0))(X)\nX = BatchNormalization(axis = 3, name = bn_name_base + '2c')(X)\nX = Add()([X_shortcut, X])\nX = Activation('relu')(X)\nreturn X\n19 20\n21 22 23\n24",
+    "question": "Câu 73. Mạng nơ-ron ResNet sử dụng kỹ thuật quan trọng gọi là kết nối tắt (skip connection / residual connection) để giải quyết hiện tượng biến mất đạo hàm (Vanishing Gradient). \n\nDựa trên đoạn mã của khối `identity_block` dưới đây, hãy liệt kê các thành phần chính của khối theo đúng thứ tự xuất hiện và chỉ ra dòng mã thực hiện phép kết nối tắt:\n\n```python\ndef identity_block(X, f, filters, stage, block):\n    conv_name_base = 'res' + str(stage) + block + '_branch'\n    bn_name_base   = 'bn'  + str(stage) + block + '_branch'\n    F1, F2, F3 = filters\n    \n    # Dòng 8: Lưu trữ tensor đầu vào cho đường tắt (shortcut)\n    X_shortcut = X\n    \n    # Dòng 10-12: Nhánh Conv 1x1\n    X = Conv2D(filters=F1, kernel_size=(1, 1), strides=(1, 1), padding='valid', name=conv_name_base + '2a')(X)\n    X = BatchNormalization(axis=3, name=bn_name_base + '2a')(X)\n    X = Activation('relu')(X)\n    \n    # Dòng 14-16: Nhánh Conv fxf\n    X = Conv2D(filters=F2, kernel_size=(f, f), strides=(1, 1), padding='same', name=conv_name_base + '2b')(X)\n    X = BatchNormalization(axis=3, name=bn_name_base + '2b')(X)\n    X = Activation('relu')(X)\n    \n    # Dòng 18-20: Nhánh Conv 1x1\n    X = Conv2D(filters=F3, kernel_size=(1, 1), strides=(1, 1), padding='valid', name=conv_name_base + '2c')(X)\n    X = BatchNormalization(axis=3, name=bn_name_base + '2c')(X)\n    \n    # Dòng 21: Phép kết nối tắt cộng tensor shortcut vào đầu ra\n    X = Add()([X_shortcut, X])\n    X = Activation('relu')(X)\n    return X\n```",
     "options": [
-      "A. Ba cặp Conv2D − BatchNorm − ReLU; kết nối tắt ở dòng ở dòng 8.",
-      "B. Hai cặp Conv2D − BatchNorm − ReLU; kết nối tắt nằm trong BatchNorm ở dòng 11,15,19.",
-      "C. Ba cặp Conv2D − BatchNorm − ReLU; Không có cơ chế kết nối tắt ở dòng.",
-      "D. Ba cặp Conv2D − BatchNorm − ReLU; kết nối tắt ở dòng 21."
+      "A. Ba cặp Conv2D − BatchNorm − ReLU; kết nối tắt ở dòng 8.",
+      "B. Hai cặp Conv2D − BatchNorm − ReLU; kết nối tắt nằm trong BatchNorm ở dòng 11, 15, 19.",
+      "C. Ba cặp Conv2D − BatchNorm − ReLU; Không có cơ chế kết nối tắt.",
+      "D. Ba cặp Conv2D − BatchNorm − ReLU; kết nối tắt ở dòng 21 (`X = Add()([X_shortcut, X])`)."
     ],
     "correctIndex": 3,
     "explanation": "**Đáp án đúng: D**\n\n• **Bản chất:** Trong khối `identity_block` của ResNet, luồng chính đi qua ba cặp Conv2D - BatchNorm - ReLU. Phép kết nối tắt (skip connection) lấy tensor đầu vào ban đầu $X_{\\text{shortcut}}$ cộng với tensor đặc trưng sau 3 lớp tích chập được thực hiện tại **dòng 21: `X = Add()([X_shortcut, X])`**."
@@ -966,12 +966,12 @@ const QUIZ_DATA = [
   {
     "id": 75,
     "category": "Computer Vision",
-    "question": "Câu 75. Trong các kiến trúc mạng phân đoạn ảnh dạng bộ mã hóa – bộ giải mã (encoder – decoder), ví dụ\nnhư U-Net, các \"kết nối tắt\" (skip connections) đóng vai trò quan trọng. Chúng kết hợp thông tin đặc trưng từ\ncác lớp ở bộ mã hóa (encoder path) với thông tin tương ứng ở bộ giải mã (decoder path) sau khi được phóng\nđại (upsampling). Điều này giúp mô hình giữ lại các chi tiết không gian có độ phân giải cao bị mất trong quá\ntrình mã hóa.\nGiả sử bạn đang xây dựng một lớp trong phần bộ giải mã của mạng U-Net bằng Python, sử dụng một\nframework học sâu như TensorFlow/Keras hoặc PyTorch. Bạn có hai tensor:\n- encoder_output: Tensor chứa các đặc trưng từ một lớp tương ứng ở bộ mã hóa.\n- decoder_input: Tensor đầu vào cho lớp hiện tại ở bộ giải mã, đã được upsample để có cùng kích thước\nchiều cao (𝐻) và chiều rộng (𝑊) với encoder_output.\n1\n4\n2 # encoder_output.shape = (batch, H, W, C1) in TF/Keras or (batch, C1, H, W) in\nPytorch\n3 # decoder_input.shape = (batch, H, W, C2) in TF/Keras or (batch, C2, H, W) in\nPytorch\n5 merged_features = some_concatenation_operation([decoder_input,\nencoder_output], axis = …)\n\nThao tác some_concatenation_operation và tham số axis phù hợp nhất để thực hiện kết nối tắt (skip\nconnection) kiểu U-Net là gì?",
+    "question": "Câu 75. Trong các kiến trúc mạng phân đoạn ảnh dạng bộ mã hóa – bộ giải mã (encoder – decoder), ví dụ như U-Net, các \"kết nối tắt\" (skip connections) đóng vai trò quan trọng. Chúng kết hợp thông tin đặc trưng từ các lớp ở bộ mã hóa (encoder path) với thông tin tương ứng ở bộ giải mã (decoder path) sau khi được phóng đại (upsampling).\n\nGiả sử bạn đang xây dựng một lớp trong phần bộ giải mã của mạng U-Net bằng Python:\n- `encoder_output`: Tensor đặc trưng từ lớp tương ứng ở bộ mã hóa.\n- `decoder_input`: Tensor đầu vào ở bộ giải mã, đã được upsample để có cùng chiều cao (H) và chiều rộng (W) với `encoder_output`.\n\n```python\n# encoder_output.shape = (batch, H, W, C1) trong Keras  hoặc  (batch, C1, H, W) trong PyTorch\n# decoder_input.shape  = (batch, H, W, C2) trong Keras  hoặc  (batch, C2, H, W) trong PyTorch\n\nmerged_features = some_concatenation_operation([decoder_input, encoder_output], axis=...)\n```\n\nThao tác `some_concatenation_operation` và tham số `axis` phù hợp nhất để thực hiện kết nối tắt kiểu U-Net là gì?",
     "options": [
-      "A. Phép nối (Concatenation) và axis dọc theo chiều batch",
-      "B. Phép nối (Concatenation) và axis dọc theo chiều kênh (channel dimension)",
-      "C. Phép cộng element-wise và axis không quan trọng",
-      "D. Phép nhân element-wise và axis không quan trọng"
+      "A. Phép cộng (`Add()`); không cần chỉ định `axis`",
+      "B. Phép nối (`Concatenate()`) dọc theo chiều kênh: `axis=3` trong Keras hoặc `dim=1` trong PyTorch",
+      "C. Phép nhân (`Multiply()`) từng phần tử",
+      "D. Phép nối (`Concatenate()`) dọc theo chiều không gian: `axis=1` (chiều Height)"
     ],
     "correctIndex": 1,
     "explanation": "**Đáp án đúng: B**\n\n• **Bản chất:** Trong kiến trúc U-Net, kết nối tắt giữa đường dẫn mã hóa (Encoder) và giải mã (Decoder) kết hợp các đặc trưng bằng **phép nối (Concatenation) dọc theo chiều kênh (channel dimension: axis=3 trong Keras, dim=1 trong PyTorch)** để truyền toàn vẹn chi tiết không gian độ phân giải cao sang tầng giải mã."
@@ -1020,10 +1020,10 @@ const QUIZ_DATA = [
     "category": "Deep Learning",
     "question": "Câu 79. Lệnh nào dùng để chuyển mô hình sang GPU?",
     "options": [
-      "A. model.gpu()",
-      "B. model.to('cuda')",
-      "C. model.cuda.enable()",
-      "D. model.device('GPU')"
+      "A. `model.gpu()`",
+      "B. `model.to('cuda')` (hoặc `model.cuda()`)",
+      "C. `model.cuda.enable()`",
+      "D. `model.device('GPU')`"
     ],
     "correctIndex": 1,
     "explanation": "**Đáp án đúng: B**\n\n• **Bản chất:** Trong PyTorch, lệnh chuẩn mực và an toàn nhất để chuyển toàn bộ tham số và bộ đệm của mô hình sang GPU là: `model.to('cuda')` (hoặc `model.cuda()`)."
@@ -1059,10 +1059,10 @@ const QUIZ_DATA = [
     "category": "Machine Learning",
     "question": "Câu 82. Trong mô hình hồi quy logistic sử dụng scikit-learn, thuộc tính nào chứa trọng số đã học của mô\nhình?",
     "options": [
-      "A. model.weights",
-      "B. model.intercept",
-      "C. model.coefficients",
-      "D. model.coef"
+      "A. `model.weights`",
+      "B. `model.intercept_`",
+      "C. `model.coefficients`",
+      "D. `model.coef_`"
     ],
     "correctIndex": 3,
     "explanation": "**Đáp án đúng: D**\n\n• **Bản chất:** Trong thư viện Scikit-learn, sau khi khớp mô hình Logistic Regression (`LogisticRegression().fit(X, y)`), vector trọng số đã học của các đặc trưng được lưu trữ trong thuộc tính **`model.coef_`** (và hệ số chặn lưu trong `model.intercept_`)."
@@ -1137,10 +1137,10 @@ const QUIZ_DATA = [
     "category": "Deep Learning",
     "question": "Câu 88. Trong PyTorch, để thêm lớp bỏ ngẫu nhiên (dropout) với xác suất 0.5 vào mạng nơ-ron, bạn sử dụng\nlệnh nào?",
     "options": [
-      "A. F.dropout(0.5)",
-      "B. nn.dropout(0.5)",
-      "C. nn.Dropout(p=0.5)",
-      "D. nn.Dropout2d(0.5)"
+      "A. `F.dropout(0.5)`",
+      "B. `nn.dropout(0.5)`",
+      "C. `nn.Dropout(p=0.5)`",
+      "D. `nn.Dropout2d(0.5)`"
     ],
     "correctIndex": 2,
     "explanation": "**Đáp án đúng: C**\n\n• **Bản chất:** Trong PyTorch, lớp Dropout ngẫu nhiên triệt tiêu các kết nối neuron với xác suất $p=0.5$ được định nghĩa chuẩn xác bằng cú pháp module: **`nn.Dropout(p=0.5)`** (hoặc `nn.Dropout(0.5)`)."
