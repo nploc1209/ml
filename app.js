@@ -1578,30 +1578,44 @@ function initVAIOApp() {
         </div>
       `;
       initLinearRegressionWidget();
-    } else if (type === "widget-confusion-matrix") {
+    } else if (type === "widget-roc-auc-threshold" || type === "widget-confusion-matrix") {
       mount.innerHTML = `
         <div class="interactive-widget">
           <div class="widget-header">
-            <span class="widget-title">Bảng Nhầm Lẫn & Các Chỉ Số Đánh Giá (Confusion Matrix & Metrics)</span>
+            <span class="widget-title">Đường Cong ROC-AUC & Thanh Trượt Ngưỡng Quyết Định (Decision Threshold)</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem;">Interactive ROC Curve, AUC & Confusion Matrix</span>
           </div>
-          <div class="widget-controls">
+          <div class="widget-controls" style="flex-wrap: wrap; gap: 10px;">
             <div class="control-group">
-              <label>Số mẫu Lành (Negative): <span id="tnVal">990</span></label>
-              <input type="range" id="tnRange" min="500" max="2000" step="50" value="990">
+              <label>Ngưỡng quyết định (τ): <span id="rocThreshVal" style="font-weight:bold; color:var(--text);">0.50</span></label>
+              <input type="range" id="rocThresh" min="0.05" max="0.95" step="0.01" value="0.50" style="width:130px;">
             </div>
             <div class="control-group">
-              <label>Số mẫu Bệnh (Positive): <span id="tpVal">10</span></label>
-              <input type="range" id="tpRange" min="5" max="100" step="5" value="10">
+              <label>Độ phân tách (d'):</label>
+              <select id="rocSeparation" style="padding:4px; font-family:Georgia;">
+                <option value="2.2">Dễ tách (d' = 2.2)</option>
+                <option value="1.5" selected>Trung bình (d' = 1.5)</option>
+                <option value="0.8">Chồng lấn nhiều (d' = 0.8)</option>
+              </select>
             </div>
             <div class="control-group">
-              <label>Recall của Model (%): <span id="recVal">80%</span></label>
-              <input type="range" id="recRange" min="10" max="100" step="5" value="80">
+              <label>Tỉ lệ mẫu (+ : -):</label>
+              <select id="rocRatio" style="padding:4px; font-family:Georgia;">
+                <option value="balanced" selected>Cân bằng (100+ : 100-)</option>
+                <option value="imbalanced">Mất cân bằng (20+ : 200-)</option>
+              </select>
             </div>
+            <button class="btn" id="rocAutoSweepBtn">Quét Tự Động (Sweep τ)</button>
+            <button class="btn" id="rocResetBtn">Đặt Lại</button>
           </div>
-          <div class="widget-output" id="cmOutput">Đang tính...</div>
+          <div class="canvas-wrapper">
+            <canvas id="rocCanvas" width="680" height="270"></canvas>
+          </div>
+          <div class="metrics-summary-grid" id="rocMetricsGrid"></div>
+          <div class="widget-output" id="rocOutput">Đang tính toán các chỉ số đánh giá...</div>
         </div>
       `;
-      initCMWidget();
+      initRocAucWidget();
     } else if (type === "widget-entropy-calculator") {
       mount.innerHTML = `
         <div class="interactive-widget">
@@ -1646,6 +1660,46 @@ function initVAIOApp() {
         </div>
       `;
       initKnnWidget();
+    } else if (type === "widget-kmeans-sandbox") {
+      mount.innerHTML = `
+        <div class="interactive-widget">
+          <div class="widget-header">
+            <span class="widget-title">Phòng Thí Nghiệm Phân Cụm K-Means Tương Tác (K-Means Sandbox)</span>
+            <span style="font-family:var(--font-mono); font-size:0.75rem;">Step-by-Step Clustering, Centroids & Inertia</span>
+          </div>
+          <div class="widget-controls" style="flex-wrap: wrap; gap: 8px;">
+            <div class="control-group">
+              <label>Số cụm K: <span id="kmeansKVal" style="font-weight:bold;">3</span></label>
+              <select id="kmeansK" style="padding:4px; font-family:Georgia;">
+                <option value="2">K = 2</option>
+                <option value="3" selected>K = 3</option>
+                <option value="4">K = 4</option>
+                <option value="5">K = 5</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label>Dữ liệu mẫu:</label>
+              <select id="kmeansDataset" style="padding:4px; font-family:Georgia;">
+                <option value="gaussian3" selected>3 Cụm Gauss Tách Biệt</option>
+                <option value="imbalanced">Mật Độ & Độ Lệch Khác Nhau</option>
+                <option value="random">Phân Bố Ngẫu Nhiên</option>
+              </select>
+            </div>
+            <button class="btn" id="kmeansStepBtn" style="font-weight:bold;">Bước Tiếp (Gán / Cập Nhật)</button>
+            <button class="btn" id="kmeansAutoBtn">Chạy Tự Động</button>
+            <button class="btn" id="kmeansKPPBtn">Khởi Tạo K-Means++</button>
+            <button class="btn" id="kmeansRandomInitBtn">Chọn Tâm Ngẫu Nhiên</button>
+            <button class="btn" id="kmeansResetBtn">Đặt Lại</button>
+            <span style="font-size:0.8rem; color:var(--text-muted); margin-left:auto;">(Bấm chuột lên canvas để thêm điểm mới)</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="kmeansCanvas" width="680" height="280" style="cursor:crosshair;"></canvas>
+          </div>
+          <div class="metrics-summary-grid" id="kmeansMetricsGrid"></div>
+          <div class="widget-output" id="kmeansOutput">Bấm 'Bước Tiếp' để quan sát thuật toán phân cụm từng bước.</div>
+        </div>
+      `;
+      initKMeansWidget();
     } else if (type === "widget-cnn-calculator") {
       mount.innerHTML = `
         <div class="interactive-widget">
@@ -1711,60 +1765,124 @@ function initVAIOApp() {
         </div>
       `;
       initAttWidget();
-    } else if (type === "widget-mlp-simulator") {
+    } else if (type === "widget-mlp-simulator" || type === "widget-activation-explorer") {
       mount.innerHTML = `
         <div class="interactive-widget">
-          <div class="widget-header">
-            <span class="widget-title">Mô Phỏng Mạng Nơ-ron MLP & Lan Truyền Ngược (Câu 1, 56 & 70)</span>
-            <span style="font-family:var(--font-mono); font-size:0.75rem;">MLP 2-Layer (Forward & Backward)</span>
+          <div class="widget-subtabs">
+            <button class="widget-subtab-btn ${type === 'widget-activation-explorer' ? '' : 'active'}" id="tabMlpBtn">1. Mạng Nơ-ron MLP & Lan Truyền Ngược</button>
+            <button class="widget-subtab-btn ${type === 'widget-activation-explorer' ? 'active' : ''}" id="tabActBtn">2. Khám Phá Hàm Kích Hoạt & Đạo Hàm (Activation Explorer)</button>
           </div>
-          <div class="widget-controls" style="flex-wrap: wrap; gap: 10px;">
-            <div class="control-group">
-              <label>Đầu vào x₁: <span id="mlpX1Val">1.0</span></label>
-              <input type="range" id="mlpX1" min="-2.0" max="2.0" step="0.1" value="1.0">
+
+          <div id="mlpTabPane" style="display:${type === 'widget-activation-explorer' ? 'none' : 'block'};">
+            <div class="widget-header">
+              <span class="widget-title">Mô Phỏng Mạng Nơ-ron MLP & Lan Truyền Ngược (Câu 1, 56 & 70)</span>
+              <span style="font-family:var(--font-mono); font-size:0.75rem;">MLP 2-Layer (Forward & Backward)</span>
             </div>
-            <div class="control-group">
-              <label>Đầu vào x₂: <span id="mlpX2Val">0.5</span></label>
-              <input type="range" id="mlpX2" min="-2.0" max="2.0" step="0.1" value="0.5">
+            <div class="widget-controls" style="flex-wrap: wrap; gap: 10px;">
+              <div class="control-group">
+                <label>Đầu vào x₁: <span id="mlpX1Val">1.0</span></label>
+                <input type="range" id="mlpX1" min="-2.0" max="2.0" step="0.1" value="1.0">
+              </div>
+              <div class="control-group">
+                <label>Đầu vào x₂: <span id="mlpX2Val">0.5</span></label>
+                <input type="range" id="mlpX2" min="-2.0" max="2.0" step="0.1" value="0.5">
+              </div>
+              <div class="control-group">
+                <label>Nhãn thật (y):</label>
+                <select id="mlpTarget" style="padding:4px; font-family:Georgia;">
+                  <option value="1" selected>y = 1.0</option>
+                  <option value="0">y = 0.0</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Hàm kích hoạt:</label>
+                <select id="mlpAct" style="padding:4px; font-family:Georgia;">
+                  <option value="sigmoid" selected>Sigmoid (σ)</option>
+                  <option value="relu">ReLU (max(0,z))</option>
+                  <option value="tanh">Tanh</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Khởi tạo Trọng số:</label>
+                <select id="mlpInit" style="padding:4px; font-family:Georgia;">
+                  <option value="random" selected>Ngẫu nhiên (Xavier/He)</option>
+                  <option value="zeros">Bằng 0 (W = 0: Lỗi đối xứng!)</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Tốc độ học (η): <span id="mlpLrVal">0.10</span></label>
+                <input type="range" id="mlpLr" min="0.01" max="0.50" step="0.01" value="0.10">
+              </div>
+              <button class="btn" id="mlpStepFwd">Lan Truyền Tiến</button>
+              <button class="btn" id="mlpStepBack">Lan Truyền Ngược</button>
+              <button class="btn" id="mlpTrainEpoch">Lặp 10 Bước</button>
+              <button class="btn" id="mlpReset">Đặt Lại</button>
             </div>
-            <div class="control-group">
-              <label>Nhãn thật (y):</label>
-              <select id="mlpTarget" style="padding:4px; font-family:Georgia;">
-                <option value="1" selected>y = 1.0</option>
-                <option value="0">y = 0.0</option>
-              </select>
+            <div class="canvas-wrapper">
+              <canvas id="mlpCanvas" width="680" height="230"></canvas>
             </div>
-            <div class="control-group">
-              <label>Hàm kích hoạt:</label>
-              <select id="mlpAct" style="padding:4px; font-family:Georgia;">
-                <option value="sigmoid" selected>Sigmoid (σ)</option>
-                <option value="relu">ReLU (max(0,z))</option>
-                <option value="tanh">Tanh</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label>Khởi tạo Trọng số:</label>
-              <select id="mlpInit" style="padding:4px; font-family:Georgia;">
-                <option value="random" selected>Ngẫu nhiên (Xavier/He)</option>
-                <option value="zeros">Bằng 0 (W = 0: Lỗi đối xứng!)</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label>Tốc độ học (η): <span id="mlpLrVal">0.10</span></label>
-              <input type="range" id="mlpLr" min="0.01" max="0.50" step="0.01" value="0.10">
-            </div>
-            <button class="btn" id="mlpStepFwd">Lan Truyền Tiến</button>
-            <button class="btn" id="mlpStepBack">Lan Truyền Ngược</button>
-            <button class="btn" id="mlpTrainEpoch">Lặp 10 Bước</button>
-            <button class="btn" id="mlpReset">Đặt Lại</button>
+            <div class="widget-output" id="mlpOut">Đang khởi tạo mạng nơ-ron...</div>
           </div>
-          <div class="canvas-wrapper">
-            <canvas id="mlpCanvas" width="680" height="230"></canvas>
+
+          <div id="actTabPane" style="display:${type === 'widget-activation-explorer' ? 'block' : 'none'};">
+            <div class="widget-header">
+              <span class="widget-title">Khám Phá Hàm Kích Hoạt & Đạo Hàm (Activation Function Explorer)</span>
+              <span style="font-family:var(--font-mono); font-size:0.75rem;">f(z), f'(z) & Vanishing Gradient Analyzer</span>
+            </div>
+            <div class="widget-controls" style="flex-wrap: wrap; gap: 10px;">
+              <div class="control-group">
+                <label>Hàm kích hoạt:</label>
+                <select id="actFuncSel" style="padding:4px; font-family:Georgia; font-weight:bold;">
+                  <option value="sigmoid" selected>Sigmoid: σ(z) = 1 / (1 + e^-z)</option>
+                  <option value="tanh">Tanh: (e^z - e^-z) / (e^z + e^-z)</option>
+                  <option value="relu">ReLU: max(0, z)</option>
+                  <option value="leaky_relu">Leaky ReLU: max(0.05z, z)</option>
+                  <option value="gelu">GELU (GPT, BERT): z · Φ(z)</option>
+                  <option value="swish">Swish / SiLU (LLaMA): z · σ(z)</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label>Giá trị đầu vào z: <span id="actZVal" style="font-weight:bold;">1.00</span></label>
+                <input type="range" id="actZRange" min="-5.0" max="5.0" step="0.05" value="1.00" style="width:130px;">
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <button class="btn" id="actPresetSatNeg">Bão Hòa Âm (z = -4.0)</button>
+                <button class="btn" id="actPresetZero">Gốc Tọa Độ (z = 0.0)</button>
+                <button class="btn" id="actPresetSatPos">Bão Hòa Dương (z = +3.5)</button>
+              </div>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="actCanvas" width="680" height="260"></canvas>
+            </div>
+            <div class="metrics-summary-grid" id="actMetricsGrid"></div>
+            <div class="widget-output" id="actOutput">Đang tính toán đạo hàm và phân tích hàm...</div>
           </div>
-          <div class="widget-output" id="mlpOut">Đang khởi tạo mạng nơ-ron...</div>
         </div>
       `;
+
       initMlpWidget();
+      initActivationWidget();
+
+      const tabMlpBtn = document.getElementById("tabMlpBtn");
+      const tabActBtn = document.getElementById("tabActBtn");
+      const mlpPane = document.getElementById("mlpTabPane");
+      const actPane = document.getElementById("actTabPane");
+
+      if (tabMlpBtn && tabActBtn && mlpPane && actPane) {
+        tabMlpBtn.addEventListener("click", () => {
+          tabMlpBtn.classList.add("active");
+          tabActBtn.classList.remove("active");
+          mlpPane.style.display = "block";
+          actPane.style.display = "none";
+        });
+        tabActBtn.addEventListener("click", () => {
+          tabActBtn.classList.add("active");
+          tabMlpBtn.classList.remove("active");
+          actPane.style.display = "block";
+          mlpPane.style.display = "none";
+          initActivationWidget();
+        });
+      }
     } else if (type === "widget-generative-diffusion") {
       mount.innerHTML = `
         <div class="interactive-widget">
@@ -2264,8 +2382,389 @@ function initVAIOApp() {
     render();
   }
 
-  // Widget 3: Confusion Matrix
+  // Widget 3 & Lesson 6: ROC-AUC & Decision Threshold Slider
+  function initRocAucWidget() {
+    const canvas = document.getElementById("rocCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    const threshSlider = document.getElementById("rocThresh");
+    const threshVal = document.getElementById("rocThreshVal");
+    const sepSel = document.getElementById("rocSeparation");
+    const ratioSel = document.getElementById("rocRatio");
+    const autoBtn = document.getElementById("rocAutoSweepBtn");
+    const resetBtn = document.getElementById("rocResetBtn");
+    const grid = document.getElementById("rocMetricsGrid");
+    const out = document.getElementById("rocOutput");
+    if (!threshSlider || !sepSel || !ratioSel || !out) return;
+
+    let sweepTimer = null;
+
+    // Normal CDF approximation (Abramowitz & Stegun formula 7.1.26)
+    function normalCdf(x) {
+      const a1 =  0.254829592;
+      const a2 = -0.284496736;
+      const a3 =  1.421413741;
+      const a4 = -1.453152027;
+      const a5 =  1.061405429;
+      const p  =  0.3275911;
+      const sign = x < 0 ? -1 : 1;
+      const absX = Math.abs(x) / Math.SQRT2;
+      const t = 1.0 / (1.0 + p * absX);
+      const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-absX * absX);
+      return 0.5 * (1.0 + sign * y);
+    }
+
+    function normalPdf(x, mean, std) {
+      const z = (x - mean) / std;
+      return (1.0 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
+    }
+
+    function render() {
+      const tau = parseFloat(threshSlider.value);
+      if (threshVal) threshVal.textContent = tau.toFixed(2);
+
+      const dPrime = parseFloat(sepSel.value);
+      const isImbalanced = ratioSel.value === "imbalanced";
+      const nPos = isImbalanced ? 20 : 100;
+      const nNeg = isImbalanced ? 200 : 100;
+
+      // Model score distribution parameters
+      const std = 0.14;
+      const mu0 = Math.max(0.12, 0.50 - (dPrime / 2) * std);
+      const mu1 = Math.min(0.88, 0.50 + (dPrime / 2) * std);
+
+      // Probabilities at threshold tau
+      const fprTau = 1.0 - normalCdf((tau - mu0) / std); // P(score >= tau | Neg)
+      const tprTau = 1.0 - normalCdf((tau - mu1) / std); // P(score >= tau | Pos)
+
+      const tp = Math.round(tprTau * nPos);
+      const fn = nPos - tp;
+      const fp = Math.round(fprTau * nNeg);
+      const tn = nNeg - fp;
+
+      const sensitivity = tprTau; // Recall
+      const specificity = 1.0 - fprTau; // TNR
+      const precision = (tp + fp) > 0 ? tp / (tp + fp) : 1.0;
+      const f1 = (precision + sensitivity) > 0 ? (2 * precision * sensitivity) / (precision + sensitivity) : 0;
+      const acc = (tp + tn) / (nPos + nNeg);
+      const auc = normalCdf(dPrime / Math.SQRT2);
+
+      // Render Metrics Grid
+      if (grid) {
+        grid.innerHTML = `
+          <div class="metric-pill">
+            <span class="metric-pill-label">TP / FN (DƯƠNG TÍNH)</span>
+            <span class="metric-pill-value" style="color:#16a34a;">${tp} <span style="font-size:0.75rem; color:#888;">/ ${fn}</span></span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">FP / TN (ÂM TÍNH)</span>
+            <span class="metric-pill-value" style="color:#dc2626;">${fp} <span style="font-size:0.75rem; color:#888;">/ ${tn}</span></span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">RECALL (TPR / NHẠY)</span>
+            <span class="metric-pill-value">${(sensitivity * 100).toFixed(1)}%</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">SPECIFICITY (TNR)</span>
+            <span class="metric-pill-value">${(specificity * 100).toFixed(1)}%</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">PRECISION (CHÍNH XÁC)</span>
+            <span class="metric-pill-value">${(precision * 100).toFixed(1)}%</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">F1-SCORE</span>
+            <span class="metric-pill-value">${f1.toFixed(3)}</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">DIỆN TÍCH ROC-AUC</span>
+            <span class="metric-pill-value" style="color:#7c3aed;">${auc.toFixed(3)}</span>
+          </div>
+        `;
+      }
+
+      // Draw Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fafafa";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+      // =================== LEFT PANEL: Score Distributions ===================
+      const lLeft = 20, lRight = 315, lBaseY = 220, lTopY = 40, lH = lBaseY - lTopY;
+      const maxPdf = normalPdf(mu1, mu1, std) * 1.08;
+
+      // Title
+      ctx.fillStyle = "#111";
+      ctx.font = "bold 11px Georgia";
+      ctx.textAlign = "left";
+      ctx.fillText("Phân Phối Xác Suất Điểm Số & Vị Trí Ngưỡng τ", lLeft, 22);
+
+      // Baseline
+      ctx.strokeStyle = "#888";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(lLeft, lBaseY);
+      ctx.lineTo(lRight, lBaseY);
+      ctx.stroke();
+
+      // Draw Negative Class PDF (Blue/Slate)
+      ctx.fillStyle = "rgba(59, 130, 246, 0.15)";
+      ctx.strokeStyle = "#2563eb";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(lLeft, lBaseY);
+      for (let px = lLeft; px <= lRight; px++) {
+        const xVal = (px - lLeft) / (lRight - lLeft);
+        const yPdf = normalPdf(xVal, mu0, std);
+        const py = lBaseY - (yPdf / maxPdf) * lH;
+        ctx.lineTo(px, py);
+      }
+      ctx.lineTo(lRight, lBaseY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Draw Positive Class PDF (Red/Orange)
+      ctx.fillStyle = "rgba(220, 38, 38, 0.18)";
+      ctx.strokeStyle = "#dc2626";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(lLeft, lBaseY);
+      for (let px = lLeft; px <= lRight; px++) {
+        const xVal = (px - lLeft) / (lRight - lLeft);
+        const yPdf = normalPdf(xVal, mu1, std);
+        const py = lBaseY - (yPdf / maxPdf) * lH;
+        ctx.lineTo(px, py);
+      }
+      ctx.lineTo(lRight, lBaseY);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Shaded False Positives (under Neg curve to the right of tau)
+      const tauPx = lLeft + tau * (lRight - lLeft);
+      ctx.fillStyle = "rgba(234, 88, 12, 0.35)";
+      ctx.beginPath();
+      ctx.moveTo(tauPx, lBaseY);
+      for (let px = tauPx; px <= lRight; px++) {
+        const xVal = (px - lLeft) / (lRight - lLeft);
+        const yPdf = normalPdf(xVal, mu0, std);
+        const py = lBaseY - (yPdf / maxPdf) * lH;
+        ctx.lineTo(px, py);
+      }
+      ctx.lineTo(lRight, lBaseY);
+      ctx.closePath();
+      ctx.fill();
+
+      // Vertical Threshold Line
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(tauPx, lTopY - 10);
+      ctx.lineTo(tauPx, lBaseY + 6);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Label on Threshold
+      ctx.fillStyle = "#111";
+      ctx.font = "bold 10px Georgia";
+      ctx.textAlign = "center";
+      ctx.fillText(`τ = ${tau.toFixed(2)}`, tauPx, lTopY - 14);
+
+      // Legend & Labels
+      ctx.font = "9px Georgia";
+      ctx.fillStyle = "#2563eb";
+      ctx.fillText("Lớp Âm (y=0)", lLeft + 35, lBaseY - 110);
+      ctx.fillStyle = "#dc2626";
+      ctx.fillText("Lớp Dương (y=1)", lRight - 45, lBaseY - 110);
+      ctx.fillStyle = "#666";
+      ctx.textAlign = "left";
+      ctx.fillText("← Dự đoán Âm (ŷ=0)", lLeft, lBaseY + 16);
+      ctx.textAlign = "right";
+      ctx.fillText("Dự đoán Dương (ŷ=1) →", lRight, lBaseY + 16);
+
+      // Divider between panels
+      ctx.strokeStyle = "#ddd";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(335, 12);
+      ctx.lineTo(335, canvas.height - 12);
+      ctx.stroke();
+
+      // =================== RIGHT PANEL: ROC Space & Curve ===================
+      const rLeft = 385, rBottom = 220, rW = 240, rH = 175;
+
+      // Title
+      ctx.fillStyle = "#111";
+      ctx.font = "bold 11px Georgia";
+      ctx.textAlign = "left";
+      ctx.fillText(`Không Gian ROC (AUC = ${auc.toFixed(3)})`, rLeft - 25, 22);
+
+      // ROC Axes
+      ctx.strokeStyle = "#888";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(rLeft, rBottom - rH);
+      ctx.lineTo(rLeft, rBottom);
+      ctx.lineTo(rLeft + rW, rBottom);
+      ctx.stroke();
+
+      // Grid & Ticks (0.0, 0.5, 1.0)
+      ctx.fillStyle = "#666";
+      ctx.font = "8.5px Georgia";
+      ctx.textAlign = "center";
+      ctx.fillText("0.0", rLeft, rBottom + 12);
+      ctx.fillText("0.5", rLeft + rW / 2, rBottom + 12);
+      ctx.fillText("1.0", rLeft + rW, rBottom + 12);
+      ctx.fillText("FPR (Tỉ lệ Dương Giả = 1 - Specificity)", rLeft + rW / 2, rBottom + 26);
+
+      ctx.textAlign = "right";
+      ctx.fillText("0.0", rLeft - 5, rBottom);
+      ctx.fillText("0.5", rLeft - 5, rBottom - rH / 2);
+      ctx.fillText("1.0", rLeft - 5, rBottom - rH);
+
+      // Diagonal line (Random Guess)
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = "#aaa";
+      ctx.beginPath();
+      ctx.moveTo(rLeft, rBottom);
+      ctx.lineTo(rLeft + rW, rBottom - rH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Compute ROC curve points
+      const rocPts = [];
+      const steps = 60;
+      for (let s = 0; s <= steps; s++) {
+        const t = (s / steps) * 1.2 - 0.1;
+        const fpr = 1.0 - normalCdf((t - mu0) / std);
+        const tpr = 1.0 - normalCdf((t - mu1) / std);
+        const px = rLeft + Math.min(1, Math.max(0, fpr)) * rW;
+        const py = rBottom - Math.min(1, Math.max(0, tpr)) * rH;
+        rocPts.push({ x: px, y: py, fpr, tpr });
+      }
+
+      // Sort by FPR ascending for fill
+      rocPts.sort((a, b) => a.x - b.x);
+
+      // Fill AUC
+      ctx.fillStyle = "rgba(124, 58, 237, 0.14)";
+      ctx.beginPath();
+      ctx.moveTo(rLeft, rBottom);
+      rocPts.forEach(pt => ctx.lineTo(pt.x, pt.y));
+      ctx.lineTo(rLeft + rW, rBottom);
+      ctx.closePath();
+      ctx.fill();
+
+      // Stroke ROC curve
+      ctx.strokeStyle = "#7c3aed";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      rocPts.forEach((pt, i) => {
+        if (i === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      });
+      ctx.stroke();
+
+      // Current Operating Point (FPR, TPR)
+      const curPtX = rLeft + fprTau * rW;
+      const curPtY = rBottom - tprTau * rH;
+
+      // Guidelines to axes
+      ctx.setLineDash([2, 2]);
+      ctx.strokeStyle = "#888";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(curPtX, rBottom);
+      ctx.lineTo(curPtX, curPtY);
+      ctx.lineTo(rLeft, curPtY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Marker
+      ctx.fillStyle = "#e11d48";
+      ctx.beginPath();
+      ctx.arc(curPtX, curPtY, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Operating point coordinates text
+      ctx.fillStyle = "#111";
+      ctx.font = "bold 9.5px Georgia";
+      ctx.textAlign = curPtX > rLeft + rW - 60 ? "right" : "left";
+      ctx.fillText(`(FPR: ${fprTau.toFixed(2)}, TPR: ${tprTau.toFixed(2)})`, curPtX + (curPtX > rLeft + rW - 60 ? -8 : 8), curPtY - 6);
+
+      // Educational Output Explanation
+      let interp = "";
+      if (tau <= 0.25) {
+        interp = `<strong>Ngưỡng τ = ${tau.toFixed(2)} (Rất thấp - Chế độ Nhạy):</strong> Mô hình dự đoán hầu hết mọi ca nghi ngờ là Dương tính. <span style="color:#16a34a; font-weight:bold;">Recall đạt ${(sensitivity * 100).toFixed(1)}%</span> (gần như không bỏ sót bệnh!), nhưng đánh đổi bằng <span style="color:#dc2626;">FP = ${fp}</span> ca báo động giả (Precision chỉ ${(precision * 100).toFixed(1)}%). Thích hợp cho <em>tầm soát ung thư giai đoạn sớm</em> hoặc <em>phát hiện giao dịch rửa tiền</em>.`;
+      } else if (tau >= 0.70) {
+        interp = `<strong>Ngưỡng τ = ${tau.toFixed(2)} (Rất cao - Chế độ Thận trọng):</strong> Mô hình chỉ dám phán đoán Dương tính khi cực kỳ chắc chắn. <span style="color:#16a34a; font-weight:bold;">Precision đạt ${(precision * 100).toFixed(1)}%</span> (hầu như không báo động giả), nhưng đánh đổi bằng việc bỏ sót <span style="color:#dc2626;">FN = ${fn}</span> ca thực tế (Recall chỉ ${(sensitivity * 100).toFixed(1)}%). Thích hợp cho <em>hệ thống tự động xóa bài Spam</em> hoặc <em>tự động duyệt vay vốn</em>.`;
+      } else {
+        interp = `<strong>Ngưỡng τ = ${tau.toFixed(2)} (Cân bằng mặc định):</strong> Điểm hoạt động cân bằng giữa Độ nhạy (Recall = ${(sensitivity * 100).toFixed(1)}%) và Độ đặc hiệu (Specificity = ${(specificity * 100).toFixed(1)}%). F1-Score đạt <strong>${f1.toFixed(3)}</strong>.`;
+      }
+
+      const imbalNote = isImbalanced
+        ? `<br><span style="color:#b00; font-weight:bold;">⚠️ BẪY OLYMPIC AI (Dữ Liệu Mất Cân Bằng):</span> Khi tỉ lệ Dương:Âm là 20:200, đường cong ROC và chỉ số AUC (${auc.toFixed(3)}) <strong>hoàn toàn không thay đổi</strong> (vì TPR và FPR chỉ chuẩn hóa riêng trong từng lớp!). Tuy nhiên, Precision bị kéo sụt xuống còn ${(precision * 100).toFixed(1)}% vì mẫu âm áp đảo tạo ra nhiều FP tuyệt đối. Đó là lý do khi dữ liệu mất cân bằng nặng, ta phải đánh giá bằng <strong>PR-AUC (Precision-Recall Curve)</strong>!`
+        : `<br><span style="color:#4338ca; font-weight:bold;">💡 KINH NGHIỆM PHÒNG THI:</span> AUC = 0.50 tương đương tung đồng xu ngẫu nhiên (đường chéo đứt nét). AUC = 1.0 là bộ phân loại hoàn hảo tuyệt đối. Diện tích AUC biểu diễn xác suất mô hình gán điểm cho 1 mẫu dương ngẫu nhiên cao hơn 1 mẫu âm ngẫu nhiên: $P(S^+ > S^-)$.`;
+
+      out.innerHTML = interp + imbalNote;
+    }
+
+    threshSlider.addEventListener("input", () => {
+      clearInterval(sweepTimer);
+      render();
+    });
+
+    sepSel.addEventListener("change", () => {
+      clearInterval(sweepTimer);
+      render();
+    });
+
+    ratioSel.addEventListener("change", () => {
+      clearInterval(sweepTimer);
+      render();
+    });
+
+    resetBtn.addEventListener("click", () => {
+      clearInterval(sweepTimer);
+      threshSlider.value = 0.50;
+      sepSel.value = "1.5";
+      ratioSel.value = "balanced";
+      render();
+    });
+
+    autoBtn.addEventListener("click", () => {
+      clearInterval(sweepTimer);
+      threshSlider.value = 0.05;
+      render();
+      sweepTimer = setInterval(() => {
+        let cur = parseFloat(threshSlider.value);
+        if (cur >= 0.94) {
+          clearInterval(sweepTimer);
+          threshSlider.value = 0.95;
+          render();
+        } else {
+          threshSlider.value = (cur + 0.02).toFixed(2);
+          render();
+        }
+      }, 55);
+    });
+
+    render();
+  }
+
   function initCMWidget() {
+    if (document.getElementById("rocCanvas")) {
+      initRocAucWidget();
+      return;
+    }
     const tnR = document.getElementById("tnRange");
     const tpR = document.getElementById("tpRange");
     const recR = document.getElementById("recRange");
@@ -2279,31 +2778,19 @@ function initVAIOApp() {
       const neg = parseInt(tnR.value, 10);
       const pos = parseInt(tpR.value, 10);
       const rec = parseInt(recR.value, 10) / 100.0;
-
       if (tnV) tnV.textContent = neg;
       if (tpV) tpV.textContent = pos;
       if (recV) recV.textContent = `${Math.round(rec * 100)}%`;
-
       const tp = Math.round(pos * rec);
       const fn = pos - tp;
       const fp = Math.round(neg * 0.02);
       const tn = neg - fp;
-
       const total = tp + fn + fp + tn;
       const acc = (tp + tn) / total;
       const prec = (tp + fp) > 0 ? tp / (tp + fp) : 0;
       const f1 = (prec + rec) > 0 ? (2 * prec * rec) / (prec + rec) : 0;
-
-      out.innerHTML = `
-        TP = ${tp}, FN = ${fn}, FP = ${fp}, TN = ${tn} | 
-        <strong>Accuracy: ${(acc * 100).toFixed(1)}%</strong> | 
-        <strong>Recall: ${(rec * 100).toFixed(1)}%</strong> | 
-        Precision: ${(prec * 100).toFixed(1)}% | 
-        <strong>F1: ${f1.toFixed(3)}</strong>
-        <br><em style="font-size:0.8rem; color:#666;">(Mẫu hiếm: dù Accuracy đạt ${(acc * 100).toFixed(1)}% nhưng bỏ sót ${fn} ca bệnh! Bắt buộc dùng Recall & Macro-F1).</em>
-      `;
+      out.innerHTML = `TP = ${tp}, FN = ${fn}, FP = ${fp}, TN = ${tn} | Acc: ${(acc*100).toFixed(1)}% | Recall: ${(rec*100).toFixed(1)}% | F1: ${f1.toFixed(3)}`;
     }
-
     [tnR, tpR, recR].forEach(el => el.addEventListener("input", calc));
     calc();
   }
@@ -2453,6 +2940,413 @@ function initVAIOApp() {
     kSel.addEventListener("change", draw);
     if (resetB) resetB.addEventListener("click", () => { Q = { x: 6.0, y: 6.0 }; draw(); });
     draw();
+  }
+
+  // Widget 5b & Lesson 9: K-Means Clustering Sandbox
+  function initKMeansWidget() {
+    const canvas = document.getElementById("kmeansCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    const kSel = document.getElementById("kmeansK");
+    const kVal = document.getElementById("kmeansKVal");
+    const datasetSel = document.getElementById("kmeansDataset");
+    const btnStep = document.getElementById("kmeansStepBtn");
+    const btnAuto = document.getElementById("kmeansAutoBtn");
+    const btnKPP = document.getElementById("kmeansKPPBtn");
+    const btnRand = document.getElementById("kmeansRandomInitBtn");
+    const btnReset = document.getElementById("kmeansResetBtn");
+    const grid = document.getElementById("kmeansMetricsGrid");
+    const out = document.getElementById("kmeansOutput");
+    if (!kSel || !datasetSel || !btnStep || !out) return;
+
+    const clusterColors = ["#2563eb", "#ea580c", "#16a34a", "#9333ea", "#e11d48"];
+
+    let points = [];
+    let centroids = [];
+    let phase = "assign";
+    let iteration = 0;
+    let converged = false;
+    let autoTimer = null;
+
+    function randn() {
+      let u = 0, v = 0;
+      while (u === 0) u = Math.random();
+      while (v === 0) v = Math.random();
+      return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    function generateDataset() {
+      const mode = datasetSel.value;
+      points = [];
+      if (mode === "gaussian3") {
+        const centers = [
+          { x: 170, y: 100, s: 28, n: 35 },
+          { x: 500, y: 110, s: 32, n: 35 },
+          { x: 340, y: 210, s: 30, n: 35 }
+        ];
+        centers.forEach(c => {
+          for (let i = 0; i < c.n; i++) {
+            points.push({
+              x: Math.min(canvas.width - 20, Math.max(20, c.x + randn() * c.s)),
+              y: Math.min(canvas.height - 20, Math.max(20, c.y + randn() * c.s)),
+              cluster: -1
+            });
+          }
+        });
+      } else if (mode === "imbalanced") {
+        const centers = [
+          { x: 180, y: 150, s: 18, n: 55 },
+          { x: 470, y: 160, s: 50, n: 30 },
+          { x: 330, y: 80, s: 22, n: 20 }
+        ];
+        centers.forEach(c => {
+          for (let i = 0; i < c.n; i++) {
+            points.push({
+              x: Math.min(canvas.width - 20, Math.max(20, c.x + randn() * c.s)),
+              y: Math.min(canvas.height - 20, Math.max(20, c.y + randn() * c.s)),
+              cluster: -1
+            });
+          }
+        });
+      } else {
+        for (let i = 0; i < 90; i++) {
+          points.push({
+            x: 40 + Math.random() * (canvas.width - 80),
+            y: 35 + Math.random() * (canvas.height - 70),
+            cluster: -1
+          });
+        }
+      }
+    }
+
+    function initCentroids(method) {
+      clearInterval(autoTimer);
+      const K = parseInt(kSel.value, 10);
+      if (kVal) kVal.textContent = K;
+      centroids = [];
+      phase = "assign";
+      iteration = 0;
+      converged = false;
+      points.forEach(p => (p.cluster = -1));
+
+      if (points.length < K) return;
+
+      if (method === "kpp") {
+        const firstIdx = Math.floor(Math.random() * points.length);
+        centroids.push({
+          x: points[firstIdx].x,
+          y: points[firstIdx].y,
+          color: clusterColors[0],
+          history: [{ x: points[firstIdx].x, y: points[firstIdx].y }]
+        });
+
+        for (let c = 1; c < K; c++) {
+          const distSq = points.map(p => {
+            let minDist = Infinity;
+            centroids.forEach(cent => {
+              const d = Math.hypot(p.x - cent.x, p.y - cent.y);
+              if (d < minDist) minDist = d;
+            });
+            return minDist * minDist;
+          });
+
+          const totalDistSq = distSq.reduce((a, b) => a + b, 0);
+          let r = Math.random() * totalDistSq;
+          let chosenIdx = 0;
+          for (let i = 0; i < distSq.length; i++) {
+            r -= distSq[i];
+            if (r <= 0) {
+              chosenIdx = i;
+              break;
+            }
+          }
+          centroids.push({
+            x: points[chosenIdx].x,
+            y: points[chosenIdx].y,
+            color: clusterColors[c % clusterColors.length],
+            history: [{ x: points[chosenIdx].x, y: points[chosenIdx].y }]
+          });
+        }
+      } else {
+        const chosen = new Set();
+        while (chosen.size < K) {
+          chosen.add(Math.floor(Math.random() * points.length));
+        }
+        let c = 0;
+        chosen.forEach(idx => {
+          centroids.push({
+            x: points[idx].x,
+            y: points[idx].y,
+            color: clusterColors[c % clusterColors.length],
+            history: [{ x: points[idx].x, y: points[idx].y }]
+          });
+          c++;
+        });
+      }
+
+      render();
+      out.innerHTML = `Đã khởi tạo <strong>${K} tâm cụm</strong> bằng phương pháp <em>${method === "kpp" ? "K-Means++ (Cách xa nhau tối ưu)" : "Ngẫu Nhiên"}</em>. Bấm <strong>'Bước Tiếp'</strong> để tiến hành gán từng điểm vào tâm gần nhất!`;
+    }
+
+    function calculateWCSS() {
+      let wcss = 0;
+      points.forEach(p => {
+        if (p.cluster >= 0 && centroids[p.cluster]) {
+          const c = centroids[p.cluster];
+          wcss += Math.pow(p.x - c.x, 2) + Math.pow(p.y - c.y, 2);
+        }
+      });
+      return Math.round(wcss);
+    }
+
+    function step() {
+      if (converged) {
+        out.innerHTML = `🎉 <strong>Thuật toán đã hội tụ hoàn toàn</strong> tại vòng lặp <strong>${iteration}</strong> (Không còn tâm cụm nào di chuyển). Bấm 'Đặt Lại' hoặc 'Khởi Tạo K-Means++' để chạy lần thí nghiệm mới!`;
+        return;
+      }
+
+      const K = centroids.length;
+      if (K === 0) {
+        initCentroids("kpp");
+        return;
+      }
+
+      if (phase === "assign") {
+        let changed = 0;
+        points.forEach(p => {
+          let minDist = Infinity;
+          let bestCluster = 0;
+          centroids.forEach((c, idx) => {
+            const d = Math.hypot(p.x - c.x, p.y - c.y);
+            if (d < minDist) {
+              minDist = d;
+              bestCluster = idx;
+            }
+          });
+          if (p.cluster !== bestCluster) changed++;
+          p.cluster = bestCluster;
+        });
+
+        const curWcss = calculateWCSS();
+        phase = "update";
+        out.innerHTML = `<strong>Pha 1: Gán Cụm (Assignment Step)</strong> - Đã gán ${points.length} điểm dữ liệu vào tâm gần nhất theo khoảng cách Euclid. Tổng bình phương khoảng cách trong cụm (Inertia/WCSS) = <strong>${curWcss.toLocaleString()}</strong>. Bước tiếp theo: Cập nhật tọa độ tâm $\\mu_k$.`;
+      } else {
+        iteration++;
+        let maxShift = 0;
+
+        centroids.forEach((c, idx) => {
+          const members = points.filter(p => p.cluster === idx);
+          if (members.length > 0) {
+            const avgX = members.reduce((s, p) => s + p.x, 0) / members.length;
+            const avgY = members.reduce((s, p) => s + p.y, 0) / members.length;
+            const shift = Math.hypot(avgX - c.x, avgY - c.y);
+            if (shift > maxShift) maxShift = shift;
+
+            c.history.push({ x: c.x, y: c.y });
+            c.x = avgX;
+            c.y = avgY;
+          }
+        });
+
+        phase = "assign";
+
+        if (maxShift < 0.8) {
+          converged = true;
+          clearInterval(autoTimer);
+          out.innerHTML = `🎉 <strong>HỘI TỤ THÀNH CÔNG!</strong> Sau <strong>${iteration} bước lặp</strong>, độ dịch chuyển tâm cực đại $\\Delta\\mu_{max} = ${maxShift.toFixed(2)}\\text{px} < 0.8\\text{px}$. WCSS tối ưu = <strong>${calculateWCSS().toLocaleString()}</strong>.<br><span style="color:#16a34a; font-weight:bold;">💡 ĐIỂM SÁNG OLYMPIC:</span> Thuật toán K-Means luôn đảm bảo hội tụ vì hàm WCSS đơn điệu giảm hoặc giữ nguyên ở mỗi pha gán/cập nhật!`;
+        } else {
+          out.innerHTML = `<strong>Pha 2: Cập Nhật Tâm (Update Centroids)</strong> [Vòng lặp ${iteration}] - Đã dời các tâm $\\mu_k$ về trọng tâm mới $\\frac{1}{|C_k|}\\sum x_i$. Độ dịch chuyển lớn nhất: <strong>${maxShift.toFixed(1)}px</strong>. Tiếp tục gán điểm ở vòng tiếp theo!`;
+        }
+      }
+
+      render();
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#fafafa";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+      const wcss = calculateWCSS();
+      if (grid) {
+        grid.innerHTML = `
+          <div class="metric-pill">
+            <span class="metric-pill-label">SỐ MẪU DỮ LIỆU (N)</span>
+            <span class="metric-pill-value">${points.length}</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">SỐ CỤM (K)</span>
+            <span class="metric-pill-value">${centroids.length}</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">VÒNG LẶP (ITERATION)</span>
+            <span class="metric-pill-value">${iteration}</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">PHA THỰC THI</span>
+            <span class="metric-pill-value" style="font-size:0.88rem;">${phase === "assign" ? "Gán Điểm" : "Cập Nhật Tâm"}</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">WCSS / INERTIA</span>
+            <span class="metric-pill-value" style="color:#2563eb;">${wcss.toLocaleString()}</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">TRẠNG THÁI</span>
+            <span class="metric-pill-value" style="font-size:0.85rem; color:${converged ? '#16a34a' : '#ea580c'};">
+              ${converged ? "ĐÃ HỘI TỤ" : "Đang tối ưu..."}
+            </span>
+          </div>
+        `;
+      }
+
+      if (centroids.length > 0) {
+        ctx.lineWidth = 0.8;
+        points.forEach(p => {
+          if (p.cluster >= 0 && centroids[p.cluster]) {
+            const c = centroids[p.cluster];
+            ctx.strokeStyle = c.color + "35";
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(c.x, c.y);
+            ctx.stroke();
+          }
+        });
+      }
+
+      points.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.5, 0, Math.PI * 2);
+        if (p.cluster >= 0 && centroids[p.cluster]) {
+          ctx.fillStyle = centroids[p.cluster].color;
+        } else {
+          ctx.fillStyle = "#888";
+        }
+        ctx.fill();
+        ctx.strokeStyle = "#111";
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      });
+
+      centroids.forEach(c => {
+        if (c.history && c.history.length > 1) {
+          ctx.setLineDash([3, 2]);
+          ctx.strokeStyle = c.color;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          c.history.forEach((h, i) => {
+            if (i === 0) ctx.moveTo(h.x, h.y);
+            else ctx.lineTo(h.x, h.y);
+          });
+          ctx.lineTo(c.x, c.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      });
+
+      centroids.forEach((c, idx) => {
+        ctx.fillStyle = c.color + "25";
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 14, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = c.color;
+        ctx.strokeStyle = "#111";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#111";
+        ctx.font = "bold 11px Georgia";
+        ctx.textAlign = "center";
+        ctx.fillText(`μ_${idx + 1}`, c.x, c.y - 12);
+      });
+
+      ctx.fillStyle = "#111";
+      ctx.font = "10px Georgia";
+      ctx.textAlign = "left";
+      ctx.fillText(`K-Means Canvas: ${points.length} điểm | ${centroids.length} tâm cụm`, 12, 20);
+    }
+
+    canvas.addEventListener("click", e => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const cx = (e.clientX - rect.left) * scaleX;
+      const cy = (e.clientY - rect.top) * scaleY;
+
+      let assignedCluster = -1;
+      if (centroids.length > 0) {
+        let minDist = Infinity;
+        centroids.forEach((c, idx) => {
+          const d = Math.hypot(cx - c.x, cy - c.y);
+          if (d < minDist) {
+            minDist = d;
+            assignedCluster = idx;
+          }
+        });
+      }
+
+      points.push({ x: cx, y: cy, cluster: assignedCluster });
+      converged = false;
+      render();
+    });
+
+    kSel.addEventListener("change", () => {
+      initCentroids("kpp");
+    });
+
+    datasetSel.addEventListener("change", () => {
+      generateDataset();
+      initCentroids("kpp");
+    });
+
+    btnStep.addEventListener("click", () => {
+      clearInterval(autoTimer);
+      step();
+    });
+
+    btnAuto.addEventListener("click", () => {
+      clearInterval(autoTimer);
+      if (converged) {
+        initCentroids("kpp");
+      }
+      autoTimer = setInterval(() => {
+        if (converged || iteration >= 30) {
+          clearInterval(autoTimer);
+        } else {
+          step();
+        }
+      }, 340);
+    });
+
+    btnKPP.addEventListener("click", () => {
+      initCentroids("kpp");
+    });
+
+    btnRand.addEventListener("click", () => {
+      initCentroids("random");
+    });
+
+    btnReset.addEventListener("click", () => {
+      clearInterval(autoTimer);
+      generateDataset();
+      initCentroids("kpp");
+    });
+
+    generateDataset();
+    initCentroids("kpp");
   }
 
   // Widget 6: CNN Dimension Calculator & NMS Simulation
@@ -2941,6 +3835,322 @@ function initVAIOApp() {
     btnReset.addEventListener("click", () => { resetParams(); });
 
     resetParams();
+  }
+
+  // Widget 10b & Lesson 10: Activation Function Explorer
+  function initActivationWidget() {
+    const canvas = document.getElementById("actCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    const funcSel = document.getElementById("actFuncSel");
+    const zRange = document.getElementById("actZRange");
+    const zVal = document.getElementById("actZVal");
+    const btnSatNeg = document.getElementById("actPresetSatNeg");
+    const btnZero = document.getElementById("actPresetZero");
+    const btnSatPos = document.getElementById("actPresetSatPos");
+    const grid = document.getElementById("actMetricsGrid");
+    const out = document.getElementById("actOutput");
+    if (!funcSel || !zRange || !out) return;
+
+    function evalFunc(type, z) {
+      if (type === "sigmoid") {
+        const s = 1.0 / (1.0 + Math.exp(-z));
+        const ds = s * (1.0 - s);
+        return { y: s, dy: ds, yMin: -0.2, yMax: 1.2 };
+      } else if (type === "tanh") {
+        const th = Math.tanh(z);
+        const dth = 1.0 - th * th;
+        return { y: th, dy: dth, yMin: -1.3, yMax: 1.3 };
+      } else if (type === "relu") {
+        const y = Math.max(0, z);
+        const dy = z > 0 ? 1.0 : (z === 0 ? 0.5 : 0.0);
+        return { y: y, dy: dy, yMin: -1.0, yMax: 4.5 };
+      } else if (type === "leaky_relu") {
+        const alpha = 0.05;
+        const y = z >= 0 ? z : alpha * z;
+        const dy = z >= 0 ? 1.0 : alpha;
+        return { y: y, dy: dy, yMin: -1.0, yMax: 4.5 };
+      } else if (type === "gelu") {
+        const k = Math.sqrt(2.0 / Math.PI) * (z + 0.044715 * Math.pow(z, 3));
+        const th = Math.tanh(k);
+        const phi = 0.5 * (1.0 + th);
+        const y = z * phi;
+        const dk = Math.sqrt(2.0 / Math.PI) * (1.0 + 3.0 * 0.044715 * z * z);
+        const dphi = 0.5 * (1.0 - th * th) * dk;
+        const dy = phi + z * dphi;
+        return { y: y, dy: dy, yMin: -1.0, yMax: 4.5 };
+      } else if (type === "swish") {
+        const s = 1.0 / (1.0 + Math.exp(-z));
+        const y = z * s;
+        const dy = s + z * s * (1.0 - s);
+        return { y: y, dy: dy, yMin: -1.0, yMax: 4.5 };
+      }
+      return { y: 0, dy: 0, yMin: -1, yMax: 1 };
+    }
+
+    function render() {
+      const type = funcSel.value;
+      const z = parseFloat(zRange.value);
+      if (zVal) zVal.textContent = z.toFixed(2);
+
+      const cur = evalFunc(type, z);
+
+      let statusHtml = "";
+      if (cur.dy < 0.001) {
+        statusHtml = `<span style="color:#b00; font-weight:bold;">Triệt Tiêu Hoàn Toàn (f' ≈ 0)</span>`;
+      } else if (cur.dy < 0.05) {
+        statusHtml = `<span style="color:#ea580c; font-weight:bold;">Vùng Bão Hòa / Nguy Hiểm</span>`;
+      } else if (cur.dy >= 0.95) {
+        statusHtml = `<span style="color:#16a34a; font-weight:bold;">Lý Tưởng (f' ≈ 1.0)</span>`;
+      } else {
+        statusHtml = `<span style="color:#2563eb; font-weight:bold;">Bình Thường</span>`;
+      }
+
+      if (grid) {
+        grid.innerHTML = `
+          <div class="metric-pill">
+            <span class="metric-pill-label">ĐẦU VÀO (z)</span>
+            <span class="metric-pill-value">${z.toFixed(2)}</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">GIÁ TRỊ HÀM f(z)</span>
+            <span class="metric-pill-value">${cur.y.toFixed(3)}</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">ĐẠO HÀM f'(z)</span>
+            <span class="metric-pill-value" style="color:#7c3aed;">${cur.dy.toFixed(3)}</span>
+          </div>
+          <div class="metric-pill">
+            <span class="metric-pill-label">TÌNH TRẠNG GRADIENT</span>
+            <span class="metric-pill-value" style="font-size:0.85rem;">${statusHtml}</span>
+          </div>
+        `;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#fafafa";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, canvas.width, canvas.height);
+
+      const zMin = -5.0, zMax = 5.0;
+
+      // =================== LEFT PANEL: Function f(z) ===================
+      const lLeft = 35, lRight = 315, lTop = 35, lBottom = 225;
+      const lW = lRight - lLeft, lH = lBottom - lTop;
+      const yMin = cur.yMin, yMax = cur.yMax;
+
+      function toScreenLeft(zVal, yVal) {
+        const px = lLeft + ((zVal - zMin) / (zMax - zMin)) * lW;
+        const py = lBottom - ((yVal - yMin) / (yMax - yMin)) * lH;
+        return { x: px, y: py };
+      }
+
+      ctx.fillStyle = "#111";
+      ctx.font = "bold 11px Georgia";
+      ctx.textAlign = "left";
+      ctx.fillText("Hàm Kích Hoạt f(z) & Tiếp Tuyến (Độ Dốc = f'(z))", lLeft - 10, 22);
+
+      const zeroAxes = toScreenLeft(0, 0);
+      ctx.strokeStyle = "#bbb";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
+
+      if (zeroAxes.y >= lTop && zeroAxes.y <= lBottom) {
+        ctx.beginPath();
+        ctx.moveTo(lLeft, zeroAxes.y);
+        ctx.lineTo(lRight, zeroAxes.y);
+        ctx.stroke();
+      }
+      if (zeroAxes.x >= lLeft && zeroAxes.x <= lRight) {
+        ctx.beginPath();
+        ctx.moveTo(zeroAxes.x, lTop);
+        ctx.lineTo(zeroAxes.x, lBottom);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      const nSteps = 100;
+      for (let i = 0; i <= nSteps; i++) {
+        const zi = zMin + (i / nSteps) * (zMax - zMin);
+        const res = evalFunc(type, zi);
+        const pt = toScreenLeft(zi, res.y);
+        if (i === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+      ctx.stroke();
+
+      ctx.strokeStyle = "#d97706";
+      ctx.lineWidth = 1.8;
+      ctx.setLineDash([4, 2]);
+      ctx.beginPath();
+      const span = 1.8;
+      const tanPt1 = toScreenLeft(z - span, cur.y - cur.dy * span);
+      const tanPt2 = toScreenLeft(z + span, cur.y + cur.dy * span);
+      ctx.moveTo(tanPt1.x, tanPt1.y);
+      ctx.lineTo(tanPt2.x, tanPt2.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      const curPt = toScreenLeft(z, cur.y);
+      ctx.fillStyle = "#dc2626";
+      ctx.beginPath();
+      ctx.arc(curPt.x, curPt.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#111";
+      ctx.font = "bold 9.5px Georgia";
+      ctx.textAlign = z > 2 ? "right" : "left";
+      ctx.fillText(`(z=${z.toFixed(1)}, f=${cur.y.toFixed(2)})`, curPt.x + (z > 2 ? -8 : 8), curPt.y - 6);
+
+      ctx.strokeStyle = "#ddd";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(335, 12);
+      ctx.lineTo(335, canvas.height - 12);
+      ctx.stroke();
+
+      // =================== RIGHT PANEL: Derivative f'(z) ===================
+      const rLeft = 380, rRight = 650, rTop = 35, rBottom = 225;
+      const rW = rRight - rLeft, rH = rBottom - rTop;
+      const dyMax = type === "sigmoid" ? 0.35 : 1.25;
+
+      function toScreenRight(zVal, dyVal) {
+        const px = rLeft + ((zVal - zMin) / (zMax - zMin)) * rW;
+        const py = rBottom - (dyVal / dyMax) * rH;
+        return { x: px, y: py };
+      }
+
+      ctx.fillStyle = "#111";
+      ctx.font = "bold 11px Georgia";
+      ctx.textAlign = "left";
+      ctx.fillText("Đồ Thị Đạo Hàm f'(z) & Cảnh Báo Triệt Tiêu Gradient", rLeft - 10, 22);
+
+      const dangerPt = toScreenRight(0, 0.05);
+      ctx.fillStyle = "rgba(239, 68, 68, 0.15)";
+      ctx.fillRect(rLeft, dangerPt.y, rW, rBottom - dangerPt.y);
+
+      ctx.setLineDash([3, 2]);
+      ctx.strokeStyle = "#dc2626";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(rLeft, dangerPt.y);
+      ctx.lineTo(rRight, dangerPt.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "#b00";
+      ctx.font = "8.5px Georgia";
+      ctx.textAlign = "right";
+      ctx.fillText("Ngưỡng triệt tiêu f'(z) < 0.05", rRight, dangerPt.y - 3);
+
+      ctx.strokeStyle = "#888";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(rLeft, rBottom);
+      ctx.lineTo(rRight, rBottom);
+      ctx.stroke();
+
+      ctx.fillStyle = "#666";
+      ctx.font = "8.5px Georgia";
+      ctx.textAlign = "right";
+      ctx.fillText("0.0", rLeft - 4, rBottom);
+      ctx.fillText((dyMax * 0.5).toFixed(2), rLeft - 4, rBottom - rH / 2);
+      ctx.fillText((dyMax).toFixed(2), rLeft - 4, rTop + 4);
+
+      ctx.strokeStyle = "#4338ca";
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i <= nSteps; i++) {
+        const zi = zMin + (i / nSteps) * (zMax - zMin);
+        const res = evalFunc(type, zi);
+        const pt = toScreenRight(zi, res.dy);
+        if (i === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+      ctx.stroke();
+
+      const curDyPt = toScreenRight(z, cur.dy);
+
+      ctx.setLineDash([2, 2]);
+      ctx.strokeStyle = "#888";
+      ctx.beginPath();
+      ctx.moveTo(curDyPt.x, rBottom);
+      ctx.lineTo(curDyPt.x, curDyPt.y);
+      ctx.lineTo(rLeft, curDyPt.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = "#7c3aed";
+      ctx.beginPath();
+      ctx.arc(curDyPt.x, curDyPt.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = "#111";
+      ctx.font = "bold 9.5px Georgia";
+      ctx.textAlign = z > 2 ? "right" : "left";
+      ctx.fillText(`f'(${z.toFixed(1)}) = ${cur.dy.toFixed(3)}`, curDyPt.x + (z > 2 ? -8 : 8), curDyPt.y - 6);
+
+      let explanation = "";
+      if (type === "sigmoid") {
+        explanation = `<strong>HÀM SIGMOID:</strong> $f(z) = \\frac{1}{1 + e^{-z}}$, đạo hàm $f'(z) = f(z)(1 - f(z))$.<br>
+        • <strong>Đạo hàm cực đại chỉ đạt 0.25</strong> tại $z = 0$. Khi mạng có nhiều lớp ẩn, gradient nhân liên tiếp $0.25^L \\to 0$, gây ra <em>Vanishing Gradient</em> nghiêm trọng.<br>
+        • <strong>Không Zero-centered:</strong> Mọi giá trị $f(z) > 0$, khiến vector gradient của các trọng số cùng dương hoặc cùng âm, gây cập nhật zíc-zắc (zigzag updates). Chỉ nên dùng ở lớp đầu ra nhị phân!`;
+      } else if (type === "tanh") {
+        explanation = `<strong>HÀM TANH:</strong> $f(z) = \\tanh(z)$, đạo hàm $f'(z) = 1 - f^2(z)$.<br>
+        • <strong>Zero-centered:</strong> Miền giá trị $(-1, 1)$, trung bình kỳ vọng bằng 0, giúp tối ưu hóa nhanh hơn Sigmoid.<br>
+        • <strong>Đạo hàm cực đại đạt 1.0</strong> tại $z = 0$. Tuy nhiên khi $|z| > 2.5$, đạo hàm triệt tiêu nhanh về 0 $\\implies$ vẫn bị hiện tượng bão hòa ở hai đầu!`;
+      } else if (type === "relu") {
+        explanation = `<strong>HÀM RELU:</strong> $f(z) = \\max(0, z)$, đạo hàm $f'(z) = 1$ khi $z > 0$, và $0$ khi $z \\le 0$.<br>
+        • <strong>Khắc phục triệt tiêu gradient ở miền dương:</strong> Đạo hàm luôn bằng 1 giúp gradient truyền ngược nguyên vẹn qua hàng chục lớp sâu.<br>
+        • <span style="color:#b00; font-weight:bold;">⚠️ BẪY OLYMPIC (Dying ReLU):</span> Khi $z \\le 0$, đạo hàm bằng 0 tuyệt đối! Nếu một nơ-ron bị cập nhật trọng số khiến $z < 0$ cho toàn bộ tập dữ liệu, nơ-ron đó sẽ "chết vĩnh viễn" và không bao giờ học được nữa!`;
+      } else if (type === "leaky_relu") {
+        explanation = `<strong>HÀM LEAKY RELU:</strong> $f(z) = z$ nếu $z \\ge 0$, và $\\alpha z$ (với $\\alpha = 0.05$) nếu $z < 0$.<br>
+        • <strong>Cứu sống nơ-ron (Giải quyết Dying ReLU):</strong> Đạo hàm ở miền âm giữ ở mức $0.05 > 0$, đảm bảo luôn có dòng gradient chảy qua để hồi phục trọng số.<br>
+        • Thường được ứng dụng rộng rãi trong mạng GAN (Discriminator) và các mô hình thị giác máy tính.`;
+      } else if (type === "gelu") {
+        explanation = `<strong>HÀM GELU (Gaussian Error Linear Unit):</strong> $f(z) = z \\cdot \\Phi(z)$, tiêu chuẩn trong <strong>BERT, GPT-2/3/4, ViT (Vision Transformer)</strong>.<br>
+        • Đạo hàm trơn tru (smooth), không có góc nhọn tại $z=0$.<br>
+        • Có một vùng giá trị âm nhẹ (cực tiểu xấp xỉ $-0.17$ tại $z \\approx -0.75$), cho phép mô hình giữ lại một lượng nhỏ thông tin xác suất ngay cả khi đầu vào âm.`;
+      } else if (type === "swish") {
+        explanation = `<strong>HÀM SWISH / SiLU:</strong> $f(z) = z \\cdot \\sigma(z)$, tiêu chuẩn trong <strong>EfficientNet, LLaMA, Mistral</strong>.<br>
+        • Tính chất phi tuyến tính mịn và <em>không đơn điệu (non-monotonic)</em>.<br>
+        • Được tìm ra bởi Google Brain bằng Neural Architecture Search (NAS), chứng minh vượt trội hơn ReLU trên hầu hết các bài toán Deep Learning phức tạp.`;
+      }
+
+      out.innerHTML = explanation;
+    }
+
+    funcSel.addEventListener("change", render);
+    zRange.addEventListener("input", render);
+
+    btnSatNeg.addEventListener("click", () => {
+      zRange.value = -4.0;
+      render();
+    });
+
+    btnZero.addEventListener("click", () => {
+      zRange.value = 0.0;
+      render();
+    });
+
+    btnSatPos.addEventListener("click", () => {
+      zRange.value = 3.5;
+      render();
+    });
+
+    render();
   }
 
   // Widget 11: Generative AI & Diffusion Simulator

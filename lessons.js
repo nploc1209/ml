@@ -2251,7 +2251,7 @@ const LESSONS_DATA = [
         }
       }
     ],
-    "interactiveWidget": "widget-confusion-matrix",
+    "interactiveWidget": "widget-roc-auc-threshold",
     "examConnection": {
       "questionTitle": "Tổng Hợp Các Dạng Bài Thi Olympic AI (VAIO 2025 & VAIC 2026)",
       "items": [
@@ -3520,7 +3520,7 @@ const LESSONS_DATA = [
         }
       }
     ],
-    "interactiveWidget": "widget-knn-classifier",
+    "interactiveWidget": "widget-kmeans-sandbox",
     "examConnection": {
       "questionTitle": "Điểm Trọng Tâm Về K-Means & PCA Trong Đề Thi VAIO 2025",
       "items": [

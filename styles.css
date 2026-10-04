@@ -1476,6 +1476,69 @@ canvas {
   line-height: 1.5;
 }
 
+/* Widget Sub-tabs & Metrics Grid */
+.widget-subtabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.widget-subtab-btn {
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  padding: 6px 14px;
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  color: var(--text-muted);
+}
+
+.widget-subtab-btn:hover {
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.widget-subtab-btn.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.metrics-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.metric-pill {
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  padding: 6px 10px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-pill-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.metric-pill-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
 /* Exam Card */
 .exam-card {
   border: 1px solid var(--border);
