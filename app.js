@@ -394,28 +394,44 @@ function formatContent(text) {
   if (!text) return "";
   let s = Array.isArray(text) ? text.join("\n\n") : String(text);
 
-  // 1. Multi-line code block: ```lang\n ... \n```
+  // 1. Protect multi-line code blocks from inline Markdown & Math parsers
+  const codeBlocks = [];
   s = s.replace(/```([a-zA-Z0-9_-]*)\s*\n([\s\S]*?)```/g, (m, lang, code) => {
-    return renderHighlightedCodeBlock(code, lang);
+    const placeholder = `@@@ML_CODE_BLOCK_${codeBlocks.length}@@@`;
+    codeBlocks.push(renderHighlightedCodeBlock(code, lang));
+    return placeholder;
   });
 
-  // 2. Inline Markdown code `...`
+  // 2. Protect display math ($$ ... $$)
+  const mathBlocks = [];
+  s = s.replace(/\$\$([\s\S]+?)\$\$/g, (m, formula) => {
+    const placeholder = `@@@ML_MATH_BLOCK_${mathBlocks.length}@@@`;
+    mathBlocks.push(`<div class="formula-block">${renderMathFormula(formula)}</div>`);
+    return placeholder;
+  });
+
+  // 3. Inline Markdown code `...`
   s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
 
-  // 3. Markdown Bold
+  // 4. Markdown Bold
   s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 
-  // 4. Markdown Italic
-  s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
-
-  // 5. Display Math ($$ ... $$)
-  s = s.replace(/\$\$([\s\S]+?)\$\$/g, (m, formula) => {
-    return `<div class="formula-block">${renderMathFormula(formula)}</div>`;
-  });
+  // 5. Markdown Italic
+  s = s.replace(/(^|[^\*])\*([^\*\n]+)\*([^\*]|$)/g, '$1<em>$2</em>$3');
 
   // 6. Inline Math ($ ... $)
   s = s.replace(/\$([^$\n]+?)\$/g, (m, formula) => {
     return renderMathFormula(formula);
+  });
+
+  // 7. Restore protected math blocks
+  mathBlocks.forEach((block, idx) => {
+    s = s.replace(`@@@ML_MATH_BLOCK_${idx}@@@`, block);
+  });
+
+  // 8. Restore protected code blocks
+  codeBlocks.forEach((block, idx) => {
+    s = s.replace(`@@@ML_CODE_BLOCK_${idx}@@@`, block);
   });
 
   return s;

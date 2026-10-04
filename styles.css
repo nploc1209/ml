@@ -988,6 +988,26 @@ body {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   tab-size: 4;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Triệt tiêu hoàn toàn viền và nền bên trong khung code */
+.code-block code,
+pre.code-block code,
+pre code {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: normal !important;
+  display: block !important;
+  line-height: inherit !important;
 }
 
 /* Syntax Highlighting Tokens (Clean Light Theme - GitHub Light Palette) */
@@ -1000,8 +1020,8 @@ body {
 .tok-decorator { color: #8250df; }                        /* Purple */
 .tok-operator { color: #cf222e; font-weight: 600; }       /* Red */
 
-/* Inline Code pills in text and options */
-code {
+/* Inline Code pills in text and options (chỉ áp dụng cho code ngoài khối pre) */
+:not(pre) > code {
   font-family: 'SF Mono', Monaco, Menlo, Consolas, monospace;
   font-size: 0.88em;
   padding: 2px 7px;
@@ -1013,7 +1033,7 @@ code {
   font-weight: 600;
 }
 
-.dark-theme code {
+.dark-theme :not(pre) > code {
   background: #21262d;
   color: #f0883e;
   border-color: #30363d;
