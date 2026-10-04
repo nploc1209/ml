@@ -1018,7 +1018,7 @@ function initVAIOApp() {
         <section class="code-lab-section">
           <div class="code-lab-header">
             <div class="code-lab-header-left">
-              <span class="code-lab-badge">💻 HANDS-ON CODE LAB</span>
+              <span class="code-lab-badge">LAB</span>
               <h2 class="code-lab-title">${lab.title || 'Thực Hành Lập Trình & Huấn Luyện Mô Hình'}</h2>
             </div>
           </div>
